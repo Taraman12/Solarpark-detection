@@ -19,7 +19,7 @@ black = "^23.1.0"
 flake8 = "^6.0.0"
 flake8-docstrings = "^1.7.0"
 mypy = "^1.1.1"
-
+docformatter = {extras = ["tomli"], version = "^1.5.1"}
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
@@ -52,6 +52,13 @@ warn_return_any = false
 warn_unreachable = true
 # Misc
 pretty = true
+
+[tool.docformatter]
+recursive = true
+wrap-summaries = 88
+wrap-descriptions = 88
+blank = true
+pre-summary-newline = true
 
 [build-system]
 requires = ["poetry-core"]

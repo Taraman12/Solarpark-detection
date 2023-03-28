@@ -26,7 +26,8 @@ def download_sentinel2_data(
         download_root (str): Path to the directory where the data will be downloaded.
 
     Returns:
-        tuple: A tuple containing the metadata of the downloaded product and the path to the extracted RGB image.
+        tuple: A tuple of gdf product and the path to the extracted RGB image.
+
     """
     load_dotenv()
     api_user = os.getenv("API_USER")
@@ -83,7 +84,8 @@ def download_sentinel2_data(
 
 def extract_image_bands(download_root: str, identifier: str, target_folder: str) -> str:
     """
-    Extracts the TCI_10m image from the zip file in the given download path for the given Sentinel-2 image identifier.
+    Extracts the TCI_10m image from the zip file in the given download path for
+    the given Sentinel-2 image identifier.
 
     Args:
         download_root (str): The path to the directory where the zip file is downloaded.
@@ -91,6 +93,7 @@ def extract_image_bands(download_root: str, identifier: str, target_folder: str)
 
     Returns:
         str: The path to the extracted TCI_10m image.
+
     """
     pattern = re.compile(r"_B0[2438]_10m\.jp2$")
 
