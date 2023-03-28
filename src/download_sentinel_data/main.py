@@ -12,12 +12,12 @@ polygons_bavaria = gpd.read_file("polygons_bavaria.geojson")
 
 # ToDo: add tile_name to final dataframe
 for centroid in set(polygons_bavaria.centroid_of_tile):
-    gdf, target_folder = download_sentinel2_data(centroid, download_path)
-    polygons_bavaria.loc[
-        polygons_bavaria["centroid_of_tile"] == centroid, "image_path"
-    ] = target_folder
+    result = download_sentinel2_data(centroid, download_path)
+    # polygons_bavaria.loc[
+    #     polygons_bavaria["centroid_of_tile"] == centroid, "image_path"
+    # ] = target_folder
 
 # new line of code
-polygons_bavaria.dropna(subset=["image_path"], inplace=True)
+# polygons_bavaria.dropna(subset=["image_path"], inplace=True)
 
-polygons_bavaria.to_file("polygons_bavaria_image_path.geojson", driver="GeoJSON")
+# polygons_bavaria.to_file("polygons_bavaria_image_path.geojson", driver="GeoJSON")

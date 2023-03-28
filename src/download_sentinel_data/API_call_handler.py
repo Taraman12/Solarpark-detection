@@ -5,7 +5,6 @@ import shutil
 from zipfile import ZipFile
 
 # third-party
-import geopandas as gpd
 from dotenv import load_dotenv
 from sentinelsat import SentinelAPI
 
@@ -15,9 +14,7 @@ class HTTPError(Exception):
     pass
 
 
-def download_sentinel2_data(
-    footprint: str, download_root: str
-) -> tuple[gpd.GeoDataFrame, str]:
+def download_sentinel2_data(footprint: str, download_root: str) -> bool:
     """
     Download Sentinel-2 data for a given footprint and extract the RGB image.
 
@@ -51,7 +48,7 @@ def download_sentinel2_data(
     # check if a product is found
     if not products:
         # ToDo: Need better error handling
-        return gpd.GeoDataFrame(), ""
+        return False
 
     # Convert the products to a geopandas dataframe
     gdf = api.to_geodataframe(products)
@@ -61,7 +58,7 @@ def download_sentinel2_data(
 
     # checks if the folder already exists
     if os.path.isdir(target_folder):
-        return gdf, target_folder
+        return True
 
     # creates folder
     os.makedirs(target_folder, exist_ok=True)
@@ -71,15 +68,15 @@ def download_sentinel2_data(
         api.download(gdf.uuid[0], directory_path=download_root)
     except HTTPError:
         # ToDo: Need better error handling
-        return gpd.GeoDataFrame(), ""
+        return False
 
     # Extract the TCI_10m image from the downloaded ZIP file
     extract_image_bands(download_root, gdf.identifier[0], target_folder)
 
     # Remove the downloaded ZIP file
     os.remove(os.path.join(download_root, gdf.identifier[0] + ".zip"))
-
-    return gdf, gdf.identifier[0]
+    return True
+    # return gdf, gdf.identifier[0]
 
 
 def extract_image_bands(download_root: str, identifier: str, target_folder: str) -> str:
