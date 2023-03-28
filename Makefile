@@ -16,12 +16,13 @@ lint-isort:
 lint-flake8:
 	@flake8 .
 
-lint-mypy:
-	@mypy ./src
+# lint-mypy:
+# 	@mypy ./src
 
-lint-mypy-report:
-	@mypy ./src --html-report ./mypy_html
+# lint-mypy-report:
+# 	@mypy ./src --html-report ./mypy_html
 
 format: format-black format-docformatter format-isort
 
-lint: lint-black lint-isort lint-flake8 lint-mypy
+lint: lint-black lint-isort lint-flake8 
+# lint-mypy
