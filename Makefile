@@ -1,6 +1,9 @@
 format-black:
 	@black .
 
+format-docformatter:
+	@docformatter -i -r ./src
+
 format-isort:
 	@isort .
 
@@ -19,6 +22,6 @@ lint-mypy:
 lint-mypy-report:
 	@mypy ./src --html-report ./mypy_html
 
-format: format-black format-isort
+format: format-black format-docformatter format-isort
 
 lint: lint-black lint-isort lint-flake8 lint-mypy
