@@ -19,8 +19,6 @@ lint-mypy:
 lint-mypy-report:
 	@mypy ./src --html-report ./mypy_html
 
-format:
-	format-black format-isort
+format: format-black format-isort
 
-lint:
-	lint-black lint-isort lint-flake8 lint-mypy
+lint: lint-black lint-isort lint-flake8 lint-mypy
