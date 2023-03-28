@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "solarpark-detection"
+name = "download_sentinel_data"
 version = "0.1.0"
 description = ""
 authors = ["FabKoch <55655975+Taraman12@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{include = "solarpark_detection"}]
+#packages = [{include = "solarpark_detection"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
