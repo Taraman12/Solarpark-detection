@@ -34,5 +34,6 @@ jobs:
       - name: Run linters
         run: |
           set -o pipefail
+          poetry run make format
           poetry run make lint
           
