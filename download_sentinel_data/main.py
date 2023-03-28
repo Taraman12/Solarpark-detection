@@ -35,6 +35,6 @@ for centroid in set(polygons_bavaria.centroid_of_tile):
     ] = target_folder
 
 # new line of code
-polygons_bavaria.dropna(subset=['image_path'], inplace=True)
+polygons_bavaria.dropna(subset=["image_path"], inplace=True)
 
 polygons_bavaria.to_file("polygons_bavaria_image_path.geojson", driver="GeoJSON")
