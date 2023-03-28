@@ -2,11 +2,11 @@
 import os
 import re
 import shutil
-from datetime import date
 from zipfile import ZipFile
 
 
 # third-party
+from dotenv import load_dotenv
 import geopandas as gpd
 from sentinelsat import SentinelAPI
 
@@ -29,11 +29,12 @@ def download_sentinel2_data(
     Returns:
         tuple: A tuple containing the metadata of the downloaded product and the path to the extracted RGB image.
     """
-
+    load_dotenv()
+    api_user = os.getenv("API_USER")
+    api_secret = os.getenv("API_SECRET")
+    api_url = os.getenv("API_URL")
     # Connect to the Sentinel API
-    api = SentinelAPI(
-        "taraman", "y6HG%!6cF!86y$tK3", "https://apihub.copernicus.eu/apihub"
-    )
+    api = SentinelAPI(api_user, api_secret, api_url)
 
     # Search for products that match the query criteria
     products = api.query(
@@ -42,7 +43,7 @@ def download_sentinel2_data(
         # date=("20220101", date(2023, 3, 7)),
         date=("NOW-21DAYS", "NOW"),
         platformname="Sentinel-2",
-        producttype='S2MSI2A', # S2MSI1C is more data available but stream crashes
+        producttype="S2MSI2A",  # S2MSI1C is more data available but stream crashes
         cloudcoverpercentage=(0, 30),
         limit=1,
     )
