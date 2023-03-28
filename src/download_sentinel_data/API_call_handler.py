@@ -84,8 +84,8 @@ def download_sentinel2_data(
 
 def extract_image_bands(download_root: str, identifier: str, target_folder: str) -> str:
     """
-    Extracts the TCI_10m image from the zip file in the given download path for
-    the given Sentinel-2 image identifier.
+    Extracts the TCI_10m image from the zip file in the given download path for the
+    given Sentinel-2 image identifier.
 
     Args:
         download_root (str): The path to the directory where the zip file is downloaded.
