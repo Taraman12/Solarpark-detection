@@ -25,6 +25,10 @@ docformatter = {extras = ["tomli"], version = "^1.5.1"}
 jupyter = "^1.0.0"
 ipykernel = "^6.22.0"
 
+
+[tool.poetry.group.api.dependencies]
+fastapi = "^0.95.0"
+
 [tool.isort]
 profile = "black"
 
