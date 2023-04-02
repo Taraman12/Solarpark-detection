@@ -21,7 +21,7 @@ services:
     depends_on:
       - db
     ports:
-      - "8080:80"
+      - "5000:80"
     # environment:
       # - POSTGRES_PASSWORD=postgres
       # - POSTGRES_USER=postgres
@@ -30,6 +30,15 @@ services:
 
     volumes:
       - data:/var/lib/postgis/data
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: frontend.dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "db"
 
 volumes:
   data:
