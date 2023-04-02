@@ -5,7 +5,9 @@ from . import models, schemas
 
 def get_solar_plant(db: Session, id_plant: int):
     return (
-        db.query(models.SolarPlants).filter(models.SolarPlants.id == id_plant).first()
+        db.query(models.SolarPlants)
+        .filter(models.SolarPlants.id_plant == id_plant)
+        .first()
     )
 
 
