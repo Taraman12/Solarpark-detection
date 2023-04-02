@@ -15,3 +15,10 @@ class SolarPlants(Base):
     first_detection = Column(Date)
     last_detection = Column(Date)
     geometry = Column(String, unique=True)
+
+
+class MailList(Base):
+    __tablename__ = "mail_list"
+
+    id_mail = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True)
