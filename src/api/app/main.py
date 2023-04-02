@@ -1,5 +1,6 @@
 # import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
@@ -8,6 +9,25 @@ from .database import SessionLocal, engine
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+origins = [
+    "https://localhost.com",
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:5173",
+    "http://localhost:*",
+    "172.19.0.1:34048",
+    "172.19.0.1:*",
+    "172.20.0.1" "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Dependency
