@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 # local-modules
 import constants as c
 
+
 def download_from_aws(identifier: str, target_folder: Path) -> bool:
     if not check_aws_free_tier_available(target_folder.parents[0]):
         return False

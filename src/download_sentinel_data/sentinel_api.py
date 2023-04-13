@@ -6,6 +6,7 @@ from typing import Union
 from dotenv import load_dotenv
 from sentinelsat import SentinelAPI
 
+
 def connect_to_sentinel_api() -> Union[SentinelAPI, Exception]:
     load_dotenv()
     api_user = os.getenv("API_USER")
