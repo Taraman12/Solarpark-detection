@@ -9,6 +9,8 @@ from pathlib import Path
 import boto3
 from dotenv import load_dotenv
 
+# local-modules
+import constants as c
 
 def download_from_aws(identifier: str, target_folder: Path) -> bool:
     if not check_aws_free_tier_available(target_folder.parents[0]):
@@ -25,30 +27,7 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
         aws_secret_access_key=aws_secret_access_key,
     )
 
-    identifier_regex = re.compile(
-        r"""^(?P<mission>S2[A-B])_MSI
-                        (?P<product_level>L[1-2][A-C])_
-                        (?P<sensing_time>\d{8}T\d{6})_
-                        (?P<processing_baseline>N\d{4})_
-                        (?P<relative_orbit>R\d{3})_T
-                        (?P<utm_code>\d{2})
-                        (?P<latitude_band>\w{1})
-                        (?P<square>\w{2})_
-                        (?P<year>\d{4})
-                        (?P<month>\d{2})
-                        (?P<day>\d{2})T
-                        (?P<product_time>\d{6})""",
-        re.VERBOSE,
-    )
-
-    BAND_FILE_MAP = {
-        "B02": None,  # blue
-        "B03": None,  # green
-        "B04": None,  # red
-        "B08": None,  # NIR
-    }
-
-    regex_match = re.search(identifier_regex, identifier)
+    regex_match = re.search(c.IDENTIFIER_REGEX, identifier)
 
     if regex_match:
         # mission = regex_match.group("mission")
@@ -64,7 +43,7 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
     bucket = f"sentinel-s2-{product_level}"
     prefix = f"tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0"
 
-    for band in BAND_FILE_MAP:
+    for band in c.BAND_FILE_MAP:
         band_file = f"{band}.jp2"
         band_file_path = target_folder / band_file
 

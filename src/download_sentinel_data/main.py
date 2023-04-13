@@ -8,6 +8,7 @@ import geopandas as gpd
 from API_call_handler import download_sentinel2_data
 
 # local-modules
+import constants as c
 from sentinel_api import connect_to_sentinel_api
 from sentinelsat.exceptions.SentinelAPIError import ServerError, UnauthorizedError
 
@@ -20,7 +21,6 @@ logging.basicConfig(
 
 if __name__ == "__main__":
     logging.info("Program started")
-    download_path = Path(r"C:\Users\Fabian\Documents\Masterarbeit_Daten\API_test3")
 
     # NOTE polygons_bavaria.geojson contains unused column 'image_path' (sic!)
     polygons_bavaria = gpd.read_file("polygons_bavaria.geojson")
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     for centroid in set(polygons_bavaria.centroid_of_tile):
         try:
-            result = download_sentinel2_data(api, centroid, download_path)
+            result = download_sentinel2_data(api, centroid, c.DOWNLOAD_PATH)
             # ToDo: add tile_name to final dataframe
         # ! result is type bool not exception
         except Exception as e:
@@ -78,11 +78,3 @@ if __name__ == "__main__":
             # ToDo: send mail to admin
 
     logging.info("Program finished successfully")
-    # polygons_bavaria.loc[
-    #     polygons_bavaria["centroid_of_tile"] == centroid, "image_path"
-    # ] = target_folder
-
-    # new line of code
-    # polygons_bavaria.dropna(subset=["image_path"], inplace=True)
-
-    # polygons_bavaria.to_file("polygons_bavaria_image_path.geojson", driver="GeoJSON")

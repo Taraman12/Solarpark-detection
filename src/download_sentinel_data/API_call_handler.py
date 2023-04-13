@@ -47,9 +47,7 @@ def download_sentinel2_data(
     # sentinelsat get_stream() for streaming data to AWS S3
     # Search for products that match the query criteria
     products = api.query(
-        # tileid=tileid,
         footprint,
-        # date=("20220101", date(2023, 3, 7)),
         date=(start_date, end_date),
         platformname="Sentinel-2",
         producttype="S2MSI2A",  # S2MSI1C is more data available but stream crashes
