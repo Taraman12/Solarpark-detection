@@ -4,7 +4,8 @@
 from pathlib import Path
 import re
 
-DOWNLOAD_PATH = Path(r"C:\Users\Fabian\Documents\Masterarbeit_Daten\API_test3")
+# NOTE Full file path will be created if it does not exist 
+DOWNLOAD_PATH = Path(r"C:\Users\Fabian\Documents\Masterarbeit_Daten\Training_data_raw")
 
 IDENTIFIER_REGEX = re.compile(
     r"""^(?P<mission>S2[A-B])_MSI

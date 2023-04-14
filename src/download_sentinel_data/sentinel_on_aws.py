@@ -7,27 +7,36 @@ from pathlib import Path
 
 # third-party
 import boto3
+from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
 # local-modules
 import constants as c
 
+# ToDo: add variable for resolution
 
 def download_from_aws(identifier: str, target_folder: Path) -> bool:
     if not check_aws_free_tier_available(target_folder.parents[0]):
         return False
 
-    load_dotenv()
+    load_dotenv(os.getcwd())
     aws_access_key_id = os.getenv("aws_access_key_id")
     aws_secret_access_key = os.getenv("aws_secret_access_key")
 
-    # Let's use Amazon S3
+    # move somewhere else to avoid multiple calls
+    # add test if credentials are valid
+    # https://stackoverflow.com/questions/53548737/verify-aws-credentials-with-boto3
     s3 = boto3.client(
         "s3",
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
     )
-
+    try:
+        response = s3.list_buckets()
+    except boto3.exceptions.ClientError:
+        print("Credentials are NOT valid.")
+        return False
+    
     regex_match = re.search(c.IDENTIFIER_REGEX, identifier)
 
     if regex_match:
@@ -42,21 +51,30 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
 
     # https://roda.sentinel-hub.com/sentinel-s2-l2a/readme.html
     bucket = f"sentinel-s2-{product_level}"
-    prefix = f"tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0"
+    prefix = f'tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0/R10m'
 
     for band in c.BAND_FILE_MAP:
+        
         band_file = f"{band}.jp2"
         band_file_path = target_folder / band_file
-
+        # Skip if file already exists
         if band_file_path.exists():
             continue
-
+        # add try except block
         # https://stackoverflow.com/questions/63323425/download-sentinel-file-from-s3-using-python-boto3
-        response = s3.get_object(
-            Bucket=bucket, Key=f"{prefix}/{band_file}", RequestPayer="requester"
-        )
+        try:
+            response = s3.get_object(
+                Bucket=bucket, Key=f"{prefix}/{band_file}", RequestPayer="requester"
+            )
+        except s3.exceptions.NoSuchKey:
+            # ToDo: Need better error handling
+            # should trigger LTA
+            print("No such key in bucket")
+            return False
+
         response_content = response["Body"].read()
-        with open(band_file_path, "wb") as file:
+        #! add variable for resolution
+        with open(target_folder /f"{band}_10m.jp2", "wb") as file:
             file.write(response_content)
 
     write_downloaded_size(target_folder)
@@ -79,12 +97,12 @@ def check_aws_free_tier_available(root_folder: Path) -> bool:
     current_month_sum = sum(
         size_logs[date]
         for date in size_logs
-        if datetime.strptime(date, "%Y-%m-%d").year == year
-        and datetime.strptime(date, "%Y-%m-%d").month == month
+        if date.year == year
+        and date.month == month
     )
     # ToDo: replace hard-coded value with a constant
     if current_month_sum < 90 * (1024**3):
-        print(f"Current month sum is: {current_month_sum/(1024**3)} GB.")
+        print(f"Current month sum is: {current_month_sum/(1024**3):.2} GB.")
         return True
     else:
         print("Current month sum is 90 GB or above.")

@@ -10,7 +10,7 @@ from API_call_handler import download_sentinel2_data
 # local-modules
 import constants as c
 from sentinel_api import connect_to_sentinel_api
-from sentinelsat.exceptions.SentinelAPIError import ServerError, UnauthorizedError
+from sentinelsat.exceptions import ServerError, UnauthorizedError
 
 logging.basicConfig(
     filename="app.log",
@@ -21,9 +21,8 @@ logging.basicConfig(
 
 if __name__ == "__main__":
     logging.info("Program started")
-
-    # NOTE polygons_bavaria.geojson contains unused column 'image_path' (sic!)
-    polygons_bavaria = gpd.read_file("polygons_bavaria.geojson")
+    print(Path.cwd())
+    tiles_germany = gpd.read_file(r"src/download_sentinel_data/data/tiles_germany.geojson")
 
     api = connect_to_sentinel_api()
 
@@ -66,12 +65,13 @@ if __name__ == "__main__":
         else:
             break
 
-    for centroid in set(polygons_bavaria.centroid_of_tile):
+    for centroid in set(tiles_germany.centroid_of_tile):
         try:
-            result = download_sentinel2_data(api, centroid, c.DOWNLOAD_PATH)
+            result = download_sentinel2_data(api, centroid, c.DOWNLOAD_PATH, mode="production")
             # ToDo: add tile_name to final dataframe
         # ! result is type bool not exception
         except Exception as e:
+            print(f"Error occurred while downloading data for centroid {centroid}: {e}")
             logging.error(
                 f"Error occurred while downloading data for centroid {centroid}: {e}"
             )
