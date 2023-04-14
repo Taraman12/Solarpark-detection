@@ -7,13 +7,13 @@ from pathlib import Path
 
 # third-party
 import boto3
-from botocore.exceptions import ClientError
-from dotenv import load_dotenv
 
 # local-modules
 import constants as c
+from dotenv import load_dotenv
 
 # ToDo: add variable for resolution
+
 
 def download_from_aws(identifier: str, target_folder: Path) -> bool:
     if not check_aws_free_tier_available(target_folder.parents[0]):
@@ -36,7 +36,7 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
     except boto3.exceptions.ClientError:
         print("Credentials are NOT valid.")
         return False
-    
+
     regex_match = re.search(c.IDENTIFIER_REGEX, identifier)
 
     if regex_match:
@@ -51,10 +51,9 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
 
     # https://roda.sentinel-hub.com/sentinel-s2-l2a/readme.html
     bucket = f"sentinel-s2-{product_level}"
-    prefix = f'tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0/R10m'
+    prefix = f"tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0/R10m"
 
     for band in c.BAND_FILE_MAP:
-        
         band_file = f"{band}.jp2"
         band_file_path = target_folder / band_file
         # Skip if file already exists
@@ -73,8 +72,8 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
             return False
 
         response_content = response["Body"].read()
-        #! add variable for resolution
-        with open(target_folder /f"{band}_10m.jp2", "wb") as file:
+        # ! add variable for resolution
+        with open(target_folder / f"{band}_10m.jp2", "wb") as file:
             file.write(response_content)
 
     write_downloaded_size(target_folder)
@@ -97,8 +96,7 @@ def check_aws_free_tier_available(root_folder: Path) -> bool:
     current_month_sum = sum(
         size_logs[date]
         for date in size_logs
-        if date.year == year
-        and date.month == month
+        if date.year == year and date.month == month
     )
     # ToDo: replace hard-coded value with a constant
     if current_month_sum < 90 * (1024**3):

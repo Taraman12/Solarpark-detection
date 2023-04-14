@@ -1,15 +1,15 @@
 # build-in
 import asyncio
 import os
-import re
 import shutil
-import time
 import tempfile
+import time
+from datetime import date
 from pathlib import Path
 from zipfile import ZipFile
 
 # local-modules
-import constants as c 
+import constants as c
 from sentinel_on_aws import download_from_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
@@ -42,8 +42,8 @@ def download_sentinel2_data(
         end_date = "NOW"
 
     elif mode == "training":
-        start_date = date(2018, 6, 1) # type: ignore
-        end_date = date(2018, 8, 1) # type: ignore
+        start_date = date(2018, 6, 1)  # type: ignore
+        end_date = date(2018, 8, 1)  # type: ignore
 
     # sentinelsat get_stream() for streaming data to AWS S3
     # Search for products that match the query criteria
@@ -79,12 +79,12 @@ def download_sentinel2_data(
         # check if product is complete
         if len(os.listdir(target_folder)) >= len(c.BAND_FILE_MAP.keys()):
             return True
-    
+
     # creates folder
     target_folder.mkdir(parents=True, exist_ok=True)
 
     # check if product is online
-    
+
     is_online = api.is_online(product.uuid)
 
     if is_online:
@@ -113,7 +113,7 @@ def download_sentinel2_data(
             # api.trigger_offline_retrieval(product.uuid)
             print("Product is not online. Triggering LTA.")
             # download from LTA waiting for 10 minutes before trying again
-            #result = asyncio.run(download_from_lta(api, product.uuid, download_root))
+            # result = asyncio.run(download_from_lta(api, product.uuid, download_root))
 
             # if result:
             #     return True
@@ -131,9 +131,8 @@ def extract_image_bands(
     download_root: Path, identifier: str, target_folder: Path
 ) -> str:
     """
-    Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a
-    Sentinel-2 ZIP folder and saves them as separate files with the format <band>_10m.jp2.
-
+    Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a Sentinel-2
+    ZIP folder and saves them as separate files with the format <band>_10m.jp2.
 
     Args:
         download_root (Path): The path to the root directory where the Sentinel-2 image
@@ -146,6 +145,7 @@ def extract_image_bands(
     Returns:
         str: A message indicating that the band images have been successfully extracted
             and saved to the `target_folder` directory.
+
     """
 
     with ZipFile(download_root / f"{identifier}.zip", mode="r") as zipped_folder:
@@ -154,11 +154,11 @@ def extract_image_bands(
             tmp_dir_path = Path(tmp_dir)
             p = tmp_dir_path.glob("**/*B0[2438]_10m.jp2")
             files = [x for x in p if x.is_file()]
-            
+
             for source_path in files:
                 band_res = source_path.stem.split("_")[2] + "_10m.jp2"
                 target_filename = target_folder / band_res
-                
+
                 with source_path.open("rb") as zf, target_filename.open("wb") as f:
                     shutil.copyfileobj(zf, f)
 

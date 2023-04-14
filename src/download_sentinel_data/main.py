@@ -3,12 +3,12 @@ import logging
 import time
 from pathlib import Path
 
+# local-modules
+import constants as c
+
 # third-party
 import geopandas as gpd
 from API_call_handler import download_sentinel2_data
-
-# local-modules
-import constants as c
 from sentinel_api import connect_to_sentinel_api
 from sentinelsat.exceptions import ServerError, UnauthorizedError
 
@@ -22,7 +22,9 @@ logging.basicConfig(
 if __name__ == "__main__":
     logging.info("Program started")
     print(Path.cwd())
-    tiles_germany = gpd.read_file(r"src/download_sentinel_data/data/tiles_germany.geojson")
+    tiles_germany = gpd.read_file(
+        r"src/download_sentinel_data/data/tiles_germany.geojson"
+    )
 
     api = connect_to_sentinel_api()
 
@@ -67,7 +69,9 @@ if __name__ == "__main__":
 
     for centroid in set(tiles_germany.centroid_of_tile):
         try:
-            result = download_sentinel2_data(api, centroid, c.DOWNLOAD_PATH, mode="production")
+            result = download_sentinel2_data(
+                api, centroid, c.DOWNLOAD_PATH, mode="production"
+            )
             # ToDo: add tile_name to final dataframe
         # ! result is type bool not exception
         except Exception as e:

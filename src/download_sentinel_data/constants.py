@@ -1,10 +1,10 @@
 # change constants here
 
 # built-in
-from pathlib import Path
 import re
+from pathlib import Path
 
-# NOTE Full file path will be created if it does not exist 
+# NOTE Full file path will be created if it does not exist
 DOWNLOAD_PATH = Path(r"C:\Users\Fabian\Documents\Masterarbeit_Daten\Training_data_raw")
 
 IDENTIFIER_REGEX = re.compile(
