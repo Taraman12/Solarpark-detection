@@ -4,11 +4,12 @@ import os
 import re
 import shutil
 import time
-from datetime.datetime import date
+import tempfile
 from pathlib import Path
 from zipfile import ZipFile
 
 # local-modules
+import constants as c 
 from sentinel_on_aws import download_from_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
@@ -41,8 +42,8 @@ def download_sentinel2_data(
         end_date = "NOW"
 
     elif mode == "training":
-        start_date = date(2018, 6, 1)
-        end_date = date(2023, 8, 1)
+        start_date = date(2018, 6, 1) # type: ignore
+        end_date = date(2018, 8, 1) # type: ignore
 
     # sentinelsat get_stream() for streaming data to AWS S3
     # Search for products that match the query criteria
@@ -51,7 +52,7 @@ def download_sentinel2_data(
         date=(start_date, end_date),
         platformname="Sentinel-2",
         producttype="S2MSI2A",  # S2MSI1C is more data available but stream crashes
-        cloudcoverpercentage=(0, 20),
+        cloudcoverpercentage=(0, 30),
     )
 
     # check if a product is found
@@ -71,45 +72,53 @@ def download_sentinel2_data(
     product = products_gdf_sorted.iloc[0]
 
     # create target folder
-    target_folder = download_root / product.identifier[0]
+    target_folder = download_root / product.identifier
 
+    # check if product is already downloaded
+    if target_folder.exists():
+        # check if product is complete
+        if len(os.listdir(target_folder)) >= len(c.BAND_FILE_MAP.keys()):
+            return True
+    
     # creates folder
     target_folder.mkdir(parents=True, exist_ok=True)
 
     # check if product is online
+    
     is_online = api.is_online(product.uuid)
 
     if is_online:
         try:
             print("Product is online. Starting download.")
             # Download the product using the UUID
-            api.download(product.uuid[0], directory_path=download_root)
+            api.download(product.uuid, directory_path=download_root)
 
             # Extract the TCI_10m image from the downloaded ZIP file
-            extract_image_bands(download_root, product.identifier[0], target_folder)
+            extract_image_bands(download_root, product.identifier, target_folder)
 
             # Remove the downloaded ZIP file
-            (download_root / (product.identifier[0] + ".zip")).unlink()
+            (download_root / (product.identifier + ".zip")).unlink()
 
         except HTTPError:
             # ToDo: Need better error handling
             return False
 
     else:
-        if download_from_aws(product.identifier[0], target_folder):
+        print("Product is not online. Trying to download from AWS S3.")
+        if download_from_aws(product.identifier, target_folder):
             return True
 
         else:
             # trigger LTA
-            api.trigger_offline_retrieval(product.uuid[0])
-
+            # api.trigger_offline_retrieval(product.uuid)
+            print("Product is not online. Triggering LTA.")
             # download from LTA waiting for 10 minutes before trying again
-            result = asyncio.run(download_from_lta(api, product.uuid[0], download_root))
+            #result = asyncio.run(download_from_lta(api, product.uuid, download_root))
 
-            if result:
-                return True
-            else:
-                return False
+            # if result:
+            #     return True
+            # else:
+            #     return False
 
     return False
 
@@ -119,35 +128,55 @@ def get_product_from_footprint() -> None:
 
 
 def extract_image_bands(
-    download_root: Path, identifier: str, target_folder: str
+    download_root: Path, identifier: str, target_folder: Path
 ) -> str:
     """
-    Extracts the TCI_10m image from the zip file in the given download path for the
-    given Sentinel-2 image identifier.
+    Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a
+    Sentinel-2 ZIP folder and saves them as separate files with the format <band>_10m.jp2.
+
 
     Args:
-        download_root (str): The path to the directory where the zip file is downloaded.
-        identifier (str): The Sentinel-2 image identifier.
+        download_root (Path): The path to the root directory where the Sentinel-2 image
+            ZIP file is located.
+        identifier (str): The identifier of the Sentinel-2 image ZIP file, without the
+            `.zip` extension.
+        target_folder (Path): The path to the directory where the extracted band images
+            will be saved.
 
     Returns:
-        str: The path to the extracted TCI_10m image.
-
+        str: A message indicating that the band images have been successfully extracted
+            and saved to the `target_folder` directory.
     """
-    pattern = re.compile(r"_B0[2438]_10m\.jp2$")
 
-    # Extract the TCI_10m image from the ZIP file
-    with ZipFile(download_root / (identifier + ".zip"), mode="r") as zipped_folder:
-        for source_filename in zipped_folder.namelist():
-            if source_filename.endswith("_TCI_10m.jp2") or pattern.search(
-                source_filename
-            ):
-                target_filename = os.path.join(
-                    target_folder, os.path.basename(source_filename)
-                )
-                with zipped_folder.open(source_filename) as zf, open(
-                    target_filename, "wb"
-                ) as f:
+    with ZipFile(download_root / f"{identifier}.zip", mode="r") as zipped_folder:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            zipped_folder.extractall(tmp_dir)
+            tmp_dir_path = Path(tmp_dir)
+            p = tmp_dir_path.glob("**/*B0[2438]_10m.jp2")
+            files = [x for x in p if x.is_file()]
+            
+            for source_path in files:
+                band_res = source_path.stem.split("_")[2] + "_10m.jp2"
+                target_filename = target_folder / band_res
+                
+                with source_path.open("rb") as zf, target_filename.open("wb") as f:
                     shutil.copyfileobj(zf, f)
+
+    # pattern = re.compile(r"_B0[2438]_10m\.jp2$")
+
+    # # Extract the TCI_10m image from the ZIP file
+    # with ZipFile(download_root / f"{identifier}.zip", mode="r") as zipped_folder:
+    #     for source_filename in zipped_folder.namelist():
+    #         if source_filename.endswith("_TCI_10m.jp2") or pattern.search(
+    #             source_filename
+    #         ):
+    #             target_filename = os.path.join(
+    #                 target_folder, os.path.basename(source_filename)
+    #             )
+    #             with zipped_folder.open(source_filename) as zf, open(
+    #                 target_filename, "wb"
+    #             ) as f:
+    #                 shutil.copyfileobj(zf, f)
 
     return identifier
 
