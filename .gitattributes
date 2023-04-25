@@ -1,3 +1,10 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# add kml files to git lfs (Large File Storage)
 *.kml filter=lfs diff=lfs merge=lfs -text
+
+# Ignore all files in directory for the github language detection
+Introduction_Notebooks -linguist-detectable
+
+**/*.ipynb -linguist-detectable
