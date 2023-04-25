@@ -1,3 +1,6 @@
 data_local
 
 .env
+
+Create_figures_thesis/*.jpg
+Create_figures_thesis/*.pdf
