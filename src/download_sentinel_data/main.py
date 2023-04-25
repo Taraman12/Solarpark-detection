@@ -66,11 +66,26 @@ if __name__ == "__main__":
 
         else:
             break
+    
+    season_start = {
+        'winter':'2018-01-01',
+        'spring':'2018-04-01',
+        'summer':'2018-07-01',
+        'autumn':'2018-10-01'
+    }
+
+    season_end = {
+        'winter':'2018-03-31',
+        'spring':'2018-06-30',
+        'summer':'2018-09-30',
+        'autumn':'2018-11-30'
+    }
 
     for centroid in set(tiles_germany.centroid_of_tile):
+        # ToDo: add progress counter
         try:
             result = download_sentinel2_data(
-                api, centroid, c.DOWNLOAD_PATH, mode="production"
+                api, centroid, c.DOWNLOAD_PATH, mode="training"
             )
             # ToDo: add tile_name to final dataframe
         # ! result is type bool not exception

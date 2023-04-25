@@ -6,13 +6,18 @@ import tempfile
 import time
 from datetime import date
 from pathlib import Path
+from typing import TypedDict
 from zipfile import ZipFile
 
 # local-modules
 import constants as c
+
+# third-party
+from geopandas import GeoSeries
 from sentinel_on_aws import download_from_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
+from typing_extensions import Unpack
 
 
 # ToDo: change os.path to pathlib
@@ -20,6 +25,13 @@ from sentinelsat.exceptions import LTATriggered
 class HTTPError(Exception):
     "Raised by sentinelsat"
     pass
+
+
+class RequestParams(TypedDict):
+    footprint: str
+    start_date: str
+    end_date: str
+    mode: str
 
 
 def download_sentinel2_data(
@@ -56,9 +68,9 @@ def download_sentinel2_data(
     )
 
     # check if a product is found
-    if not products:
-        # ToDo: Need better error handling
+    if not products and mode == "production":
         return False
+        # ToDo: Need better error handling
 
     # Convert the products to a geopandas dataframe
     products_gdf = api.to_geodataframe(products)
@@ -84,7 +96,6 @@ def download_sentinel2_data(
     target_folder.mkdir(parents=True, exist_ok=True)
 
     # check if product is online
-
     is_online = api.is_online(product.uuid)
 
     if is_online:
@@ -123,13 +134,42 @@ def download_sentinel2_data(
     return False
 
 
-def get_product_from_footprint() -> None:
-    pass
+def get_product_from_footprint(
+    api: SentinelAPI,
+    footprint: str,
+    start_date: str = "NOW-5DAYS",
+    end_date: str = "NOW",
+    mode: str = "production",
+    **kwargs: Unpack[RequestParams],  # type: ignore
+) -> GeoSeries:
+    products = api.query(
+        footprint,
+        date=(start_date, end_date),
+        platformname="Sentinel-2",
+        producttype="S2MSI2A",  # S2MSI1C is more data available but stream crashes
+        cloudcoverpercentage=(0, 30),
+    )
+    # check if a product is found
+    if not products:
+        if mode == "production":
+            return False
+        # ToDo: Need better error handling
+
+    # Convert the products to a geopandas dataframe
+    products_gdf = api.to_geodataframe(products)
+
+    # sort products by cloud cover percentage
+    products_gdf_sorted = products_gdf.sort_values(
+        ["cloudcoverpercentage"], ascending=True
+    )
+
+    # return first product
+    return products_gdf_sorted.iloc[0]
 
 
 def extract_image_bands(
     download_root: Path, identifier: str, target_folder: Path
-) -> str:
+) -> bool:
     """
     Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a Sentinel-2
     ZIP folder and saves them as separate files with the format <band>_10m.jp2.
@@ -178,7 +218,7 @@ def extract_image_bands(
     #             ) as f:
     #                 shutil.copyfileobj(zf, f)
 
-    return identifier
+    return True
 
 
 async def download_from_lta(
