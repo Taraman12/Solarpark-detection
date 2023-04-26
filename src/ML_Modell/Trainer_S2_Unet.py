@@ -17,14 +17,14 @@ from torchmetrics.classification import BinaryJaccardIndex
 class TrainerS2Unet:
     def __init__(
         self,
-        image_dir,
-        mask_dir,
-        epochs=30,
-        batch_size=32,
-        shuffle=True,
-        config_name="",
-        log_dir="",
-    ):
+        image_dir: str,
+        mask_dir: str,
+        epochs: int=30,
+        batch_size: int=32,
+        shuffle: bool=True,
+        config_name: str="",
+        log_dir: str="",
+    ) -> None:
         self.dataset = GeoImageDataset(image_dir, mask_dir)
         self.epochs = epochs
         self.batch_size = batch_size
@@ -45,19 +45,21 @@ class TrainerS2Unet:
         logging.info(f"Using {self.device} device")
 
         train_dataloader = DataLoader(
-            train_ds, batch_size=self.batch_size, shuffle=self.shuffle
+            train_ds, batch_size=self.batch_size, shuffle=self.shuffle, num_workers=1
         )
 
         test_dataloader = DataLoader(
-            test_ds, batch_size=self.batch_size, shuffle=self.shuffle
+            test_ds, batch_size=self.batch_size, shuffle=self.shuffle, num_workers=1
         )
 
         model = self._load_model(model_settings=model_settings)
 
         loss_fn = smp.losses.DiceLoss(mode="binary", log_loss=True, from_logits=False)
 
+        # metrics = [smp.utils.metrics.IoU(threshold=0.5)]
+        
         # check different optimizer
-        optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.0005, momentum=0.9)
         # ? Check for different max_lr (0.01)
         # ! should be implemented
         # scheduler = torch.optim.lr_scheduler.OneCycleLR(

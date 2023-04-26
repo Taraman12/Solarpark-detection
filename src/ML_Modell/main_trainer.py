@@ -18,6 +18,12 @@ ENCODER_NAMES = [
 ENCODER_WEIGHTS = ["imagenet", None]
 ACTIVATIONS = ["sigmoid", None]
 
+model_settings_eff_b2 = {
+    "encoder_name": "efficientnet-b0",
+    "encoder_weights": "imagenet",
+    "activation": "sigmoid",
+}
+
 model_settings1 = {
     "encoder_name": "timm-resnest14d",
     "encoder_weights": "imagenet",
@@ -30,9 +36,9 @@ model_settings2 = {
 }
 
 
-settings = [model_settings1, model_settings2]
+settings = [model_settings_eff_b2]
 
-root_dir = Path(__file__).resolve().parent.parent
+root_dir = Path(__file__).resolve().parent.parent.parent
 
 
 def main():
