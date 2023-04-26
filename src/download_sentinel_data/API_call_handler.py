@@ -114,22 +114,22 @@ def download_sentinel2_data(
             # ToDo: Need better error handling
             return False
 
-    else:
-        print("Product is not online. Trying to download from AWS S3.")
-        if download_from_aws(product.identifier, target_folder):
-            return True
+    
+    print("Product is not online. Trying to download from AWS S3.")
+    if download_from_aws(product.identifier, target_folder):
+        return True
 
-        else:
-            # trigger LTA
-            # api.trigger_offline_retrieval(product.uuid)
-            print("Product is not online. Triggering LTA.")
-            # download from LTA waiting for 10 minutes before trying again
-            # result = asyncio.run(download_from_lta(api, product.uuid, download_root))
+        
+    # trigger LTA
+    # api.trigger_offline_retrieval(product.uuid)
+    print("Product is not online. Triggering LTA.")
+    # download from LTA waiting for 10 minutes before trying again
+    # result = asyncio.run(download_from_lta(api, product.uuid, download_root))
 
-            # if result:
-            #     return True
-            # else:
-            #     return False
+    # if result:
+    #     return True
+    # else:
+    #     return False
 
     return False
 
