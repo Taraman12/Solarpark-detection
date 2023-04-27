@@ -37,7 +37,8 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
         print("Credentials are NOT valid.")
         return False
 
-    regex_match = re.search(c.IDENTIFIER_REGEX, identifier)
+    # ! changed to match instead of search
+    regex_match = re.match(c.IDENTIFIER_REGEX, identifier)
 
     if regex_match:
         # mission = regex_match.group("mission")
@@ -100,7 +101,7 @@ def check_aws_free_tier_available(root_folder: Path) -> bool:
     )
     # ToDo: replace hard-coded value with a constant
     if current_month_sum < 90 * (1024**3):
-        print(f"Current month sum is: {current_month_sum/(1024**3):.2} GB.")
+        print(f"Current month sum is: {current_month_sum/(1024**3):.2f} GB.")
         return True
     else:
         print("Current month sum is 90 GB or above.")

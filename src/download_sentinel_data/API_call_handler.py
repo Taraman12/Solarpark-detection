@@ -6,13 +6,18 @@ import tempfile
 import time
 from datetime import date
 from pathlib import Path
+from typing import TypedDict
 from zipfile import ZipFile
 
 # local-modules
 import constants as c
+
+# third-party
+from geopandas import GeoSeries
 from sentinel_on_aws import download_from_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
+from typing_extensions import Unpack
 
 
 # ToDo: change os.path to pathlib
@@ -22,8 +27,20 @@ class HTTPError(Exception):
     pass
 
 
+class RequestParams(TypedDict):
+    footprint: str
+    start_date: str
+    end_date: str
+    mode: str
+
+
 def download_sentinel2_data(
-    api: SentinelAPI, footprint: str, download_root: Path, mode: str = "production"
+    api: SentinelAPI,
+    footprint: str,
+    start_date: date,
+    end_date: date,
+    download_root: Path = Path("."),
+    mode: str = "production",
 ) -> bool:
     """
     Download Sentinel-2 data for a given footprint and extract the RGB image.
@@ -37,13 +54,13 @@ def download_sentinel2_data(
 
     """
 
-    if mode == "production":
-        start_date = "NOW-5DAYS"
-        end_date = "NOW"
+    # if mode == "production":
+    #     start_date = "NOW-5DAYS"
+    #     end_date = "NOW"
 
-    elif mode == "training":
-        start_date = date(2018, 6, 1)  # type: ignore
-        end_date = date(2018, 8, 1)  # type: ignore
+    # elif mode == "training":
+    #     start_date = date(2018, 6, 1)  # type: ignore
+    #     end_date = date(2018, 8, 1)  # type: ignore
 
     # sentinelsat get_stream() for streaming data to AWS S3
     # Search for products that match the query criteria
@@ -56,16 +73,16 @@ def download_sentinel2_data(
     )
 
     # check if a product is found
-    if not products:
-        # ToDo: Need better error handling
+    if not products:  # and mode == "production"
         return False
+        # ToDo: Need better error handling
 
     # Convert the products to a geopandas dataframe
     products_gdf = api.to_geodataframe(products)
 
     # sort products by cloud cover percentage
     products_gdf_sorted = products_gdf.sort_values(
-        ["cloudcoverpercentage"], ascending=True
+        by="cloudcoverpercentage", ascending=True
     )
 
     # select first product
@@ -84,7 +101,6 @@ def download_sentinel2_data(
     target_folder.mkdir(parents=True, exist_ok=True)
 
     # check if product is online
-
     is_online = api.is_online(product.uuid)
 
     if is_online:
@@ -98,38 +114,65 @@ def download_sentinel2_data(
 
             # Remove the downloaded ZIP file
             (download_root / (product.identifier + ".zip")).unlink()
-
+            return True
         except HTTPError:
             # ToDo: Need better error handling
             return False
 
-    else:
-        print("Product is not online. Trying to download from AWS S3.")
-        if download_from_aws(product.identifier, target_folder):
-            return True
+    print("Product is not online. Download from AWS S3.")
+    if download_from_aws(product.identifier, target_folder):
+        return True
 
-        else:
-            # trigger LTA
-            # api.trigger_offline_retrieval(product.uuid)
-            print("Product is not online. Triggering LTA.")
-            # download from LTA waiting for 10 minutes before trying again
-            # result = asyncio.run(download_from_lta(api, product.uuid, download_root))
+    # trigger LTA
+    api.trigger_offline_retrieval(product.uuid)
+    print("Product is not online. Triggering LTA.")
+    # download from LTA waiting for 10 minutes before trying again
+    # result = asyncio.run(download_from_lta(api, product.uuid, download_root))
 
-            # if result:
-            #     return True
-            # else:
-            #     return False
+    # if result:
+    #     return True
+    # else:
+    #     return False
 
     return False
 
 
-def get_product_from_footprint() -> None:
-    pass
+def get_product_from_footprint(
+    api: SentinelAPI,
+    footprint: str,
+    start_date: str = "NOW-5DAYS",
+    end_date: str = "NOW",
+    mode: str = "production",
+    **kwargs: Unpack[RequestParams],  # type: ignore
+) -> GeoSeries:
+    products = api.query(
+        footprint,
+        date=(start_date, end_date),
+        platformname="Sentinel-2",
+        producttype="S2MSI2A",  # S2MSI1C is more data available but stream crashes
+        cloudcoverpercentage=(0, 30),
+    )
+    # check if a product is found
+    if not products:
+        if mode == "production":
+            return False
+        # ToDo: Need better error handling
+
+    # Convert the products to a geopandas dataframe
+    products_gdf = api.to_geodataframe(products)
+
+    # sort products by cloud cover percentage
+    products_gdf_sorted = products_gdf.sort_values(
+        ["cloudcoverpercentage"], ascending=True
+    )
+
+    # return first product
+    return products_gdf_sorted.iloc[0]
 
 
 def extract_image_bands(
     download_root: Path, identifier: str, target_folder: Path
-) -> str:
+) -> bool:
     """
     Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a Sentinel-2
     ZIP folder and saves them as separate files with the format <band>_10m.jp2.
@@ -178,7 +221,7 @@ def extract_image_bands(
     #             ) as f:
     #                 shutil.copyfileobj(zf, f)
 
-    return identifier
+    return True
 
 
 async def download_from_lta(
