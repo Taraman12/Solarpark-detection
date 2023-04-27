@@ -1,5 +1,6 @@
 # build-in
 import os
+from pathlib import Path
 
 # third-party
 import torch
@@ -7,7 +8,7 @@ from torch.utils.data import Dataset
 
 
 class GeoImageDataset(Dataset):
-    def __init__(self, img_dir: str, mask_dir: str):  # transform=None
+    def __init__(self, img_dir: Path, mask_dir: Path):  # transform=None
         self.img_dir = img_dir
         self.mask_dir = mask_dir
         self.img_files = os.listdir(self.img_dir)
