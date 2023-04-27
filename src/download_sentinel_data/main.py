@@ -28,21 +28,6 @@ if __name__ == "__main__":
 
     api = connect_to_sentinel_api()
 
-    # if api is ServerError:
-    #     print(f"""Could not connect to Sentinel API \n
-    #             Probably ongoing maintenance \n
-    #             retry after 5 minutes""")
-    #     # ToDo: add error handling -> retry after 5 minutes
-    #     # ToDo: send mail to admin
-    #     exit()
-    # elif api is UnauthorizedError:
-    #     print("Wrong credentials for Sentinel API \n Please check .env file")
-    #     exit()
-    # elif isinstance(api, Exception):
-    #     # ToDo: send mail to admin
-    #     print("Unknown error occurred")
-    #     exit()
-
     while True:
         if isinstance(api, ServerError):
             # ToDo: send mail to admin once a day
@@ -66,26 +51,26 @@ if __name__ == "__main__":
 
         else:
             break
-    
-    season_start = {
-        'winter':'2018-01-01',
-        'spring':'2018-04-01',
-        'summer':'2018-07-01',
-        'autumn':'2018-10-01'
-    }
 
-    season_end = {
-        'winter':'2018-03-31',
-        'spring':'2018-06-30',
-        'summer':'2018-09-30',
-        'autumn':'2018-11-30'
-    }
 
-    for centroid in set(tiles_germany.centroid_of_tile):
-        # ToDo: add progress counter
+for season_counter, (season, dates) in enumerate(c.SEASONS_DICT.items()):
+    start_date, end_date = dates["start_date"], dates["end_date"]
+    for centroid_counter, centroid in enumerate(set(tiles_germany.centroid_of_tile)):
+        # ToDo: add faster way to check if data is already downloaded
+        # see: make_trainings_data.ipynb
         try:
             result = download_sentinel2_data(
-                api, centroid, c.DOWNLOAD_PATH, mode="training"
+                api=api,
+                footprint=centroid,
+                start_date=start_date,
+                end_date=end_date,
+                download_root=c.DOWNLOAD_PATH,
+                mode="training",
+            )
+            print(
+                f"season {season_counter} of {len(c.SEASONS_DICT.keys())}"
+                f"for tile {centroid_counter}/"
+                f"{len(set(tiles_germany.centroid_of_tile))} finished"
             )
             # ToDo: add tile_name to final dataframe
         # ! result is type bool not exception

@@ -2,10 +2,20 @@
 
 # built-in
 import re
+
+# third-party
+from datetime import date
 from pathlib import Path
 
 # NOTE Full file path will be created if it does not exist
-DOWNLOAD_PATH = Path(r"C:\Users\Fabian\Documents\Masterarbeit_Daten\Training_data_raw")
+DOWNLOAD_PATH = Path(r"..\data_local\training_data_raw")
+
+SEASONS_DICT = {
+    "winter": {"start_date": date(2018, 1, 1), "end_date": date(2018, 3, 31)},
+    "spring": {"start_date": date(2018, 4, 1), "end_date": date(2018, 6, 30)},
+    "summer": {"start_date": date(2018, 7, 1), "end_date": date(2018, 9, 30)},
+    "autumn": {"start_date": date(2018, 10, 1), "end_date": date(2018, 11, 30)},
+}
 
 IDENTIFIER_REGEX = re.compile(
     r"""^(?P<mission>S2[A-B])_MSI

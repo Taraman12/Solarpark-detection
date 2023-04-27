@@ -35,7 +35,12 @@ class RequestParams(TypedDict):
 
 
 def download_sentinel2_data(
-    api: SentinelAPI, footprint: str, download_root: Path, mode: str = "production"
+    api: SentinelAPI,
+    footprint: str,
+    start_date: date,
+    end_date: date,
+    download_root: Path = Path("."),
+    mode: str = "production",
 ) -> bool:
     """
     Download Sentinel-2 data for a given footprint and extract the RGB image.
@@ -49,13 +54,13 @@ def download_sentinel2_data(
 
     """
 
-    if mode == "production":
-        start_date = "NOW-5DAYS"
-        end_date = "NOW"
+    # if mode == "production":
+    #     start_date = "NOW-5DAYS"
+    #     end_date = "NOW"
 
-    elif mode == "training":
-        start_date = date(2018, 6, 1)  # type: ignore
-        end_date = date(2018, 8, 1)  # type: ignore
+    # elif mode == "training":
+    #     start_date = date(2018, 6, 1)  # type: ignore
+    #     end_date = date(2018, 8, 1)  # type: ignore
 
     # sentinelsat get_stream() for streaming data to AWS S3
     # Search for products that match the query criteria
@@ -68,7 +73,7 @@ def download_sentinel2_data(
     )
 
     # check if a product is found
-    if not products and mode == "production":
+    if not products:  # and mode == "production"
         return False
         # ToDo: Need better error handling
 
@@ -77,7 +82,7 @@ def download_sentinel2_data(
 
     # sort products by cloud cover percentage
     products_gdf_sorted = products_gdf.sort_values(
-        ["cloudcoverpercentage"], ascending=True
+        by="cloudcoverpercentage", ascending=True
     )
 
     # select first product
@@ -109,19 +114,17 @@ def download_sentinel2_data(
 
             # Remove the downloaded ZIP file
             (download_root / (product.identifier + ".zip")).unlink()
-
+            return True
         except HTTPError:
             # ToDo: Need better error handling
             return False
 
-    
-    print("Product is not online. Trying to download from AWS S3.")
+    print("Product is not online. Download from AWS S3.")
     if download_from_aws(product.identifier, target_folder):
         return True
 
-        
     # trigger LTA
-    # api.trigger_offline_retrieval(product.uuid)
+    api.trigger_offline_retrieval(product.uuid)
     print("Product is not online. Triggering LTA.")
     # download from LTA waiting for 10 minutes before trying again
     # result = asyncio.run(download_from_lta(api, product.uuid, download_root))
