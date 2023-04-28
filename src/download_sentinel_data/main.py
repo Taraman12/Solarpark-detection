@@ -1,5 +1,6 @@
 # built-in
 import logging
+from distutils.util import strtobool
 import time
 from pathlib import Path
 
@@ -21,10 +22,39 @@ logging.basicConfig(
 
 if __name__ == "__main__":
     logging.info("Program started")
-    print(Path.cwd())
+    print("Program started")
+
+    # ToDo: Check if tiles_germany.geojson exists
     tiles_germany = gpd.read_file(
         r"src/download_sentinel_data/data/tiles_germany.geojson"
     )
+
+    if len(tiles_germany) == 0:
+        logging.error("Could not read tiles_germany.geojson")
+        print("Could not read tiles_germany.geojson")
+        exit()
+
+    while True:
+        if not Path(c.DOWNLOAD_PATH).exists():
+            print(
+                f"The download path: {c.DOWNLOAD_PATH} does not exist. \n"
+                f" Do you want to create it? [y/n] (no will exiting program)"
+            )
+            user_input = input()
+
+            try:
+                user_input_bool = bool(strtobool(user_input))
+            except ValueError:
+                print("Invalid input. Please use y/n")
+                continue
+
+            if user_input_bool:
+                print("path created")
+            else:
+                print("path not created, exiting program")
+                exit()
+            
+        break
 
     api = connect_to_sentinel_api()
 
@@ -68,8 +98,8 @@ for season_counter, (season, dates) in enumerate(c.SEASONS_DICT.items()):
                 mode="training",
             )
             print(
-                f"season {season_counter} of {len(c.SEASONS_DICT.keys())}"
-                f"for tile {centroid_counter}/"
+                f"season {season} ({season_counter+1}/{len(c.SEASONS_DICT.keys())}) "
+                f"for tile {centroid_counter+1}/"
                 f"{len(set(tiles_germany.centroid_of_tile))} finished"
             )
             # ToDo: add tile_name to final dataframe

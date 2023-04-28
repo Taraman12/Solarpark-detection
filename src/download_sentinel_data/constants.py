@@ -7,8 +7,8 @@ import re
 from datetime import date
 from pathlib import Path
 
-# NOTE Full file path will be created if it does not exist
-DOWNLOAD_PATH = Path(r"..\data_local\training_data_raw")
+# NOTE file path can be created on the fly
+DOWNLOAD_PATH = Path(r".\data_local\training_data_raw")
 
 SEASONS_DICT = {
     "winter": {"start_date": date(2018, 1, 1), "end_date": date(2018, 3, 31)},
