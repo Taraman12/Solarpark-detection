@@ -8,10 +8,14 @@ from typing import Any, Dict, Tuple, Union
 import geopandas as gpd
 import numpy as np
 import rasterio
+from rasterio.features import geometry_mask
 import torch
 from rasterio import DatasetReader
 from torch import Tensor
 from torchvision.transforms import Pad
+
+# local modules
+import constants as c
 
 """
 ToDo: Needs better documentation
@@ -20,24 +24,31 @@ ToDo: handle memory consumption (but not so important)
 # Defining constants
 
 # dict to store filenames with bands as keys
-BAND_FILE_MAP = {
-    "B02": None,  # blue
-    "B03": None,  # green
-    "B04": None,  # red
-    "B08": None,  # NIR
-}
+BAND_FILE_MAP = dict(
+    B02=None,  # blue
+    B03=None,  # green
+    B04=None,  # red
+    B08=None,  # NIR
+)
 
 # extracts tile, date, band and resolution from filename
-FILENAME_REGEX = r"""^T(?P<tile>\d{2}[A-Z]{3})_
-                        (?P<date>\d{8}T\d{6})_
-                        (?P<band>B0\d{1})(?:_
-                        (?P<resolution>\d{2}m))?\..*$"""
+FILENAME_REGEX = re.compile(
+    r"""(?P<band>B0\d{1})(?:_
+                            (?P<resolution>\d{2}m))?\..*$""",
+    re.VERBOSE,
+)
 
 
 def save_patched_data_to_disk(
-    image_input_dir, mask_input_dir, image_output_dir, mask_output_dir, kernel_size
+    image_input_dir,
+    masks_gdf,
+    image_output_dir,
+    mask_output_dir,
+    kernel_size,
+    tile,
+    tile_date,
 ):
-    bands, tile = open_DatasetReaders_as_dict(image_input_dir)
+    bands = open_DatasetReaders_as_dict(image_input_dir)
 
     blue = np.float32(bands["B02"].read(1))
     green = np.float32(bands["B03"].read(1))
@@ -68,7 +79,7 @@ def save_patched_data_to_disk(
     image_tensor_patched = image_tensor_patched.swapaxes(-3, -2)
 
     # ! MASK #
-    masks_gdf = gpd.read_file(mask_input_dir)
+    # masks_gdf = gpd.read_file(mask_input_dir)
 
     # filter all masks to selected tile
     masks = filter_mask_on_tile(masks_gdf, tile)
@@ -87,18 +98,22 @@ def save_patched_data_to_disk(
     mask_patched = convert_tensor_into_patches(mask_tensor, kernel_size, fill=False)
 
     file_counter = 0
+
+    file_identifier = 0
     # ToDo: find a better way for iterating
     for i in range(image_tensor_patched.shape[1] - 1):
         for j in range(image_tensor_patched.shape[2] - 1):
             if mask_patched[i, j].sum() != 0:
                 file_counter += 1
+                file_identifier += 1
+                filename = f"{tile}_{file_identifier}_{tile_date}.pt"
                 torch.save(
                     image_tensor_patched[:, i, j].clone().float(),
-                    os.path.join(image_output_dir, f"{tile}_date_{i}_{j}.pt"),
+                    os.path.join(image_output_dir, filename),
                 )
                 torch.save(
                     mask_patched[i, j].clone(),
-                    os.path.join(mask_output_dir, f"{tile}_date_{i}_{j}.pt"),
+                    os.path.join(mask_output_dir, filename),
                 )
     return file_counter
 
@@ -108,14 +123,12 @@ def open_DatasetReaders_as_dict(
 ) -> Tuple[Dict[str, Any], Union[str, Any]]:
     # fill dict with paths
     for filename in os.listdir(image_dir):
-        match = re.search(FILENAME_REGEX, filename)
-        if match:
-            tile = match.group("tile")
-
-        for band_name in BAND_FILE_MAP.keys():
-            if filename.endswith(f"{band_name}_10m.jp2"):
-                BAND_FILE_MAP[band_name] = os.path.join(image_dir, filename)
-                break
+        regex_match = re.match(FILENAME_REGEX, filename)
+        if regex_match:
+            for band_name in BAND_FILE_MAP.keys():
+                if filename.endswith(f"{band_name}_10m.jp2"):
+                    BAND_FILE_MAP[band_name] = image_dir / filename
+                    break
 
     # Verify that all required bands have been found
     missing_bands = [
@@ -129,7 +142,7 @@ def open_DatasetReaders_as_dict(
     return {
         band_name: rasterio.open(file_path)
         for band_name, file_path in BAND_FILE_MAP.items()
-    }, tile
+    }
     # dataset_readers = {}
     # for band_name, file_path in BAND_FILE_MAP.items():
     #     dataset_readers[band_name] = rasterio.open(file_path)
@@ -158,7 +171,7 @@ def rasterize_mask(masks: gpd.GeoDataFrame, band: DatasetReader) -> np.ndarray:
     # create a raster which matches the image shape
     # invert=True masked pixels set to True (instead of the other way around)
     # all_touched=True all pixels within the mask set to True (instead the bounds)
-    return rasterio.features.geometry_mask(
+    return geometry_mask(
         masks,
         out_shape=band.shape,
         transform=band.transform,
@@ -168,7 +181,7 @@ def rasterize_mask(masks: gpd.GeoDataFrame, band: DatasetReader) -> np.ndarray:
 
 
 def filter_mask_on_tile(masks: gpd.GeoDataFrame, tile: str) -> gpd.GeoDataFrame:
-    return masks[masks.Name == tile].geometry.reset_index(drop=True)
+    return masks[masks.tile_name == tile].geometry.reset_index(drop=True)
 
 
 def padding_tensor(tensor: Tensor, kernel_size: int, fill=0) -> Tensor:
@@ -195,24 +208,59 @@ def padding_size(image_size: int, kernel_size: int) -> int:
     return int(((image_size // kernel_size + 1) * kernel_size - image_size) / 2)
 
 
-if __name__ == "__main__":
-    print("program started")
-    root_dir = Path(__file__).resolve().parent.parent
-    image_root_dir = r"C:\Users\Fabian\Documents\Masterarbeit_Daten\API_test4"
-    mask_input_dir = root_dir / "data_local/trn_polygons_germany_tiles.geojson"
-    image_output_dir = r"C:\Users\Fabian\Documents\Masterarbeit_Daten\images_only_AOI4"
-    mask_output_dir = r"C:\Users\Fabian\Documents\Masterarbeit_Daten\masks_only_AOI4"
-    kernel_size = 256
-    # ToDo: add loop over all folders in image_dir (it is only a single one)
-    # open mask_gdf outside the loop
-    for tile_folder in os.listdir(image_root_dir):
-        image_input_dir = os.path.join(image_root_dir, tile_folder)
-        result = save_patched_data_to_disk(
-            image_input_dir,
-            mask_input_dir,
-            image_output_dir,
-            mask_output_dir,
-            kernel_size,
-        )
-        print(f"Number of files saved: {result}")
-    print("program finished")
+# if __name__ == "__main__":
+#     print("Program started")
+#     root_dir = Path(__file__).resolve().parent.parent
+#     # os.chdir(Path(__file__).parent)
+#     print(os.getcwd())
+#     # rename
+#     image_input_dir = c.IMAGE_INPUT_DIR
+#     mask_input_dir = c.MASK_INPUT_DIR  # root_dir
+#     image_output_dir = c.IMAGE_OUTPUT_DIR
+#     mask_output_dir = c.MASK_OUTPUT_DIR
+
+#     for input_directory in [image_input_dir, mask_input_dir]:
+#         if not input_directory.exists():
+#             print(f"Input path: {input_directory} does not exist")
+
+#     for output_directory in [image_output_dir, mask_output_dir]:
+#         if not output_directory.exists():
+#             output_directory.mkdir(parents=True, exist_ok=False)
+#             print(
+#                 f"Output path: {output_directory} does not exist \n"
+#                 f"Directory created"
+#             )
+
+#     kernel_size = 256
+#     # ToDo: add loop over all folders in image_dir (it is only a single one)
+#     # open mask_gdf outside the loop
+#     for tile_folder in os.listdir(image_input_dir):
+#         # ! changed to match instead of search
+#         regex_match = re.match(c.IDENTIFIER_REGEX, tile_folder)
+
+#         if not regex_match:
+#             continue
+
+#         else:
+#             # mission = regex_match.group("mission")
+#             utm_code = regex_match.group("utm_code")
+#             product_level = regex_match.group("product_level").lower()
+#             latitude_band = regex_match.group("latitude_band")
+#             square = regex_match.group("square")
+#             year = regex_match.group("year")
+#             month = str(int(regex_match.group("month")))
+#             day = str(int(regex_match.group("day")))
+#             tile = f"{latitude_band}{square}"
+
+#         image_input_dir = image_input_dir / tile_folder
+#         result = save_patched_data_to_disk(
+#             image_input_dir,
+#             mask_input_dir,
+#             image_output_dir,
+#             mask_output_dir,
+#             kernel_size,
+#             tile=tile,
+#             tile_date=f"{year}-{month}-{day}",
+#         )
+#         print(f"Number of files saved: {result}")
+#     print("program finished")
