@@ -49,6 +49,7 @@ if __name__ == "__main__":
                 continue
 
             if user_input_bool:
+                c.DOWNLOAD_PATH.mkdir(parents=True, exist_ok=False)
                 print("path created")
             else:
                 print("path not created, exiting program")
