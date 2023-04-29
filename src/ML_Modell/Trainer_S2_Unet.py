@@ -145,6 +145,7 @@ class TrainerS2Unet:
 
             # Compute prediction error
             pred = model(X)
+            # ! check why we need to squeeze and convert to float32
             loss = self.loss_fn(pred.squeeze(1), y.to(torch.float32))
 
             # Backpropagation
@@ -175,6 +176,7 @@ class TrainerS2Unet:
                 X, y = X.to(self.device), y.to(self.device)
                 pred = model(X)
                 # test_loss += loss_fn(pred, y).item()
+                # ToDo: calculate average loss
                 test_loss += self.loss_fn(pred.squeeze(1), y.to(torch.float32)).item()
                 loss = self.loss_fn(pred.squeeze(1), y.to(torch.float32)).item()
 
@@ -189,6 +191,8 @@ class TrainerS2Unet:
             f"Test Error: \n"
             f"Jaccard-Index: {(jaccard_idx):>0.3f}%, Avg loss: {test_loss:>5f} \n"
         )
+        # ToDo: fix typing
+        # ToDo: return average loss
         return loss, jaccard_idx.item()  # type: ignore
 
     def _load_model(
