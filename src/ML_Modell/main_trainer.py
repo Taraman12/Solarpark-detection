@@ -3,13 +3,13 @@ import gc
 import logging
 from pathlib import Path
 
-import model_config as config
-
 # third-party
 import torch
 from torch.cuda import OutOfMemoryError
 
+
 # local modules
+import model_config as config
 from Trainer_S2_Unet import TrainerS2Unet
 
 settings = [config.MODEL_CONFIG_EFF_B0]
