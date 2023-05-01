@@ -13,6 +13,12 @@ from API_call_handler import download_sentinel2_data
 from sentinel_api import connect_to_sentinel_api
 from sentinelsat.exceptions import ServerError, UnauthorizedError
 
+"""
+ToDo: Add faster way to check if tile is already downloaded
+ToDo: Needs better documentation
+ToDo: handle memory consumption (but not so important)
+"""
+
 logging.basicConfig(
     filename="app.log",
     filemode="w",
@@ -54,7 +60,7 @@ if __name__ == "__main__":
             else:
                 print("path not created, exiting program")
                 exit()
-            
+
         break
 
     api = connect_to_sentinel_api()
