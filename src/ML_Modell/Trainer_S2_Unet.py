@@ -1,12 +1,15 @@
 # build-in
 import csv
 import logging
+import random
+from typing import List, Tuple
 
 # import os
 from pathlib import Path
 from typing import Any, Optional, Union
 
 # third-party
+import numpy as np
 import segmentation_models_pytorch as smp
 import torch
 import torch.nn as nn
@@ -42,7 +45,6 @@ class TrainerS2Unet:
         self.loss = model_settings["loss"]
         self.config_name = model_settings["config_name"]
         self.comment = model_settings["comment"]
-        self.dataset = GeoImageDataset(image_dir, mask_dir)
         self.writer = SummaryWriter(log_dir=(log_dir / self.config_name))
 
         self.loss_fn = smp.losses.DiceLoss(
@@ -50,14 +52,19 @@ class TrainerS2Unet:
         )
 
         self.device = self._get_device()
+        self.train_ds, self.test_ds, self.val_ds = self._make_split(image_dir, mask_dir)
 
     def train_model(
         self,
         model_dir: Path,
         pretrained_model_path: Optional[Path] = None,
     ) -> None:
-        train_ds, test_ds = random_split(self.dataset, [0.8, 0.2])
+        train_ds = GeoImageDataset(self.train_ds[0], self.train_ds[1])
+        test_ds = GeoImageDataset(self.test_ds[0], self.test_ds[1])
+        val_ds = GeoImageDataset(self.val_ds[0], self.val_ds[1])
 
+        # train_ds, test_ds = random_split(self.dataset, [0.8, 0.2])
+        print(f"Using {self.device} device")
         logging.info(f"Using {self.device} device")
 
         train_dataloader = DataLoader(
@@ -68,7 +75,7 @@ class TrainerS2Unet:
         )
 
         test_dataloader = DataLoader(
-            test_ds,
+            val_ds,
             batch_size=self.batch_size,
             shuffle=self.shuffle,
             num_workers=self.num_workers,
@@ -92,7 +99,7 @@ class TrainerS2Unet:
             epochs=self.epochs,
         )
 
-        jaccard_idx_temp = []
+        jaccard_idx_temp: List[float] = []
 
         self.writer.add_text(
             "Hyperparameter", self.dict2mdtable(self.model_settings), 1
@@ -107,11 +114,21 @@ class TrainerS2Unet:
             test_loss, jaccard_idx = self.test(test_dataloader, model)
             scheduler.step()
 
-            jaccard_idx_temp.append(jaccard_idx)
+            
 
             self.writer.add_scalar("Loss/train", train_loss, epoch)
             self.writer.add_scalar("Loss/test", test_loss, epoch)
             self.writer.add_scalar("Jaccard/test", jaccard_idx, epoch)
+
+            jaccard_idx_temp.append(jaccard_idx)
+
+            if jaccard_idx >= np.max(jaccard_idx_temp):
+                torch.save(
+                    model.state_dict(),
+                    model_dir / f"{self.config_name}_best_model.pth",
+                )
+            
+            
 
             if (epoch) % 10 == 0:
                 torch.save(
@@ -213,6 +230,52 @@ class TrainerS2Unet:
 
         return model
 
+    def _make_split(self, image_dir: Path, masks_dir: Path):  # type: ignore
+        def index_to_filename(image_dir: Path, set_list: list) -> list:
+            set_filenames = []
+            for file_path in image_dir.glob("*.pt"):
+                tile, number, date = file_path.stem.split("_")
+                if (tile, number) in set_list:
+                    set_filenames.append(str(file_path))
+            return set_filenames
+
+        tile_id_list = []
+
+        for file_path in image_dir.glob("*.pt"):
+            filename = file_path.stem
+            tile, number, date = filename.split("_")
+            tile_id_list.append((tile, number))
+
+        tile_id_unique = list(set(tile_id_list))
+
+        random.seed(42)
+
+        random.shuffle(tile_id_unique)
+
+        num_total = len(tile_id_unique)
+        num_train = int(num_total * 0.7)
+        num_val = int(num_total * 0.1)
+        num_test = num_total - num_train - num_val
+
+        train_list = tile_id_unique[:num_train]
+        val_list = tile_id_unique[num_train : num_train + num_val]
+        test_list = tile_id_unique[num_train + num_val :]
+
+        train_filenames_images = index_to_filename(image_dir, train_list)
+        train_filenames_masks = index_to_filename(masks_dir, train_list)
+
+        val_filenames_images = index_to_filename(image_dir, val_list)
+        val_filenames_masks = index_to_filename(masks_dir, val_list)
+
+        test_filenames_images = index_to_filename(image_dir, test_list)
+        test_filenames_masks = index_to_filename(masks_dir, test_list)
+
+        train_ds = train_filenames_images, train_filenames_masks
+        val_ds = val_filenames_images, val_filenames_masks
+        test_ds = test_filenames_images, test_filenames_masks
+
+        return train_ds, val_ds, test_ds
+
     def _write_to_csv(self, avg_jaccard_idx: float) -> None:
         csv_path = r"C:\Users\Fabian\Documents\Masterarbeit_Daten\jaccard_idx.csv"
         # Öffne die CSV-Datei zum Lesen
@@ -240,10 +303,15 @@ class TrainerS2Unet:
                 csv_writer.writerow(row)
 
     def _get_device(self) -> str:
+        # GPU with CUDA needed (check torch installation)
         if torch.cuda.is_available():
             return "cuda"
+
+        # On Apple M1/2 with Metal Acceleration
         elif torch.backends.mps.is_available():
             return "mps"
+
+        # fallback to CPU
         else:
             return "cpu"
 

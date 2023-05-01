@@ -12,6 +12,10 @@ from torch.cuda import OutOfMemoryError
 import model_config as config
 from Trainer_S2_Unet import TrainerS2Unet
 
+"""
+ToDo: Add save model with the highest IoU
+"""
+
 settings = [config.MODEL_CONFIG_EFF_B0]
 
 root_dir = Path(__file__).resolve().parent.parent.parent
@@ -31,8 +35,8 @@ def main() -> None:
         )
 
         trainer = TrainerS2Unet(
-            image_dir=root_dir / "data_local/images_only_AOI4",
-            mask_dir=root_dir / "data_local/masks_only_AOI4",
+            image_dir=root_dir / "data_local/images_only_AOI_all_seasons",
+            mask_dir=root_dir / "data_local/masks_only_AOI_all_seasons",
             model_settings=model_settings,
             log_dir=root_dir / "data_local/runs",
         )
