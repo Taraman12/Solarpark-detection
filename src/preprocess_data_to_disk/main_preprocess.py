@@ -17,6 +17,26 @@ from torchvision.transforms import Pad
 import constants as c
 from preprocessing_dataset_to_disk import save_patched_data_to_disk 
 
+"""
+ToDo: Add counter for loop
+ToDo: Add check if image and mask have the same length
+ToDo: Log/Print the number of total files saved
+
+ToDo: Needs better documentation
+ToDo: Needs better variable names
+ToDo: Needs better function names
+ToDo: Needs better type hints
+ToDo: Needs better comments
+ToDo: Needs better logging
+ToDo: Needs better error handling
+ToDo: Needs better testing
+ToDo: Needs better refactoring
+ToDo: Needs better structure
+
+
+
+"""
+
 if __name__ == "__main__":
     print("Program started")
     root_dir = Path(__file__).resolve().parent.parent

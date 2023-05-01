@@ -5,9 +5,10 @@ IMAGE_INPUT_DIR = Path(r".\data_local\training_data_raw")
 
 MASK_INPUT_DIR = Path(r".\src\preprocess_data_to_disk\data\trn_polygons_germany_tile_names.geojson")
 
-IMAGE_OUTPUT_DIR = Path(r".\data_local\images_only_AOI_test_season")
-
-MASK_OUTPUT_DIR = Path(r".\data_local\mask_only_AOI_test_season")
+# NOTE will be created if not existent
+IMAGE_OUTPUT_DIR = Path(r".\data_local\images_only_AOI_all_seasons_gamma_corrected")
+# NOTE will be created if not existent
+MASK_OUTPUT_DIR = Path(r".\data_local\masks_only_AOI_all_seasons_gamma_corrected")
 
 IDENTIFIER_REGEX = re.compile(
     r"""^(?P<mission>S2[A-B])_MSI
