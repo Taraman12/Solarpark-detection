@@ -35,8 +35,8 @@ def main() -> None:
         )
 
         trainer = TrainerS2Unet(
-            image_dir=root_dir / "data_local/images_only_AOI_all_seasons",
-            mask_dir=root_dir / "data_local/masks_only_AOI_all_seasons",
+            image_dir=root_dir / "data_local/images_only_AOI_test_color_corr_cleaned",
+            mask_dir=root_dir / "data_local/masks_only_AOI_test_color_corr_cleaned",
             model_settings=model_settings,
             log_dir=root_dir / "data_local/runs",
         )
@@ -46,6 +46,7 @@ def main() -> None:
 
         # ToDo: fix typing
         except OutOfMemoryError:  # type: ignore
+            print("Out of memory error")
             logging.warning(f"Out of memory error for model {config_name}")
             gc.collect()
             torch.cuda.empty_cache()

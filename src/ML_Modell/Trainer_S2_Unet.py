@@ -114,8 +114,6 @@ class TrainerS2Unet:
             test_loss, jaccard_idx = self.test(test_dataloader, model)
             scheduler.step()
 
-            
-
             self.writer.add_scalar("Loss/train", train_loss, epoch)
             self.writer.add_scalar("Loss/test", test_loss, epoch)
             self.writer.add_scalar("Jaccard/test", jaccard_idx, epoch)
@@ -127,8 +125,7 @@ class TrainerS2Unet:
                     model.state_dict(),
                     model_dir / f"{self.config_name}_best_model.pth",
                 )
-            
-            
+                print("Model saved!")
 
             if (epoch) % 10 == 0:
                 torch.save(
@@ -236,8 +233,17 @@ class TrainerS2Unet:
             for file_path in image_dir.glob("*.pt"):
                 tile, number, date = file_path.stem.split("_")
                 if (tile, number) in set_list:
-                    set_filenames.append(str(file_path))
+                    set_filenames.append(str(file_path))  # .name
             return set_filenames
+
+        def remove_index_from_list(image_input_list: list) -> list:
+            output_list = []
+            for i, element in enumerate(image_input_list):
+                image = torch.load(element)
+                if not image.max() == 0:
+                    output_list.append(i)
+
+            return output_list
 
         tile_id_list = []
 
@@ -263,12 +269,35 @@ class TrainerS2Unet:
 
         train_filenames_images = index_to_filename(image_dir, train_list)
         train_filenames_masks = index_to_filename(masks_dir, train_list)
+        # train_list_cleaned = remove_index_from_list(train_filenames_images)
+        # train_filenames_images_cleaned = index_to_filename(image_dir, train_list_cleaned)
+        # train_filenames_masks_cleaned = index_to_filename(masks_dir, train_list_cleaned)
+        # removed_items = len(train_list) - len(train_list_cleaned)
+        # print(f"Removed {removed_items} items from training set.")
+
+        if len(train_filenames_images) != len(train_filenames_masks):
+            raise ValueError(
+                "The number of images and masks in the training set does not match."
+            )
 
         val_filenames_images = index_to_filename(image_dir, val_list)
         val_filenames_masks = index_to_filename(masks_dir, val_list)
+        # val_list_cleaned = remove_index_from_list(val_filenames_images)
+        # val_filenames_images_cleaned = index_to_filename(image_dir, val_list_cleaned)
+        # val_filenames_masks_cleaned = index_to_filename(masks_dir, val_list_cleaned)
+
+        if len(val_filenames_images) != len(val_filenames_masks):
+            raise ValueError(
+                "The number of images and masks in the validation set does not match."
+            )
 
         test_filenames_images = index_to_filename(image_dir, test_list)
         test_filenames_masks = index_to_filename(masks_dir, test_list)
+
+        if len(test_filenames_images) != len(test_filenames_masks):
+            raise ValueError(
+                "The number of images and masks in the test set does not match."
+            )
 
         train_ds = train_filenames_images, train_filenames_masks
         val_ds = val_filenames_images, val_filenames_masks

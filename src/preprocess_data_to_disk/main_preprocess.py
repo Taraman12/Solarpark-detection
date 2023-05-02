@@ -63,9 +63,14 @@ if __name__ == "__main__":
     masks_gdf = gpd.read_file(mask_input_dir)
 
     kernel_size = 256
+
+    file_list = os.listdir(image_input_dir)
     # ToDo: add loop over all folders in image_dir (it is only a single one)
     # open mask_gdf outside the loop
-    for tile_folder in os.listdir(image_input_dir):
+    result_total = 0
+
+    for i, tile_folder in enumerate(file_list):
+        print(f"Processing tile {i+1} of {len(file_list)}")
         # ! changed to match instead of search
         regex_match = re.match(c.IDENTIFIER_REGEX, tile_folder)
 
@@ -91,5 +96,7 @@ if __name__ == "__main__":
             tile=tile,
             tile_date=f"{year}-{month}-{day}",
         )
+        result_total += result
         print(f"Number of files saved: {result}")
+    print(f"Number of total files saved: {result_total}")
     print("program finished")

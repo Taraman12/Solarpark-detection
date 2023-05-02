@@ -4,7 +4,7 @@
 MODEL_CONFIG_EFF_B0 = dict(
     encoder_name="timm-efficientnet-b0",
     encoder_weights="imagenet",
-    epochs=2,
+    epochs=10,
     batch_size=32,
     max_lr=0.1,
     in_channels=4,  # model input channels (3 for RGB, etc.)
@@ -15,8 +15,8 @@ MODEL_CONFIG_EFF_B0 = dict(
     optimizer="Adam",
     scheduler="OneCycleLR",
     loss="DiceLoss_Scheduler",
-    config_name="eff_b0",
-    comment="log_loss=True_from_logits=True",
+    config_name="eff_l2_all_seasons_cleaned_dropped",
+    comment="all_seasons, color_corr, cleaned, dropped with model eff_b0",
 )
 
 MODEL_CONFIG_DEFAULT = dict(
