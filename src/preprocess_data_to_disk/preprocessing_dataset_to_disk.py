@@ -56,13 +56,20 @@ def save_patched_data_to_disk(
     nir = np.float32(bands["B08"].read(1))
 
     # consumes a lot of memory
-    blue = robust_normalize(blue)
-    green = robust_normalize(green)
-    red = robust_normalize(red)
-    nir = robust_normalize(nir)
+    # blue = robust_normalize(blue)
+    # green = robust_normalize(green)
+    # red = robust_normalize(red)
+    # nir = robust_normalize(nir)
 
     # consumes a lot of additional memory
     stacked_bands = np.dstack((nir, red, green, blue))
+
+    # Color correction
+    stacked_bands = stacked_bands / 8
+
+    stacked_bands = stacked_bands.astype(int)
+
+    stacked_bands = robust_normalize(stacked_bands)
 
     stacked_bands_tensor = torch.from_numpy(stacked_bands.transpose((2, 0, 1)))
 
@@ -103,18 +110,21 @@ def save_patched_data_to_disk(
     # ToDo: find a better way for iterating
     for i in range(image_tensor_patched.shape[1] - 1):
         for j in range(image_tensor_patched.shape[2] - 1):
-            if mask_patched[i, j].sum() != 0:
-                file_counter += 1
-                file_identifier += 1
-                filename = f"{tile}_{file_identifier}_{tile_date}.pt"
-                torch.save(
-                    image_tensor_patched[:, i, j].clone().float(),
-                    os.path.join(image_output_dir, filename),
-                )
-                torch.save(
-                    mask_patched[i, j].clone(),
-                    os.path.join(mask_output_dir, filename),
-                )
+            if mask_patched[i, j].sum() >= 200:
+                # check if the image patch is not empty (all black)
+                # see: https://gis.stackexchange.com/questions/380038/reasons-for-partial-tiles-in-sentinel
+                if not image_tensor_patched[:, i, j].float().max() == 0:
+                    file_identifier += 1
+                    file_counter += 1
+                    filename = f"{tile}_{file_identifier}_{tile_date}.pt"
+                    torch.save(
+                        image_tensor_patched[:, i, j].clone().float(),
+                        os.path.join(image_output_dir, filename),
+                    )
+                    torch.save(
+                        mask_patched[i, j].clone(),
+                        os.path.join(mask_output_dir, filename),
+                    )
     return file_counter
 
 
@@ -206,61 +216,3 @@ def convert_tensor_into_patches(tensor: Tensor, kernel_size: int, fill=0) -> Ten
 def padding_size(image_size: int, kernel_size: int) -> int:
     """Computes the padding size, which is needed so that the kernel fits the image."""
     return int(((image_size // kernel_size + 1) * kernel_size - image_size) / 2)
-
-
-# if __name__ == "__main__":
-#     print("Program started")
-#     root_dir = Path(__file__).resolve().parent.parent
-#     # os.chdir(Path(__file__).parent)
-#     print(os.getcwd())
-#     # rename
-#     image_input_dir = c.IMAGE_INPUT_DIR
-#     mask_input_dir = c.MASK_INPUT_DIR  # root_dir
-#     image_output_dir = c.IMAGE_OUTPUT_DIR
-#     mask_output_dir = c.MASK_OUTPUT_DIR
-
-#     for input_directory in [image_input_dir, mask_input_dir]:
-#         if not input_directory.exists():
-#             print(f"Input path: {input_directory} does not exist")
-
-#     for output_directory in [image_output_dir, mask_output_dir]:
-#         if not output_directory.exists():
-#             output_directory.mkdir(parents=True, exist_ok=False)
-#             print(
-#                 f"Output path: {output_directory} does not exist \n"
-#                 f"Directory created"
-#             )
-
-#     kernel_size = 256
-#     # ToDo: add loop over all folders in image_dir (it is only a single one)
-#     # open mask_gdf outside the loop
-#     for tile_folder in os.listdir(image_input_dir):
-#         # ! changed to match instead of search
-#         regex_match = re.match(c.IDENTIFIER_REGEX, tile_folder)
-
-#         if not regex_match:
-#             continue
-
-#         else:
-#             # mission = regex_match.group("mission")
-#             utm_code = regex_match.group("utm_code")
-#             product_level = regex_match.group("product_level").lower()
-#             latitude_band = regex_match.group("latitude_band")
-#             square = regex_match.group("square")
-#             year = regex_match.group("year")
-#             month = str(int(regex_match.group("month")))
-#             day = str(int(regex_match.group("day")))
-#             tile = f"{latitude_band}{square}"
-
-#         image_input_dir = image_input_dir / tile_folder
-#         result = save_patched_data_to_disk(
-#             image_input_dir,
-#             mask_input_dir,
-#             image_output_dir,
-#             mask_output_dir,
-#             kernel_size,
-#             tile=tile,
-#             tile_date=f"{year}-{month}-{day}",
-#         )
-#         print(f"Number of files saved: {result}")
-#     print("program finished")
