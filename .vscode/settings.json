@@ -3,5 +3,6 @@
         "sessionmaker"
     ],
     "python.linting.mypyEnabled": true,
-    "python.linting.enabled": true,  
+    "python.linting.enabled": true,
+    "mypy.dmypyExecutable":"C://Users//Fabian//Documents//Github_Masterthesis//Solarpark-detection//.env//Lib//site-packages//mypy//dmypy_server.py"
 }
