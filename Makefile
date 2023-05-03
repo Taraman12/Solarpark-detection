@@ -2,7 +2,7 @@ format-black:
 	@black ./src --exclude ./src/frontend
 
 format-docformatter:
-	@docformatter ./src --exclude ./src/frontend --in-place --recursive
+	@docformatter ./src --in-place --recursive --exclude ./src/frontend
 
 format-isort:
 	@isort ./src --skip ./src/frontend
@@ -14,10 +14,10 @@ lint-isort:
 	@isort ./src --skip ./src/frontend --check
 
 lint-flake8:
-	@flake8 ./src --exclude ./src/frontend 
+	@flake8 ./src --exclude ./src/frontend
 
 # lint-mypy:
-# 	@mypy ./src
+# 	@mypy ./src --exclude ./src/frontend --check
 
 # lint-mypy-report:
 # 	@mypy ./src --html-report ./mypy_html
