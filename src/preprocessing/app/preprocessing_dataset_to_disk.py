@@ -18,6 +18,7 @@ from app.constants import BAND_FILE_MAP
 
 """
 ToDo: Needs better documentation
+ToDo: Neets Type hints
 ToDo: handle memory consumption (but not so important)
 """
 # Defining constants
