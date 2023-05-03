@@ -1,8 +1,14 @@
 {
     "cSpell.words": [
         "sessionmaker"
-    ],
+    ],    
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+    },
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.defaultInterpreterPath": "~/.venv/bin/python",
     "python.linting.mypyEnabled": true,
     "python.linting.enabled": true,
-    "mypy.dmypyExecutable":"C://Users//Fabian//Documents//Github_Masterthesis//Solarpark-detection//.env//Lib//site-packages//mypy//dmypy_server.py"
+    "mypy.dmypyExecutable":"C://Users//Fabian//Documents//Github_Masterthesis//Solarpark-detection//.env//Lib//site-packages//mypy//dmypy_server.py",
 }
