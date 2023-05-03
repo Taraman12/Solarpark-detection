@@ -27,7 +27,7 @@ ml-model-requirements:
 	@poetry export -f requirements.txt --output ./src/ML_Modell/requirements.txt --without-hashes --with ml-model
 
 preprocessing-requirements:
-	@poetry export -f requirements.txt --output ./src/preprocess_data_to_disk/requirements.txt --without-hashes --with preprocessing
+	@poetry export -f requirements.txt --output ./src/preprocessing/requirements.txt --without-hashes --with preprocessing
 	
 
 # lint-mypy:
