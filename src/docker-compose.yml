@@ -15,14 +15,14 @@ services:
       #- POSTGRES_MULTIPLE_EXTENSIONS=postgis,postgis_tiger_geocoder,postgis_topology
 
   api:
-    build: 
+    build:
       context: ./api
       dockerfile: api.dockerfile
     depends_on:
       - db
     ports:
       - "5000:80"
-    # environment:
+      # environment:
       # - POSTGRES_PASSWORD=postgres
       # - POSTGRES_USER=postgres
       # - POSTGRES_DBNAME=postgres
@@ -31,8 +31,15 @@ services:
     volumes:
       - data:/var/lib/postgis/data
 
+  downloader:
+    build:
+      context: ./downloader
+      dockerfile: downloader.dockerfile
+    environment:
+      - DOCKERIZED=true
+
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: frontend.dockerfile
     ports:
