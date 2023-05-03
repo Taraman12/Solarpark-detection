@@ -1,21 +1,20 @@
 # build-in
 import os
 import re
-from pathlib import Path
 from typing import Any, Dict, Tuple, Union
+
+# local modules
+import constants as c
 
 # third-party
 import geopandas as gpd
 import numpy as np
 import rasterio
-from rasterio.features import geometry_mask
 import torch
 from rasterio import DatasetReader
+from rasterio.features import geometry_mask
 from torch import Tensor
 from torchvision.transforms import Pad
-
-# local modules
-import constants as c
 
 """
 ToDo: Needs better documentation
@@ -112,7 +111,7 @@ def save_patched_data_to_disk(
         for j in range(image_tensor_patched.shape[2] - 1):
             if mask_patched[i, j].sum() >= 200:
                 # check if the image patch is not empty (all black)
-                # see: https://gis.stackexchange.com/questions/380038/reasons-for-partial-tiles-in-sentinel
+                # https://gis.stackexchange.com/questions/380038/reasons-for-partial-tiles-in-sentinel
                 if not image_tensor_patched[:, i, j].float().max() == 0:
                     file_identifier += 1
                     file_counter += 1

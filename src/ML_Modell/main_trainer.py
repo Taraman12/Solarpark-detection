@@ -3,13 +3,12 @@ import gc
 import logging
 from pathlib import Path
 
+# local modules
+import model_config as config
+
 # third-party
 import torch
 from torch.cuda import OutOfMemoryError
-
-
-# local modules
-import model_config as config
 from Trainer_S2_Unet import TrainerS2Unet
 
 """
@@ -20,8 +19,8 @@ settings = [config.MODEL_CONFIG_EFF_B0]
 
 root_dir = Path(__file__).resolve().parent.parent.parent
 
-# pretrained_model_path = root_dir / "data_local/saved_models/timm-efficientnet-b0_imagenet_sigmoid_epoch-60.pth"
-
+# pretrained_model_path = root_dir / "data_local/saved_models/
+# pretrained_model_name = "timm-efficientnet-b0_imagenet_sigmoid_epoch-60.pth"
 pretrained_model_path = None
 
 

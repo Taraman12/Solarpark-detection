@@ -2,11 +2,10 @@
 import csv
 import logging
 import random
-from typing import List, Tuple
 
 # import os
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 # third-party
 import numpy as np
@@ -18,7 +17,7 @@ import torch.nn as nn
 from dataset_class import GeoImageDataset
 from torch.optim import Adam
 from torch.optim.lr_scheduler import OneCycleLR
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchmetrics.classification import BinaryJaccardIndex
 
@@ -60,7 +59,7 @@ class TrainerS2Unet:
         pretrained_model_path: Optional[Path] = None,
     ) -> None:
         train_ds = GeoImageDataset(self.train_ds[0], self.train_ds[1])
-        test_ds = GeoImageDataset(self.test_ds[0], self.test_ds[1])
+        # test_ds = GeoImageDataset(self.test_ds[0], self.test_ds[1])
         val_ds = GeoImageDataset(self.val_ds[0], self.val_ds[1])
 
         # train_ds, test_ds = random_split(self.dataset, [0.8, 0.2])
@@ -236,14 +235,14 @@ class TrainerS2Unet:
                     set_filenames.append(str(file_path))  # .name
             return set_filenames
 
-        def remove_index_from_list(image_input_list: list) -> list:
-            output_list = []
-            for i, element in enumerate(image_input_list):
-                image = torch.load(element)
-                if not image.max() == 0:
-                    output_list.append(i)
+        # def remove_index_from_list(image_input_list: list) -> list:
+        #     output_list = []
+        #     for i, element in enumerate(image_input_list):
+        #         image = torch.load(element)
+        #         if not image.max() == 0:
+        #             output_list.append(i)
 
-            return output_list
+        #     return output_list
 
         tile_id_list = []
 
@@ -261,7 +260,7 @@ class TrainerS2Unet:
         num_total = len(tile_id_unique)
         num_train = int(num_total * 0.7)
         num_val = int(num_total * 0.1)
-        num_test = num_total - num_train - num_val
+        # num_test = num_total - num_train - num_val
 
         train_list = tile_id_unique[:num_train]
         val_list = tile_id_unique[num_train : num_train + num_val]
@@ -270,8 +269,8 @@ class TrainerS2Unet:
         train_filenames_images = index_to_filename(image_dir, train_list)
         train_filenames_masks = index_to_filename(masks_dir, train_list)
         # train_list_cleaned = remove_index_from_list(train_filenames_images)
-        # train_filenames_images_cleaned = index_to_filename(image_dir, train_list_cleaned)
-        # train_filenames_masks_cleaned = index_to_filename(masks_dir, train_list_cleaned)
+        # train_filenames_images_cleaned = index_to_filename(, train_list_cleaned)
+        # train_filenames_masks_cleaned = index_to_filename(, train_list_cleaned)
         # removed_items = len(train_list) - len(train_list_cleaned)
         # print(f"Removed {removed_items} items from training set.")
 

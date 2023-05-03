@@ -1,7 +1,7 @@
 # built-in
 import logging
-from distutils.util import strtobool
 import time
+from distutils.util import strtobool
 from pathlib import Path
 
 # local-modules

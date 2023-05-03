@@ -2,20 +2,13 @@
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, Tuple, Union
-
-# third-party
-import geopandas as gpd
-import numpy as np
-import rasterio
-import torch
-from rasterio import DatasetReader
-from torch import Tensor
-from torchvision.transforms import Pad
 
 # local modules
 import constants as c
-from preprocessing_dataset_to_disk import save_patched_data_to_disk 
+
+# third-party
+import geopandas as gpd
+from preprocessing_dataset_to_disk import save_patched_data_to_disk
 
 """
 ToDo: Add counter for loop
@@ -59,7 +52,7 @@ if __name__ == "__main__":
                 f"Output path: {output_directory} does not exist \n"
                 f"Directory created"
             )
-    
+
     masks_gdf = gpd.read_file(mask_input_dir)
 
     kernel_size = 256
@@ -86,7 +79,6 @@ if __name__ == "__main__":
             day = str(int(regex_match.group("day")))
             tile = f"{utm_code}{latitude_band}{square}"
 
-       
         result = save_patched_data_to_disk(
             image_input_dir / tile_folder,
             masks_gdf,
