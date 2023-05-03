@@ -2,7 +2,7 @@ format-black:
 	@black ./src --exclude ./src/frontend
 
 format-docformatter:
-	@docformatter ./src --in-place --recursive
+	@docformatter --in-place --recursive ./src --exclude ./src/frontend
 
 format-isort:
 	@isort ./src --skip ./src/frontend
