@@ -22,13 +22,6 @@ ToDo: handle memory consumption (but not so important)
 """
 # Defining constants
 
-# dict to store filenames with bands as keys
-BAND_FILE_MAP = dict(
-    B02=None,  # blue
-    B03=None,  # green
-    B04=None,  # red
-    B08=None,  # NIR
-)
 
 # extracts tile, date, band and resolution from filename
 FILENAME_REGEX = re.compile(
@@ -134,14 +127,17 @@ def open_DatasetReaders_as_dict(
     for filename in os.listdir(image_dir):
         regex_match = re.match(FILENAME_REGEX, filename)
         if regex_match:
-            for band_name in BAND_FILE_MAP.keys():
+            # ToDo: loop over items in BAND_FILE_MAP instead of keys
+            for band_name in c.BAND_FILE_MAP.keys():
                 if filename.endswith(f"{band_name}_10m.jp2"):
-                    BAND_FILE_MAP[band_name] = image_dir / filename
+                    c.BAND_FILE_MAP[band_name] = image_dir / filename
                     break
 
     # Verify that all required bands have been found
     missing_bands = [
-        band_name for band_name, file_path in BAND_FILE_MAP.items() if file_path is None
+        band_name
+        for band_name, file_path in c.BAND_FILE_MAP.items()
+        if file_path is None
     ]
 
     if missing_bands:
@@ -150,7 +146,7 @@ def open_DatasetReaders_as_dict(
     # store open DatasetReaders in dict
     return {
         band_name: rasterio.open(file_path)
-        for band_name, file_path in BAND_FILE_MAP.items()
+        for band_name, file_path in c.BAND_FILE_MAP.items()
     }
     # dataset_readers = {}
     # for band_name, file_path in BAND_FILE_MAP.items():

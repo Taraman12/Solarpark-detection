@@ -27,3 +27,10 @@ IDENTIFIER_REGEX = re.compile(
                     (?P<product_time>\d{6})""",
     re.VERBOSE,
 )
+
+BAND_FILE_MAP = {
+    "B02": None,  # blue
+    "B03": None,  # green
+    "B04": None,  # red
+    "B08": None,  # NIR
+}
