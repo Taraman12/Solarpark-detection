@@ -1,18 +1,19 @@
 # built-in
 import logging
+import os
 import time
 from distutils.util import strtobool
 from pathlib import Path
 from typing import Union
 
 # local-modules
-import constants as c
+import app.constants as c
+from app.api_call_handler import download_sentinel2_data
+from app.sentinel_api import connect_to_sentinel_api
 
 # third-party
 import geopandas as gpd
-from API_call_handler import download_sentinel2_data
 from geopandas import GeoDataFrame
-from sentinel_api import connect_to_sentinel_api
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import ServerError, UnauthorizedError
 
@@ -30,7 +31,7 @@ ToDo: handle memory consumption (but not so important)
 # )
 
 
-def load_tiles_germany(path: Path) -> GeoDataFrame:
+def load_tiles_file(path: Path) -> GeoDataFrame:
     """
     Load a GeoDataFrame from a GeoJSON file.
 
@@ -41,7 +42,7 @@ def load_tiles_germany(path: Path) -> GeoDataFrame:
 
     Returns
     -------
-    tiles_germany : GeoDataFrame
+    tiles_file : GeoDataFrame
         The GeoDataFrame loaded from the GeoJSON file.
 
     Raises
@@ -50,15 +51,19 @@ def load_tiles_germany(path: Path) -> GeoDataFrame:
         If the GeoDataFrame loaded from the GeoJSON file is empty.
 
     """
-
-    tiles_germany = gpd.read_file(path)
-
-    if len(tiles_germany) == 0:
-        logging.error("Could not read tiles_germany.geojson")
-        print("Could not read tiles_germany.geojson")
+    if not path.exists():
+        logging.error(f"Could not find {path}")
+        print(f"Could not find {path}")
         exit()
 
-    return tiles_germany
+    tiles_file = gpd.read_file(path)
+
+    if len(tiles_file) == 0:
+        logging.error(f"Could not read {path.name}")
+        print(f"Could not read {path.name}")
+        exit()
+
+    return tiles_file
 
 
 def create_download_path(path: Path) -> bool:
@@ -70,7 +75,11 @@ def create_download_path(path: Path) -> bool:
     Returns:
         bool: True if path was created, False if not
     """
-    if not Path(path).exists():
+    if os.environ.get("DOCKERIZED") == "true":
+        # ! add here aws s3 bucket
+        print("Dockerized")
+
+    if not path.exists():
         print(
             f"The download path: {path} does not exist. \n"
             f" Do you want to create it? [Y/n] (no will exiting program)"
@@ -123,10 +132,10 @@ def wait_for_api_connection() -> Union[bool, SentinelAPI]:
 
 
 if __name__ == "__main__":
-    logging.info("Program started")
-    print("Program started")
+    logging.info("Downloader started")
+    print("Downloader started")
 
-    tiles_germany = load_tiles_germany(path=c.PATH_TO_TILES)
+    tiles_file = load_tiles_file(path=c.PATH_TO_TILES)
 
     while True:
         if create_download_path(path=c.DOWNLOAD_PATH):
@@ -143,7 +152,7 @@ if __name__ == "__main__":
 
 for season_counter, (season, dates) in enumerate(c.SEASONS_DICT.items()):
     start_date, end_date = dates["start_date"], dates["end_date"]
-    for centroid_counter, centroid in enumerate(set(tiles_germany.centroid_of_tile)):
+    for centroid_counter, centroid in enumerate(set(tiles_file.centroid_of_tile)):
         # ToDo: add faster way to check if data is already downloaded
         # see: make_trainings_data.ipynb
         try:
@@ -158,7 +167,7 @@ for season_counter, (season, dates) in enumerate(c.SEASONS_DICT.items()):
             print(
                 f"season {season} ({season_counter+1}/{len(c.SEASONS_DICT.keys())}) "
                 f"for tile {centroid_counter+1}/"
-                f"{len(set(tiles_germany.centroid_of_tile))} finished"
+                f"{len(set(tiles_file.centroid_of_tile))} finished"
             )
             # ToDo: add tile_name to final dataframe
         # ! result is type bool not exception
