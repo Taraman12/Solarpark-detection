@@ -10,7 +10,7 @@ from pathlib import Path
 # NOTE file path can be created on the fly
 DOWNLOAD_PATH = Path(r".\data_local\training_data_raw_test")
 
-PATH_TO_TILES = Path(r"src/download_sentinel_data/data/tiles_germany.geojson")
+PATH_TO_TILES = Path(r"app/data/tiles_germany.geojson")
 
 SEASONS_DICT = {
     "winter": {"start_date": date(2018, 1, 1), "end_date": date(2018, 3, 31)},

@@ -5,12 +5,13 @@ import re
 from datetime import datetime
 from pathlib import Path
 
+# local-modules
+import app.constants as c
+
 # third-party
 import boto3
-
-# local-modules
-import constants as c
 from dotenv import load_dotenv
+
 
 # ToDo: add variable for resolution
 

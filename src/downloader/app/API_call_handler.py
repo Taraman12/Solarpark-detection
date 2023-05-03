@@ -10,11 +10,11 @@ from typing import TypedDict
 from zipfile import ZipFile
 
 # local-modules
-import constants as c
+import app.constants as c
+from app.sentinel_on_aws import download_from_aws
 
 # third-party
 from geopandas import GeoSeries
-from sentinel_on_aws import download_from_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
 from typing_extensions import Unpack
