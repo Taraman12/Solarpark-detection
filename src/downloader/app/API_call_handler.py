@@ -9,15 +9,15 @@ from pathlib import Path
 from typing import TypedDict
 from zipfile import ZipFile
 
-# local-modules
-from app.constants import BAND_FILE_MAP
-from app.sentinel_on_aws import download_from_aws
-
 # third-party
 from geopandas import GeoSeries
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
 from typing_extensions import Unpack
+
+# local-modules
+from app.constants import BAND_FILE_MAP
+from app.sentinel_on_aws import download_from_aws
 
 
 # ToDo: change os.path to pathlib

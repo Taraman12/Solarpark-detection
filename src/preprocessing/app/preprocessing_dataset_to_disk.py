@@ -8,13 +8,13 @@ import geopandas as gpd
 import numpy as np
 import rasterio
 import torch
-
-# local modules
-from app.constants import BAND_FILE_MAP
 from rasterio import DatasetReader
 from rasterio.features import geometry_mask
 from torch import Tensor
 from torchvision.transforms import Pad
+
+# local modules
+from app.constants import BAND_FILE_MAP
 
 """
 ToDo: Needs better documentation

@@ -1,4 +1,4 @@
-# built-in
+# build-in
 import logging
 import os
 import time
@@ -8,14 +8,14 @@ from typing import Union
 
 # third-party
 import geopandas as gpd
-from app.api_call_handler import download_sentinel2_data
-
-# local-modules
-from app.constants import DOWNLOAD_PATH, PATH_TO_TILES, SEASONS_DICT
-from app.sentinel_api import connect_to_sentinel_api
 from geopandas import GeoDataFrame
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import ServerError, UnauthorizedError
+
+# local modules
+from app.api_call_handler import download_sentinel2_data
+from app.constants import DOWNLOAD_PATH, PATH_TO_TILES, SEASONS_DICT
+from app.sentinel_api import connect_to_sentinel_api
 
 """
 ToDo: Add faster way to check if tile is already downloaded
