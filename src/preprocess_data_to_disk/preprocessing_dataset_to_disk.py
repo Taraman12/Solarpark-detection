@@ -1,8 +1,10 @@
 # build-in
 import os
 import re
-from pathlib import Path
 from typing import Any, Dict, Tuple, Union
+
+# local modules
+import constants as c
 
 # third-party
 import geopandas as gpd
@@ -10,6 +12,7 @@ import numpy as np
 import rasterio
 import torch
 from rasterio import DatasetReader
+from rasterio.features import geometry_mask
 from torch import Tensor
 from torchvision.transforms import Pad
 
@@ -19,25 +22,25 @@ ToDo: handle memory consumption (but not so important)
 """
 # Defining constants
 
-# dict to store filenames with bands as keys
-BAND_FILE_MAP = {
-    "B02": None,  # blue
-    "B03": None,  # green
-    "B04": None,  # red
-    "B08": None,  # NIR
-}
 
 # extracts tile, date, band and resolution from filename
-FILENAME_REGEX = r"""^T(?P<tile>\d{2}[A-Z]{3})_
-                        (?P<date>\d{8}T\d{6})_
-                        (?P<band>B0\d{1})(?:_
-                        (?P<resolution>\d{2}m))?\..*$"""
+FILENAME_REGEX = re.compile(
+    r"""(?P<band>B0\d{1})(?:_
+                            (?P<resolution>\d{2}m))?\..*$""",
+    re.VERBOSE,
+)
 
 
 def save_patched_data_to_disk(
-    image_input_dir, mask_input_dir, image_output_dir, mask_output_dir, kernel_size
+    image_input_dir,
+    masks_gdf,
+    image_output_dir,
+    mask_output_dir,
+    kernel_size,
+    tile,
+    tile_date,
 ):
-    bands, tile = open_DatasetReaders_as_dict(image_input_dir)
+    bands = open_DatasetReaders_as_dict(image_input_dir)
 
     blue = np.float32(bands["B02"].read(1))
     green = np.float32(bands["B03"].read(1))
@@ -45,13 +48,20 @@ def save_patched_data_to_disk(
     nir = np.float32(bands["B08"].read(1))
 
     # consumes a lot of memory
-    blue = robust_normalize(blue)
-    green = robust_normalize(green)
-    red = robust_normalize(red)
-    nir = robust_normalize(nir)
+    # blue = robust_normalize(blue)
+    # green = robust_normalize(green)
+    # red = robust_normalize(red)
+    # nir = robust_normalize(nir)
 
     # consumes a lot of additional memory
     stacked_bands = np.dstack((nir, red, green, blue))
+
+    # Color correction
+    stacked_bands = stacked_bands / 8
+
+    stacked_bands = stacked_bands.astype(int)
+
+    stacked_bands = robust_normalize(stacked_bands)
 
     stacked_bands_tensor = torch.from_numpy(stacked_bands.transpose((2, 0, 1)))
 
@@ -68,7 +78,7 @@ def save_patched_data_to_disk(
     image_tensor_patched = image_tensor_patched.swapaxes(-3, -2)
 
     # ! MASK #
-    masks_gdf = gpd.read_file(mask_input_dir)
+    # masks_gdf = gpd.read_file(mask_input_dir)
 
     # filter all masks to selected tile
     masks = filter_mask_on_tile(masks_gdf, tile)
@@ -87,19 +97,26 @@ def save_patched_data_to_disk(
     mask_patched = convert_tensor_into_patches(mask_tensor, kernel_size, fill=False)
 
     file_counter = 0
+
+    file_identifier = 0
     # ToDo: find a better way for iterating
     for i in range(image_tensor_patched.shape[1] - 1):
         for j in range(image_tensor_patched.shape[2] - 1):
-            if mask_patched[i, j].sum() != 0:
-                file_counter += 1
-                torch.save(
-                    image_tensor_patched[:, i, j].clone().float(),
-                    os.path.join(image_output_dir, f"{tile}_date_{i}_{j}.pt"),
-                )
-                torch.save(
-                    mask_patched[i, j].clone(),
-                    os.path.join(mask_output_dir, f"{tile}_date_{i}_{j}.pt"),
-                )
+            if mask_patched[i, j].sum() >= 200:
+                # check if the image patch is not empty (all black)
+                # https://gis.stackexchange.com/questions/380038/reasons-for-partial-tiles-in-sentinel
+                if not image_tensor_patched[:, i, j].float().max() == 0:
+                    file_identifier += 1
+                    file_counter += 1
+                    filename = f"{tile}_{file_identifier}_{tile_date}.pt"
+                    torch.save(
+                        image_tensor_patched[:, i, j].clone().float(),
+                        os.path.join(image_output_dir, filename),
+                    )
+                    torch.save(
+                        mask_patched[i, j].clone(),
+                        os.path.join(mask_output_dir, filename),
+                    )
     return file_counter
 
 
@@ -108,18 +125,19 @@ def open_DatasetReaders_as_dict(
 ) -> Tuple[Dict[str, Any], Union[str, Any]]:
     # fill dict with paths
     for filename in os.listdir(image_dir):
-        match = re.search(FILENAME_REGEX, filename)
-        if match:
-            tile = match.group("tile")
-
-        for band_name in BAND_FILE_MAP.keys():
-            if filename.endswith(f"{band_name}_10m.jp2"):
-                BAND_FILE_MAP[band_name] = os.path.join(image_dir, filename)
-                break
+        regex_match = re.match(FILENAME_REGEX, filename)
+        if regex_match:
+            # ToDo: loop over items in BAND_FILE_MAP instead of keys
+            for band_name in c.BAND_FILE_MAP.keys():
+                if filename.endswith(f"{band_name}_10m.jp2"):
+                    c.BAND_FILE_MAP[band_name] = image_dir / filename
+                    break
 
     # Verify that all required bands have been found
     missing_bands = [
-        band_name for band_name, file_path in BAND_FILE_MAP.items() if file_path is None
+        band_name
+        for band_name, file_path in c.BAND_FILE_MAP.items()
+        if file_path is None
     ]
 
     if missing_bands:
@@ -128,8 +146,8 @@ def open_DatasetReaders_as_dict(
     # store open DatasetReaders in dict
     return {
         band_name: rasterio.open(file_path)
-        for band_name, file_path in BAND_FILE_MAP.items()
-    }, tile
+        for band_name, file_path in c.BAND_FILE_MAP.items()
+    }
     # dataset_readers = {}
     # for band_name, file_path in BAND_FILE_MAP.items():
     #     dataset_readers[band_name] = rasterio.open(file_path)
@@ -158,7 +176,7 @@ def rasterize_mask(masks: gpd.GeoDataFrame, band: DatasetReader) -> np.ndarray:
     # create a raster which matches the image shape
     # invert=True masked pixels set to True (instead of the other way around)
     # all_touched=True all pixels within the mask set to True (instead the bounds)
-    return rasterio.features.geometry_mask(
+    return geometry_mask(
         masks,
         out_shape=band.shape,
         transform=band.transform,
@@ -168,7 +186,7 @@ def rasterize_mask(masks: gpd.GeoDataFrame, band: DatasetReader) -> np.ndarray:
 
 
 def filter_mask_on_tile(masks: gpd.GeoDataFrame, tile: str) -> gpd.GeoDataFrame:
-    return masks[masks.Name == tile].geometry.reset_index(drop=True)
+    return masks[masks.tile_name == tile].geometry.reset_index(drop=True)
 
 
 def padding_tensor(tensor: Tensor, kernel_size: int, fill=0) -> Tensor:
@@ -193,26 +211,3 @@ def convert_tensor_into_patches(tensor: Tensor, kernel_size: int, fill=0) -> Ten
 def padding_size(image_size: int, kernel_size: int) -> int:
     """Computes the padding size, which is needed so that the kernel fits the image."""
     return int(((image_size // kernel_size + 1) * kernel_size - image_size) / 2)
-
-
-if __name__ == "__main__":
-    print("program started")
-    root_dir = Path(__file__).resolve().parent.parent
-    image_root_dir = r"C:\Users\Fabian\Documents\Masterarbeit_Daten\API_test4"
-    mask_input_dir = root_dir / "data_local/trn_polygons_germany_tiles.geojson"
-    image_output_dir = r"C:\Users\Fabian\Documents\Masterarbeit_Daten\images_only_AOI4"
-    mask_output_dir = r"C:\Users\Fabian\Documents\Masterarbeit_Daten\masks_only_AOI4"
-    kernel_size = 256
-    # ToDo: add loop over all folders in image_dir (it is only a single one)
-    # open mask_gdf outside the loop
-    for tile_folder in os.listdir(image_root_dir):
-        image_input_dir = os.path.join(image_root_dir, tile_folder)
-        result = save_patched_data_to_disk(
-            image_input_dir,
-            mask_input_dir,
-            image_output_dir,
-            mask_output_dir,
-            kernel_size,
-        )
-        print(f"Number of files saved: {result}")
-    print("program finished")

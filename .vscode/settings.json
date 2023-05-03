@@ -4,5 +4,5 @@
     ],
     "python.linting.mypyEnabled": true,
     "python.linting.enabled": true,
-    "mypy.dmypyExecutable":"C://Users//Fabian//AppData//Local//pypoetry//Cache//virtualenvs//solarpark-detection-vU_0sE1Z-py3.10//Lib//site-packages//mypy//dmypy_server.py"
+    "mypy.dmypyExecutable":"C://Users//Fabian//Documents//Github_Masterthesis//Solarpark-detection//.env//Lib//site-packages//mypy//dmypy_server.py"
 }
