@@ -6,13 +6,13 @@ from distutils.util import strtobool
 from pathlib import Path
 from typing import Union
 
-# local-modules
-import app.constants as c
-from app.api_call_handler import download_sentinel2_data
-from app.sentinel_api import connect_to_sentinel_api
-
 # third-party
 import geopandas as gpd
+from app.api_call_handler import download_sentinel2_data
+
+# local-modules
+from app.constants import DOWNLOAD_PATH, PATH_TO_TILES, SEASONS_DICT
+from app.sentinel_api import connect_to_sentinel_api
 from geopandas import GeoDataFrame
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import ServerError, UnauthorizedError
@@ -135,10 +135,10 @@ if __name__ == "__main__":
     logging.info("Downloader started")
     print("Downloader started")
 
-    tiles_file = load_tiles_file(path=c.PATH_TO_TILES)
+    tiles_file = load_tiles_file(path=PATH_TO_TILES)
 
     while True:
-        if create_download_path(path=c.DOWNLOAD_PATH):
+        if create_download_path(path=DOWNLOAD_PATH):
             break
 
     while True:
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             exit()
 
 
-for season_counter, (season, dates) in enumerate(c.SEASONS_DICT.items()):
+for season_counter, (season, dates) in enumerate(SEASONS_DICT.items()):
     start_date, end_date = dates["start_date"], dates["end_date"]
     for centroid_counter, centroid in enumerate(set(tiles_file.centroid_of_tile)):
         # ToDo: add faster way to check if data is already downloaded
@@ -161,11 +161,11 @@ for season_counter, (season, dates) in enumerate(c.SEASONS_DICT.items()):
                 footprint=centroid,
                 start_date=start_date,
                 end_date=end_date,
-                download_root=c.DOWNLOAD_PATH,
+                download_root=DOWNLOAD_PATH,
                 mode="training",
             )
             print(
-                f"season {season} ({season_counter+1}/{len(c.SEASONS_DICT.keys())}) "
+                f"season {season} ({season_counter+1}/{len(SEASONS_DICT.keys())}) "
                 f"for tile {centroid_counter+1}/"
                 f"{len(set(tiles_file.centroid_of_tile))} finished"
             )

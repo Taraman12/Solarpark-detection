@@ -3,13 +3,18 @@ import os
 import re
 from pathlib import Path
 
-# local modules
-import app.constants as c
-from app.preprocessing_dataset_to_disk import save_patched_data_to_disk
-
-# third-party
 import geopandas as gpd
 
+# local-modules
+from app.constants import (
+    BAND_FILE_MAP,
+    IDENTIFIER_REGEX,
+    IMAGE_INPUT_DIR,
+    IMAGE_OUTPUT_DIR,
+    MASK_INPUT_DIR,
+    MASK_OUTPUT_DIR,
+)
+from app.preprocessing_dataset_to_disk import save_patched_data_to_disk
 
 """
 ToDo: Add counter for loop
@@ -35,10 +40,10 @@ if __name__ == "__main__":
     # os.chdir(Path(__file__).parent)
     print(os.getcwd())
     # rename
-    image_input_dir = c.IMAGE_INPUT_DIR
-    mask_input_dir = c.MASK_INPUT_DIR  # root_dir
-    image_output_dir = c.IMAGE_OUTPUT_DIR
-    mask_output_dir = c.MASK_OUTPUT_DIR
+    image_input_dir = IMAGE_INPUT_DIR
+    mask_input_dir = MASK_INPUT_DIR  # root_dir
+    image_output_dir = IMAGE_OUTPUT_DIR
+    mask_output_dir = MASK_OUTPUT_DIR
 
     for input_directory in [image_input_dir, mask_input_dir]:
         if not input_directory.exists():
@@ -64,7 +69,7 @@ if __name__ == "__main__":
     for i, tile_folder in enumerate(file_list):
         print(f"Processing tile {i+1} of {len(file_list)}")
         # ! changed to match instead of search
-        regex_match = re.match(c.IDENTIFIER_REGEX, tile_folder)
+        regex_match = re.match(IDENTIFIER_REGEX, tile_folder)
 
         if not regex_match:
             continue

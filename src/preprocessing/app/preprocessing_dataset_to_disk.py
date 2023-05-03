@@ -3,16 +3,16 @@ import os
 import re
 from typing import Any, Dict, Tuple, Union
 
-# local modules
-import app.constants as c
-
 # third-party
 import geopandas as gpd
 import numpy as np
 import rasterio
+import torch
+
+# local modules
+from app.constants import BAND_FILE_MAP
 from rasterio import DatasetReader
 from rasterio.features import geometry_mask
-import torch
 from torch import Tensor
 from torchvision.transforms import Pad
 
@@ -128,16 +128,14 @@ def open_DatasetReaders_as_dict(
         regex_match = re.match(FILENAME_REGEX, filename)
         if regex_match:
             # ToDo: loop over items in BAND_FILE_MAP instead of keys
-            for band_name in c.BAND_FILE_MAP.keys():
+            for band_name in BAND_FILE_MAP.keys():
                 if filename.endswith(f"{band_name}_10m.jp2"):
-                    c.BAND_FILE_MAP[band_name] = image_dir / filename
+                    BAND_FILE_MAP[band_name] = image_dir / filename
                     break
 
     # Verify that all required bands have been found
     missing_bands = [
-        band_name
-        for band_name, file_path in c.BAND_FILE_MAP.items()
-        if file_path is None
+        band_name for band_name, file_path in BAND_FILE_MAP.items() if file_path is None
     ]
 
     if missing_bands:
@@ -146,7 +144,7 @@ def open_DatasetReaders_as_dict(
     # store open DatasetReaders in dict
     return {
         band_name: rasterio.open(file_path)
-        for band_name, file_path in c.BAND_FILE_MAP.items()
+        for band_name, file_path in BAND_FILE_MAP.items()
     }
     # dataset_readers = {}
     # for band_name, file_path in BAND_FILE_MAP.items():
