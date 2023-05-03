@@ -22,12 +22,12 @@ ToDo: Needs better documentation
 ToDo: handle memory consumption (but not so important)
 """
 
-logging.basicConfig(
-    filename="app.log",
-    filemode="w",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
+# logging.basicConfig(
+#     filename="app.log",
+#     filemode="w",
+#     format="%(asctime)s - %(levelname)s - %(message)s",
+#     level=logging.INFO,
+# )
 
 
 def load_tiles_germany(path: Path) -> GeoDataFrame:
