@@ -4,11 +4,12 @@ import re
 from pathlib import Path
 
 # local modules
-import constants as c
+import app.constants as c
+from app.preprocessing_dataset_to_disk import save_patched_data_to_disk
 
 # third-party
 import geopandas as gpd
-from preprocessing_dataset_to_disk import save_patched_data_to_disk
+
 
 """
 ToDo: Add counter for loop
@@ -25,9 +26,7 @@ ToDo: Needs better error handling
 ToDo: Needs better testing
 ToDo: Needs better refactoring
 ToDo: Needs better structure
-
-
-
+ToDo: Needs better everything
 """
 
 if __name__ == "__main__":

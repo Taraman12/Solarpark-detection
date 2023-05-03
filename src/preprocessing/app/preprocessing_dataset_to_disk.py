@@ -4,15 +4,15 @@ import re
 from typing import Any, Dict, Tuple, Union
 
 # local modules
-import constants as c
+import app.constants as c
 
 # third-party
 import geopandas as gpd
 import numpy as np
 import rasterio
-import torch
 from rasterio import DatasetReader
 from rasterio.features import geometry_mask
+import torch
 from torch import Tensor
 from torchvision.transforms import Pad
 
