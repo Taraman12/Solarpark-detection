@@ -31,10 +31,16 @@ services:
     volumes:
       - data:/var/lib/postgis/data
 
-  downloader:
+  # downloader:
+  #   build:
+  #     context: ./downloader
+  #     dockerfile: downloader.dockerfile
+  #   environment:
+  #     - DOCKERIZED=true
+  preprocessing:
     build:
-      context: ./downloader
-      dockerfile: downloader.dockerfile
+      context: ./preprocessing
+      dockerfile: preprocessing.dockerfile
     environment:
       - DOCKERIZED=true
 
