@@ -8,7 +8,6 @@ import geopandas as gpd
 
 # local-modules
 from app.constants import (
-    BAND_FILE_MAP,
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
     IMAGE_OUTPUT_DIR,
