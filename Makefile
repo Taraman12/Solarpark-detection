@@ -29,6 +29,9 @@ ml-model-requirements:
 preprocessing-requirements:
 	@poetry export -f requirements.txt --output ./src/preprocessing/requirements.txt --without-hashes --with preprocessing
 
+ml-serve-requirements:
+	@poetry export -f requirements.txt --output ./src/ml-serve/requirements.txt --without-hashes --with ml-serve
+
 dev-requirements:
 	@poetry export -f requirements.txt --output ./requirements-dev.txt --without-hashes --with dev
 
@@ -40,7 +43,7 @@ dev-requirements:
 
 format: format-black format-isort # format-docformatter
 
-lint: lint-black lint-isort lint-flake8 
+lint: lint-black lint-isort lint-flake8
 # lint-mypy
 
-requirements: api-requirements downloader-requirements ml-model-requirements preprocessing-requirements dev-requirements
+requirements: api-requirements downloader-requirements ml-model-requirements preprocessing-requirements ml-serve-requirements dev-requirements
