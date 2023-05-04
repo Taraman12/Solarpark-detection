@@ -7,10 +7,10 @@ from pathlib import Path
 
 # third-party
 import boto3
+from dotenv import load_dotenv
 
 # local-modules
-import constants as c
-from dotenv import load_dotenv
+from app.constants import BAND_FILE_MAP, IDENTIFIER_REGEX
 
 # ToDo: add variable for resolution
 
@@ -38,7 +38,7 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
         return False
 
     # ! changed to match instead of search
-    regex_match = re.match(c.IDENTIFIER_REGEX, identifier)
+    regex_match = re.match(IDENTIFIER_REGEX, identifier)
 
     if regex_match:
         # mission = regex_match.group("mission")
@@ -54,7 +54,7 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
     bucket = f"sentinel-s2-{product_level}"
     prefix = f"tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0/R10m"
 
-    for band in c.BAND_FILE_MAP:
+    for band in BAND_FILE_MAP:
         band_file = f"{band}.jp2"
         band_file_path = target_folder / band_file
         # Skip if file already exists

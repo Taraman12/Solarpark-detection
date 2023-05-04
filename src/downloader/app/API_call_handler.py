@@ -9,15 +9,15 @@ from pathlib import Path
 from typing import TypedDict
 from zipfile import ZipFile
 
-# local-modules
-import constants as c
-
 # third-party
 from geopandas import GeoSeries
-from sentinel_on_aws import download_from_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
 from typing_extensions import Unpack
+
+# local-modules
+from app.constants import BAND_FILE_MAP
+from app.sentinel_on_aws import download_from_aws
 
 
 # ToDo: change os.path to pathlib
@@ -94,7 +94,7 @@ def download_sentinel2_data(
     # check if product is already downloaded
     if target_folder.exists():
         # check if product is complete
-        if len(os.listdir(target_folder)) >= len(c.BAND_FILE_MAP.keys()):
+        if len(os.listdir(target_folder)) >= len(BAND_FILE_MAP.keys()):
             return True
 
     # creates folder

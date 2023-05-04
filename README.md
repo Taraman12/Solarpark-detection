@@ -2,6 +2,10 @@
 # Solarpark-detection
  Continuous solar park detection from satellite imagery with Deep Learning
 
+# ToDos:
+- [ ] Add a description of the project
+- [ ] Add pre-commit hooks
+- [ ] Add docformatter again
  # Create requirements.txt
  check if all groups are correct
  

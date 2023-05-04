@@ -1,11 +1,10 @@
+# build-in
 import re
 from pathlib import Path
 
 IMAGE_INPUT_DIR = Path(r".\data_local\training_data_raw")
 
-MASK_INPUT_DIR = Path(
-    r".\src\preprocess_data_to_disk\data\trn_polygons_germany_tile_names.geojson"
-)
+MASK_INPUT_DIR = Path(r"app/data/trn_polygons_germany_tile_names.geojson")
 
 # NOTE will be created if not existent
 IMAGE_OUTPUT_DIR = Path(r".\data_local\images_only_AOI_test_color_corr_2")
