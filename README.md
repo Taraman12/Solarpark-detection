@@ -6,6 +6,8 @@
 - [ ] Add a description of the project
 - [ ] Add pre-commit hooks
 - [ ] Add docformatter again
+- [ ] Add torch-serve
+
  # Create requirements.txt
  check if all groups are correct
  
