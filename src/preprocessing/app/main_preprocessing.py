@@ -40,6 +40,11 @@ if __name__ == "__main__":
     root_dir = Path(__file__).resolve().parent.parent
     # os.chdir(Path(__file__).parent)
     print(os.getcwd())
+
+    if os.environ.get("DOCKERIZED") == "true":
+        print("Running in docker container")
+        exit()
+    
     # rename
     image_input_dir = IMAGE_INPUT_DIR
     mask_input_dir = MASK_INPUT_DIR  # root_dir
