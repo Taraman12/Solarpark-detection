@@ -44,7 +44,7 @@ if __name__ == "__main__":
     if os.environ.get("DOCKERIZED") == "true":
         print("Running in docker container")
         exit()
-    
+
     # rename
     image_input_dir = IMAGE_INPUT_DIR
     mask_input_dir = MASK_INPUT_DIR  # root_dir
