@@ -75,8 +75,9 @@ torch = "^2.0.0"
 torchvision = "^0.15.1"
 torchserve = "^0.7.1"
 torch-model-archiver = "^0.7.1"
-nvgpu = "^0.10.0"
 segmentation-models-pytorch = "^0.3.2"
+nvgpu = {version = "^0.10.0", platform = "linux"}
+types-pyyaml = "^6.0.12.9"
 
 [tool.isort]
 profile = "black"

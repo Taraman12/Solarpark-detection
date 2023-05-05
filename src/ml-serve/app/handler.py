@@ -6,11 +6,11 @@
 """
 ModelHandler defines a custom model handler
 """
-import os
-import yaml
+
 from pathlib import Path
-from typing import Optional
+
 import segmentation_models_pytorch as smp
+import yaml
 from ts.torch_handler.base_handler import BaseHandler
 
 
@@ -34,10 +34,10 @@ class ModelHandler(BaseHandler):
         # properties = context.system_properties
         model_dir = Path(r"src/ml-serve/app/model")  # context.get('model_dir')
 
-        model_file_path = model_dir / "eff_b0.pth"
+        # model_file_path = model_dir / "eff_b0.pth"
         model_config_path = model_dir / "model-config.yaml"
 
-        with open(r"src/ml-serve/app/model/model-config.yaml", "r") as f:
+        with open(model_config_path, "r") as f:
             model_config = yaml.safe_load(f)
 
         # defining and loading smp model
@@ -87,7 +87,8 @@ class ModelHandler(BaseHandler):
     def handle(self, data, context):
         """
         Invoke by TorchServe for prediction request.
-        Do pre-processing of data, prediction using model and postprocessing of prediction output
+        Do pre-processing of data, prediction using model and postprocessing of
+        prediction output
         :param data: Input data for prediction
         :param context: Initial context contains model server system properties.
         :return: prediction output
