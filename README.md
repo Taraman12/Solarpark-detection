@@ -13,5 +13,8 @@
  
  poetry export -f requirements.txt --output requirements.txt --without-hashes --with main --with lint --with dev --with ml-model --with api 
 
+# problems with psycopg2:
+sudo apt-get install libpq-dev
+
 mypy vscode settings:
 "mypy.dmypyExecutable":".//.env//Lib//site-packages//mypy//dmypy_server.py"
