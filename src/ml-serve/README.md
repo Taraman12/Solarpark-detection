@@ -19,3 +19,6 @@ torchserve --start \
            --ts-config config.properties \
            --model-store model \
            --models test_model.mar
+
+File build_image.sh from:
+https://github.com/pytorch/serve/tree/master/docker

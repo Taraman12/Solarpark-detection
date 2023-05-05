@@ -37,12 +37,14 @@ services:
   #     dockerfile: downloader.dockerfile
   #   environment:
   #     - DOCKERIZED=true
-  preprocessing:
-    build:
-      context: ./preprocessing
-      dockerfile: preprocessing.dockerfile
-    environment:
-      - DOCKERIZED=true
+  # preprocessing:
+  #   build:
+  #     context: ./preprocessing
+  #     dockerfile: preprocessing.dockerfile
+  #   environment:
+  #     - DOCKERIZED=true
+
+  ml-serve:
 
   frontend:
     build:
