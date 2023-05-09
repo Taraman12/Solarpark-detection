@@ -1,35 +1,45 @@
 version: "3.9"
 services:
-  db:
-    image: postgres:latest
-    restart: always
-    volumes:
-      - data:/var/lib/postgres/data
-    environment:
-      - POSTGRES_PASSWORD=hallo_api
-      - POSTGRES_USER=hallo_api
-      - POSTGRES_DB=hallo_api_dev
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      #- POSTGRES_INITDB_ARGS=--encoding=UTF8
-      #- POSTGRES_MULTIPLE_EXTENSIONS=postgis,postgis_tiger_geocoder,postgis_topology
+  # db:
+  #   image: postgres:latest
+  #   restart: always
+  #   volumes:
+  #     - data:/var/lib/postgres/data
+  #   environment:
+  #     - POSTGRES_PASSWORD=hallo_api
+  #     - POSTGRES_USER=hallo_api
+  #     - POSTGRES_DB=hallo_api_dev
+  #     - POSTGRES_HOST=db
+  #     - POSTGRES_PORT=5432
+  #     #- POSTGRES_INITDB_ARGS=--encoding=UTF8
+  #     #- POSTGRES_MULTIPLE_EXTENSIONS=postgis,postgis_tiger_geocoder,postgis_topology
 
-  api:
-    build:
-      context: ./api
-      dockerfile: api.dockerfile
-    depends_on:
-      - db
-    ports:
-      - "5000:80"
-      # environment:
-      # - POSTGRES_PASSWORD=postgres
-      # - POSTGRES_USER=postgres
-      # - POSTGRES_DBNAME=postgres
-      # - POSTGRES_HOST=db
+  # torchserve_docker:
+  #   image: pytorch/torchserve:0.1.1-cpu
+  #   ports:
+  #     - "8080:8080"
+  #     - "8081:8081"
+  #     - "8082:8082"
+  #   volumes:
+  #     - /ml-serve/app/model:/home/model-server/model-store
+  #   command: torchserve --model-store /home/model-server/model-store --models solarDetection=test_model.mar
 
-    volumes:
-      - data:/var/lib/postgis/data
+  # api:
+  #   build:
+  #     context: ./api
+  #     dockerfile: api.dockerfile
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - "5000:80"
+  #     # environment:
+  #     # - POSTGRES_PASSWORD=postgres
+  #     # - POSTGRES_USER=postgres
+  #     # - POSTGRES_DBNAME=postgres
+  #     # - POSTGRES_HOST=db
+
+  #   volumes:
+  #     - data:/var/lib/postgis/data
 
   # downloader:
   #   build:
@@ -45,15 +55,29 @@ services:
   #     - DOCKERIZED=true
 
   ml-serve:
-
-  frontend:
     build:
-      context: ./frontend
-      dockerfile: frontend.dockerfile
+      context: ./ml-serve
+      dockerfile: ml-serve.dockerfile
     ports:
-      - "8080:8080"
-    depends_on:
-      - "db"
+      - "7070:7070"
+      - "7071:7071"
+      - "0.0.0.0:8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+    expose:
+      - "7070"
+      - "7071"
+      - "8080"
+      - "8081"
+      - "8082"
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: frontend.dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - "db"
 
 volumes:
   data:
