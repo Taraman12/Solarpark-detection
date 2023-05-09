@@ -1,7 +1,0 @@
-encoder_name: "timm-efficientnet-b0"
-encoder_weights: "imagenet"
-batch_size: 32
-in_channels: 4
-classes: 1
-activation: "sigmoid"
-comment: "all_seasons, color_corr, cleaned, dropped with model eff_b0"
