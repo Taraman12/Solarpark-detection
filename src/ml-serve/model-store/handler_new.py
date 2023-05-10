@@ -23,9 +23,8 @@ class ModelHandler(object):
         :param context: context contains model server system properties
         :return:
         """
-        logger = logging.getLogger("ts_log")
+        logger = logging.getLogger("model_log")
         logger.setLevel(logging.INFO)
-        logger.warning("initialize...")
         logging.info("initialize...")
         #  load the model
         self.manifest = context.manifest
