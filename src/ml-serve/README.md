@@ -37,4 +37,5 @@ check if model is loaded:
 curl "http://localhost:8081/models"
 
 #### make .mar file
+##### run this in (git) bash shell
 ./ml-serve/make_archive.sh
