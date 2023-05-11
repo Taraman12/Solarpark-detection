@@ -16,6 +16,7 @@ ToDo: use jit to load the model instead on state_dict
 Needs be be saved as a script model first
 https://pytorch.org/tutorials/advanced/cpp_export.html
 https://stackoverflow.com/questions/42703500/how-do-i-save-a-trained-model-in-pytorch
+https://github.com/pytorch/serve/blob/master/ts/torch_handler/base_handler.py
 """
 
 logger = logging.getLogger("model_log")
@@ -56,6 +57,7 @@ class ModelHandler(BaseHandler):
         with open("model-config.yaml", "r") as f:
             model_config = yaml.safe_load(f)
 
+        # https://pytorch.org/serve/custom_service.html
         # NOTE there are two ways to load the model
         # 1. load the model using torch.load
         # self.model = torch.jit.load(model_pt_path)
