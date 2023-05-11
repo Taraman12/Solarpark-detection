@@ -7,14 +7,15 @@ from pathlib import Path
 import geopandas as gpd
 
 # local-modules
-from app.constants import (
+from constants import (
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
     IMAGE_OUTPUT_DIR,
     MASK_INPUT_DIR,
     MASK_OUTPUT_DIR,
 )
-from app.preprocessing_dataset_to_disk import save_patched_data_to_disk
+
+from preprocessing_dataset_to_disk import save_patched_data_to_disk
 
 """
 ToDo: Add counter for loop
