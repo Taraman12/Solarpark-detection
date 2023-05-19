@@ -1,4 +1,5 @@
 data_local
+data_raw
 
 Create_figures_thesis/*.jpg
 Create_figures_thesis/*.pdf
