@@ -6,7 +6,8 @@
 - [ ] Add a description of the project
 - [ ] Add pre-commit hooks
 - [ ] Add docformatter again
-- [ ] Add torch-serve
+- [ ] Add mypy again
+- [ ] Add readTheDocs
 
  # Create requirements.txt
  check if all groups are correct
