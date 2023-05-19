@@ -10,13 +10,17 @@ from pathlib import Path
 # NOTE file path can be created on the fly
 DOWNLOAD_PATH = Path(r".\data_local\training_data_raw_test")
 
-PATH_TO_TILES = Path(r"app/data/tiles_germany.geojson")
+PATH_TO_TILES = Path(r"src\downloader\app\data\tiles_germany.geojson")
 
 SEASONS_DICT = {
     "winter": {"start_date": date(2018, 1, 1), "end_date": date(2018, 3, 31)},
     "spring": {"start_date": date(2018, 4, 1), "end_date": date(2018, 6, 30)},
     "summer": {"start_date": date(2018, 7, 1), "end_date": date(2018, 9, 30)},
     "autumn": {"start_date": date(2018, 10, 1), "end_date": date(2018, 11, 30)},
+}
+
+NOW_DICT = {
+    "now": {"start_date": date(2023, 5, 1), "end_date": date(2023, 5, 17)},
 }
 
 IDENTIFIER_REGEX = re.compile(

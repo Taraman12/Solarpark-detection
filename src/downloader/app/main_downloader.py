@@ -13,9 +13,9 @@ from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import ServerError, UnauthorizedError
 
 # local modules
-from app.api_call_handler import download_sentinel2_data
-from app.constants import DOWNLOAD_PATH, PATH_TO_TILES, SEASONS_DICT
-from app.sentinel_api import connect_to_sentinel_api
+from api_call_handler import download_sentinel2_data
+from constants import DOWNLOAD_PATH, PATH_TO_TILES, NOW_DICT
+from sentinel_api import connect_to_sentinel_api
 
 """
 ToDo: Add faster way to check if tile is already downloaded
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             exit()
 
 
-for season_counter, (season, dates) in enumerate(SEASONS_DICT.items()):
+for season_counter, (season, dates) in enumerate(NOW_DICT.items()):
     start_date, end_date = dates["start_date"], dates["end_date"]
     for centroid_counter, centroid in enumerate(set(tiles_file.centroid_of_tile)):
         # ToDo: add faster way to check if data is already downloaded
@@ -163,9 +163,10 @@ for season_counter, (season, dates) in enumerate(SEASONS_DICT.items()):
                 end_date=end_date,
                 download_root=DOWNLOAD_PATH,
                 mode="training",
+                deployed=True,
             )
             print(
-                f"season {season} ({season_counter+1}/{len(SEASONS_DICT.keys())}) "
+                f"season {season} ({season_counter+1}/{len(NOW_DICT.keys())}) "
                 f"for tile {centroid_counter+1}/"
                 f"{len(set(tiles_file.centroid_of_tile))} finished"
             )

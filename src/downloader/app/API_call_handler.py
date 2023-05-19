@@ -6,27 +6,35 @@ import tempfile
 import time
 from datetime import date
 from pathlib import Path
-from typing import TypedDict
+from typing import TypedDict, Union, Optional
 from zipfile import ZipFile
 
 # third-party
+import geopandas as gpd
 from geopandas import GeoSeries
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
 from typing_extensions import Unpack
+import boto3
+from boto3 import client
+from botocore.errorfactory import ClientError
+from dotenv import load_dotenv
 
 # local-modules
-from app.constants import BAND_FILE_MAP
-from app.sentinel_on_aws import download_from_aws
+from constants import BAND_FILE_MAP
+from sentinel_on_aws import download_from_aws
 
 
 # ToDo: change os.path to pathlib
 # ToDo: use sentinelsat get_stream() for streaming data to AWS S3
+
+
 class HTTPError(Exception):
     "Raised by sentinelsat"
     pass
 
 
+# maybe not needed
 class RequestParams(TypedDict):
     footprint: str
     start_date: str
@@ -41,6 +49,7 @@ def download_sentinel2_data(
     end_date: date,
     download_root: Path = Path("."),
     mode: str = "production",
+    deployed: bool = False,
 ) -> bool:
     """
     Download Sentinel-2 data for a given footprint and extract the RGB image.
@@ -64,29 +73,10 @@ def download_sentinel2_data(
 
     # sentinelsat get_stream() for streaming data to AWS S3
     # Search for products that match the query criteria
-    products = api.query(
-        footprint,
-        date=(start_date, end_date),
-        platformname="Sentinel-2",
-        producttype="S2MSI2A",  # S2MSI1C is more data available but stream crashes
-        cloudcoverpercentage=(0, 30),
-    )
+    product = get_product_from_footprint(api, footprint)
 
-    # check if a product is found
-    if not products:  # and mode == "production"
+    if len(product) == 0:
         return False
-        # ToDo: Need better error handling
-
-    # Convert the products to a geopandas dataframe
-    products_gdf = api.to_geodataframe(products)
-
-    # sort products by cloud cover percentage
-    products_gdf_sorted = products_gdf.sort_values(
-        by="cloudcoverpercentage", ascending=True
-    )
-
-    # select first product
-    product = products_gdf_sorted.iloc[0]
 
     # create target folder
     target_folder = download_root / product.identifier
@@ -100,6 +90,23 @@ def download_sentinel2_data(
     # creates folder
     target_folder.mkdir(parents=True, exist_ok=True)
 
+    if deployed:
+        s3 = login_aws()
+        if not s3:
+            return False
+
+        load_dotenv(os.getcwd())
+        bucket_name = os.getenv("aws_s3_bucket")
+        try:
+            # Skip if file already exists
+            response = s3.head_object(
+                Bucket=bucket_name, Key=f"\data_raw\{product.identifier}"
+            )
+
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                print("The object does not exist.")
+
     # check if product is online
     is_online = api.is_online(product.uuid)
 
@@ -112,8 +119,18 @@ def download_sentinel2_data(
             # Extract the TCI_10m image from the downloaded ZIP file
             extract_image_bands(download_root, product.identifier, target_folder)
 
+            # Upload the extracted image to AWS S3
+            upload_to_aws(
+                s3,
+                target_folder,
+                bucket=bucket_name,
+                output_path=f"data_raw/{product.identifier}",
+            )
             # Remove the downloaded ZIP file
             (download_root / (product.identifier + ".zip")).unlink()
+            if deployed:
+                # Remove the downloaded ZIP file
+                (download_root / (product.identifier)).unlink()
             return True
         except HTTPError:
             # ToDo: Need better error handling
@@ -145,6 +162,7 @@ def get_product_from_footprint(
     mode: str = "production",
     **kwargs: Unpack[RequestParams],  # type: ignore
 ) -> GeoSeries:
+    products_gdf = gpd.GeoSeries()
     products = api.query(
         footprint,
         date=(start_date, end_date),
@@ -155,7 +173,7 @@ def get_product_from_footprint(
     # check if a product is found
     if not products:
         if mode == "production":
-            return False
+            return products_gdf
         # ToDo: Need better error handling
 
     # Convert the products to a geopandas dataframe
@@ -168,6 +186,61 @@ def get_product_from_footprint(
 
     # return first product
     return products_gdf_sorted.iloc[0]
+
+
+def login_aws() -> boto3.client:
+    load_dotenv(os.getcwd())
+    aws_access_key_id = os.getenv("aws_access_key_id")
+    aws_secret_access_key = os.getenv("aws_secret_access_key")
+
+    # move somewhere else to avoid multiple calls
+    # add test if credentials are valid
+    # https://stackoverflow.com/questions/53548737/verify-aws-credentials-with-boto3
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+    )
+    try:
+        response = s3.list_buckets()
+        return s3
+    except boto3.exceptions.ClientError:
+        print("Credentials are NOT valid.")
+        return False
+
+
+def upload_to_aws(
+    s3: boto3.client,
+    input_folder: Path,
+    bucket: Optional[str],
+    output_path: Union[str, None] = None,
+) -> bool:
+    """
+    Uploads a Sentinel-2 image to AWS S3.
+
+    Args:
+        input_folder (Path): The path to the directory where the Sentinel-2 image is
+            located.
+
+    Returns:
+        bool: True if the upload was successful, False otherwise.
+
+    """
+    # If S3 object_name was not specified, use file_name
+    if output_path is None:
+        output_path = os.path.basename(input_folder)
+
+    for root, dirs, files in os.walk(input_folder):
+        for file in files:
+            local_file = os.path.join(root, file)
+
+            # Upload the file
+            try:
+                response = s3.upload_file(local_file, bucket, f"{output_path}/{file}")
+            except ClientError as e:
+                # logging.error(e)
+                return False
+    return True
 
 
 def extract_image_bands(
