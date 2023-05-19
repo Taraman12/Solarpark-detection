@@ -116,7 +116,7 @@ warn_unreachable = true
 # Misc
 pretty = true
 #
-exclude = ['__init__.py', 'archive/']
+exclude = ['__init__.py', 'archive/', 'preprocessing/']
 # ignore = "*__init__.py"
 
 [tool.docformatter]
