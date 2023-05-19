@@ -11,7 +11,7 @@ def get_solar_plant(db: Session, id_plant: int):
     )
 
 
-def create_solar_plant(db: Session, solar_plant: schemas.SolarPlantsCreate):
+def create_solar_plant(db: Session, solar_plant: schemas.SolarPlantsCreate) -> models.SolarPlants:
     db_solar_plant = models.SolarPlants(**solar_plant.dict())
     db.add(db_solar_plant)
     db.commit()
