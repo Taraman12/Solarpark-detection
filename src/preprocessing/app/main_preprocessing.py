@@ -15,7 +15,10 @@ from constants import (
     MASK_OUTPUT_DIR,
 )
 
-from preprocessing_dataset_to_disk import save_patched_data_to_disk
+# from preprocessing_dataset_to_disk import save_patched_data_to_disk
+from save_to_disk import save_patched_data_to_disk
+from aws_functions import aws_list_files, aws_list_folders
+from cloud_clients import s3_client, verify_aws_credentials, aws_available
 
 """
 ToDo: Add counter for loop
@@ -45,16 +48,21 @@ if __name__ == "__main__":
         print("Running in docker container")
         exit()
 
+    # if os.environ.get("Training") == "false":
+    training = False
     # rename
     image_input_dir = IMAGE_INPUT_DIR
     mask_input_dir = MASK_INPUT_DIR  # root_dir
     image_output_dir = IMAGE_OUTPUT_DIR
     mask_output_dir = MASK_OUTPUT_DIR
 
+    # mandatory
     for input_directory in [image_input_dir, mask_input_dir]:
         if not input_directory.exists():
             print(f"Input path: {input_directory} does not exist")
+            exit()
 
+    # optional
     for output_directory in [image_output_dir, mask_output_dir]:
         if not output_directory.exists():
             output_directory.mkdir(parents=True, exist_ok=False)
@@ -63,19 +71,36 @@ if __name__ == "__main__":
                 f"Directory created"
             )
 
+    # optional
+
+    if not aws_available:
+        # ToDo: set up logging
+        # ToDo: make it possible to run without aws credentials
+        print("AWS credentials not valid")
+
     masks_gdf = gpd.read_file(mask_input_dir)
 
     kernel_size = 256
+    if training:
+        folder_list = os.listdir(image_input_dir)
+    else:
+        # ! change to raw_data
+        # ToDo: import from constants
+        folder_list = aws_list_folders(prefix=str(image_input_dir))
+        image_input_dir = Path()
 
-    file_list = os.listdir(image_input_dir)
+        # folder_list_raw = [
+        #     folder.replace("data_raw/", "") for folder in folder_list_raw
+        # ]
+        # folder_list = [folder.strip("/") for folder in folder_list_raw]
     # ToDo: add loop over all folders in image_dir (it is only a single one)
     # open mask_gdf outside the loop
     result_total = 0
 
-    for i, tile_folder in enumerate(file_list):
-        print(f"Processing tile {i+1} of {len(file_list)}")
-        # ! changed to match instead of search
-        regex_match = re.match(IDENTIFIER_REGEX, tile_folder)
+    for i, tile_folder in enumerate(folder_list):
+        print(f"Processing file {i+1} of {len(folder_list)}")
+
+        regex_match = re.search(IDENTIFIER_REGEX, tile_folder)
 
         if not regex_match:
             continue
@@ -94,9 +119,10 @@ if __name__ == "__main__":
             masks_gdf,
             image_output_dir,
             mask_output_dir,
-            kernel_size,
             tile=tile,
             tile_date=f"{year}-{month}-{day}",
+            kernel_size=kernel_size,
+            production=False,
         )
         result_total += result
         print(f"Number of files saved: {result}")

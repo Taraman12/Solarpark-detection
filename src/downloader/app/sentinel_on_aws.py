@@ -7,36 +7,45 @@ from pathlib import Path
 
 # third-party
 import boto3
+from boto3 import client
+from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 
+
 # local-modules
-from app.constants import BAND_FILE_MAP, IDENTIFIER_REGEX
+from constants import BAND_FILE_MAP, IDENTIFIER_REGEX
 
 # ToDo: add variable for resolution
 
 
-def download_from_aws(identifier: str, target_folder: Path) -> bool:
+def download_from_aws(
+    identifier: str, target_folder: Path, deployed: bool = False
+) -> bool:
     if not check_aws_free_tier_available(target_folder.parents[0]):
         return False
 
-    load_dotenv(os.getcwd())
-    aws_access_key_id = os.getenv("aws_access_key_id")
-    aws_secret_access_key = os.getenv("aws_secret_access_key")
+    # load_dotenv(os.getcwd())
+    # aws_access_key_id = os.getenv("aws_access_key_id")
+    # aws_secret_access_key = os.getenv("aws_secret_access_key")
 
-    # move somewhere else to avoid multiple calls
-    # add test if credentials are valid
-    # https://stackoverflow.com/questions/53548737/verify-aws-credentials-with-boto3
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-    )
-    try:
-        response = s3.list_buckets()
-    except boto3.exceptions.ClientError:
-        print("Credentials are NOT valid.")
+    # # move somewhere else to avoid multiple calls
+    # # add test if credentials are valid
+    # # https://stackoverflow.com/questions/53548737/verify-aws-credentials-with-boto3
+    # s3 = boto3.client(
+    #     "s3",
+    #     aws_access_key_id=aws_access_key_id,
+    #     aws_secret_access_key=aws_secret_access_key,
+    # )
+    # try:
+    #     response = s3.list_buckets()
+    # except boto3.exceptions.ClientError:
+    #     print("Credentials are NOT valid.")
+    #     return False
+    s3 = login_aws()
+    if not s3:
         return False
-
+    load_dotenv(os.getcwd())
+    bucket_name = os.getenv("aws_s3_bucket")
     # ! changed to match instead of search
     regex_match = re.match(IDENTIFIER_REGEX, identifier)
 
@@ -53,6 +62,34 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
     # https://roda.sentinel-hub.com/sentinel-s2-l2a/readme.html
     bucket = f"sentinel-s2-{product_level}"
     prefix = f"tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0/R10m"
+
+    if deployed:
+        for band in BAND_FILE_MAP:
+            band_file = f"{band}.jp2"
+            band_file_path = target_folder / band_file
+            try:
+                # Skip if file already exists
+                response = s3.head_object(Bucket=bucket_name, Key="\test\image_0_4.tif")
+                continue
+            except ClientError as e:
+                if e.response["Error"]["Code"] == "404":
+                    print("The object does not exist.")
+
+            # add try except block
+            # https://stackoverflow.com/questions/63323425/download-sentinel-file-from-s3-using-python-boto3
+            try:
+                response = s3.copy_object(
+                    Bucket=bucket_name,
+                    Key=f"{prefix}/{band_file}",
+                    CopySource={"Bucket": bucket, "Key": f"{prefix}/{band_file}"},
+                    RequestPayer="requester",
+                )
+                return True
+            except s3.exceptions.NoSuchKey:
+                # ToDo: Need better error handling
+                # should trigger LTA
+                print("No such key in bucket")
+                return False
 
     for band in BAND_FILE_MAP:
         band_file = f"{band}.jp2"
@@ -79,6 +116,27 @@ def download_from_aws(identifier: str, target_folder: Path) -> bool:
 
     write_downloaded_size(target_folder)
     return True
+
+
+def login_aws() -> boto3.client:
+    load_dotenv(os.getcwd())
+    aws_access_key_id = os.getenv("aws_access_key_id")
+    aws_secret_access_key = os.getenv("aws_secret_access_key")
+
+    # move somewhere else to avoid multiple calls
+    # add test if credentials are valid
+    # https://stackoverflow.com/questions/53548737/verify-aws-credentials-with-boto3
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+    )
+    try:
+        response = s3.list_buckets()
+        return s3
+    except boto3.exceptions.ClientError:
+        print("Credentials are NOT valid.")
+        return False
 
 
 def check_aws_free_tier_available(root_folder: Path) -> bool:
@@ -119,7 +177,7 @@ def write_downloaded_size(target_folder: Path) -> None:
 
     # Load existing pickle file or create empty dictionary
     if (root_folder / "downloaded_size_logs.pickle").exists():
-        # ? wrb is used due to an error with mypy
+        # ? r+b is used due to an error with mypy
         with open((root_folder / "downloaded_size_logs.pickle"), "r+b") as f:
             size_logs = pickle.load(f)
     else:
