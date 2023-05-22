@@ -9,12 +9,24 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.8.1,<3.11"
 
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+ipykernel = "^6.22.0"
+boto3 = {extras = ["crt"], version = "^1.26.104"}
+rasterio = "^1.3.6"
+matplotlib = "^3.7.1"
+types-requests = "^2.29.0.0"
+mypy = "^1.2.0"
+
 [tool.poetry.group.api.dependencies]
 fastapi = "^0.95.0"
 uvicorn = "^0.21.1"
 sqlalchemy = "^2.0.7"
-pydantic = "^1.10.7"
+pydantic = {extras = ["email"], version = "^1.10.7"}
+mypy = "^1.2.0"
 psycopg2 = "^2.9.5"
+load-dotenv = "^0.1.0"
+alembic = "^1.11.1"
 
 
 [tool.poetry.group.downloader.dependencies]
@@ -30,15 +42,6 @@ black = "^23.1.0"
 flake8 = "^6.0.0"
 flake8-docstrings = "^1.7.0"
 docformatter = {extras = ["tomli"], version = "^1.5.1"}
-
-[tool.poetry.group.dev.dependencies]
-jupyter = "^1.0.0"
-ipykernel = "^6.22.0"
-boto3 = {extras = ["crt"], version = "^1.26.104"}
-rasterio = "^1.3.6"
-matplotlib = "^3.7.1"
-types-requests = "^2.29.0.0"
-mypy = "^1.2.0"
 
 
 [tool.poetry.group.ml-model.dependencies]
@@ -81,6 +84,10 @@ segmentation-models-pytorch = "^0.3.2"
 # nvgpu = {version = "^0.10.0", platform = "linux"}
 # types-pyyaml = "^6.0.12.9"
 
+
+[tool.poetry.group.ml-feeder.dependencies]
+rasterio = {extras = ["s3"], version = "^1.3.6"}
+
 [tool.isort]
 profile = "black"
 # recognize a module as being part of the current python project
@@ -111,13 +118,14 @@ no_implicit_optional = true
 # Warnings
 warn_return_any = false
 warn_unreachable = true
-# 
+#
 # enable-incomplete-feature = "Unpack"
 # Misc
 pretty = true
 #
 exclude = ['__init__.py', 'archive/', 'preprocessing/']
 # ignore = "*__init__.py"
+plugins = ["pydantic.mypy", "sqlmypy"]
 
 [tool.docformatter]
 recursive = true
