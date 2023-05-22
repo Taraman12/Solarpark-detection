@@ -109,7 +109,6 @@ def save_patched_data_to_disk(
 
             # Schneide den Ausschnitt aus dem zusammengefügten Bild aus
             small_image = stacked_bands[
-                :,
                 window.row_off : window.row_off + window.height,
                 window.col_off : window.col_off + window.width,
             ]
@@ -149,35 +148,43 @@ def save_patched_data_to_disk(
                     mask_output_path,
                     metadata,
                     np.expand_dims(mask_patch, axis=0),
-                    production,
                 )
                 # ToDo: delete the bigger image if production is false
 
             # Speichere das kleine Bild als GeoTIFF
             output_path = image_output_dir / filename
             metadata["count"] = 4
-            save_patch(output_path, metadata, small_image, production)
+            metadata["driver"] = "GTiff"
+            metadata["dtype"] = rasterio.float32
+            if production:
+                # send to ml-model
+                pass
+            save_patch(output_path, metadata, small_image.transpose(2, 0, 1))
     # add check if all images are saved
 
     return file_counter
 
 
-def save_patch(
-    output_path: Path, metadata: dict, data_array: np.ndarray, production: bool
-) -> bool:
+def save_patch(output_path: Path, metadata: dict, data_array: np.ndarray) -> bool:
     # ! add folder for masks and images
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    # looks like the metadata is not correct or dytpe is not correct
     with rasterio.open(fp=output_path, mode="w", **metadata) as dst:
-        dst.write(data_array)
+        dst.write(data_array.astype(rasterio.float32))
 
-    if aws_available:
-        result = upload_file_to_aws(
-            input_file_path=output_path, output_path=output_path.name
-        )
-        if result:
-            return True
-        else:
-            raise Exception("Upload to AWS failed")
+    # Optional: Upload to AWS
+    # NOTE: Each upload is a request to AWS and only 2000 requests per month are free
+    # therefore, this is commented out by default
+    #
+    # if aws_available:
+    #     #
+    #     result = upload_file_to_aws(
+    #         input_file_path=output_path, output_path=output_path.name
+    #     )
+    #     if result:
+    #         return True
+    #     else:
+    #         raise Exception("Upload to AWS failed")
 
     return True
 
@@ -251,7 +258,7 @@ def preprocess_bands(bands: Dict[str, np.ndarray]) -> np.ndarray:
         A numpy array of preprocessed bands.
     """
     # ToDo: add padding
-    stacked_bands = stack_bands(bands).transpose(2, 0, 1)
+    stacked_bands = stack_bands(bands)
     stacked_bands = color_correction(stacked_bands)
     stacked_bands = robust_normalize(stacked_bands)
 

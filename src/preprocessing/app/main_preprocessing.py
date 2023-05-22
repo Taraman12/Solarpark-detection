@@ -81,6 +81,9 @@ if __name__ == "__main__":
     masks_gdf = gpd.read_file(mask_input_dir)
 
     kernel_size = 256
+
+    training = True
+    aws_available = False
     if training:
         folder_list = os.listdir(image_input_dir)
     else:

@@ -28,4 +28,5 @@ def verify_aws_credentials() -> bool:
         print("Credentials are NOT valid.")
         return False
 
-aws_available = verify_aws_credentials()
+# aws_available = verify_aws_credentials()
+aws_available = False
