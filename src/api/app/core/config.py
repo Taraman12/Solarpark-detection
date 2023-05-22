@@ -59,7 +59,7 @@ class Settings(BaseSettings):
         load_dotenv(dotenv_path)
 
     # if not DOCKERIZED override .env server db with localhost
-    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
+    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "solar-park-detection")
@@ -73,7 +73,7 @@ class Settings(BaseSettings):
             scheme="postgresql",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
+            host=values.get("POSTGRES_HOST"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
 
