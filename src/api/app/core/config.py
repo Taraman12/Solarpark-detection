@@ -10,7 +10,6 @@ from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, v
 # import secrets
 
 
-
 # ToDo: Revisit BACKEND_CORS_ORIGINS
 
 
