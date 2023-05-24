@@ -10,7 +10,7 @@
 
 # RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
-FROM python:3.10
+FROM python:3.10-slim
 
 WORKDIR /code
 
