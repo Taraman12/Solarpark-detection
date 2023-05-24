@@ -2,8 +2,8 @@
 from sqlalchemy.orm import Session
 
 # local modules
-from app import crud, schemas
-from app.core.config import settings
+from app import crud, schemas  # noqa: F401
+from app.core.config import settings  # noqa: F401
 from app.db import base  # noqa: F401
 
 # make sure all SQL Alchemy models are imported (app.db.base) before initializing DB
@@ -15,7 +15,7 @@ def init_db(db: Session) -> None:
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
     # the tables un-commenting the next line
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)  # noqa: F821
 
     # alternatively:
     # Base = declarative_base()

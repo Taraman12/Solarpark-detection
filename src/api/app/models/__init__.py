@@ -1,2 +1,2 @@
-from .maillist import MailList
-from .solarpark import SolarPark
+from .maillist import MailList  # noqa
+from .solarpark import SolarPark  # noqa

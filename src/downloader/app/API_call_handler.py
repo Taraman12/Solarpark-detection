@@ -13,7 +13,8 @@ import boto3
 
 # third-party
 import geopandas as gpd
-from boto3 import client
+
+# from boto3 import client
 from botocore.errorfactory import ClientError
 
 # local-modules
@@ -100,7 +101,9 @@ def download_sentinel2_data(
         try:
             # Skip if file already exists
             response = s3.head_object(
-                Bucket=bucket_name, Key=f"\data_raw\{product.identifier}"
+                # / changed form \
+                Bucket=bucket_name,
+                Key=f"/data_raw/{product.identifier}",
             )
 
         except ClientError as e:
@@ -202,7 +205,7 @@ def login_aws() -> boto3.client:
         aws_secret_access_key=aws_secret_access_key,
     )
     try:
-        response = s3.list_buckets()
+        s3.list_buckets()
         return s3
     except boto3.exceptions.ClientError:
         print("Credentials are NOT valid.")
@@ -236,7 +239,7 @@ def upload_to_aws(
 
             # Upload the file
             try:
-                response = s3.upload_file(local_file, bucket, f"{output_path}/{file}")
+                s3.upload_file(local_file, bucket, f"{output_path}/{file}")
             except ClientError as e:
                 # logging.error(e)
                 return False

@@ -1,12 +1,8 @@
 # build-in
-from typing import Any, List, Optional, TypeVar
-
-import shapely.wkt
-from geoalchemy2.elements import WKTElement
-from geoalchemy2.shape import to_shape
+from typing import Any, TypeVar
 
 # third-party
-from pydantic import BaseModel
+# from pydantic import BaseModel
 from shapely.geometry import Polygon
 from sqlalchemy.orm import Session
 
@@ -16,6 +12,11 @@ from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 
 # local modules
 from .base import CRUDBase
+
+# import shapely.wkt
+# from geoalchemy2.elements import WKTElement
+# from geoalchemy2.shape import to_shape
+
 
 ModelType = TypeVar("ModelType", bound=Base)
 

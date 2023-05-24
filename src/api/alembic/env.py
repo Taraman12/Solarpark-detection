@@ -47,7 +47,10 @@ def get_src_path():
 
 
 def get_url():
-    """Builds the url for the database connection from .env or docker environment variables"""
+    """
+    Builds the url for the database connection from .env
+    or docker environment variables
+    """
     if os.environ.get("DOCKERIZED") == "true":
         USER = os.getenv("POSTGRES_USER", "postgres")
         PASSWORD = os.getenv("POSTGRES_PASSWORD", "")

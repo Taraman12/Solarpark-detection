@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 
 # third-party
 from dotenv import load_dotenv
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import AnyHttpUrl, BaseSettings, HttpUrl, PostgresDsn, validator
 
 # import secrets
 

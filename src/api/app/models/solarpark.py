@@ -1,5 +1,5 @@
 # third-party
-from geoalchemy2 import Geometry
+# from geoalchemy2 import Geometry
 from sqlalchemy import Column, Date, Float, Integer, String
 
 # local modules

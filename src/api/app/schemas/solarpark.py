@@ -1,11 +1,14 @@
 # build-in
 from datetime import date
-from typing import Any, List, Optional, Tuple
 
 # third-party
-from pydantic import BaseModel, ConstrainedFloat, Field, PrivateAttr, conlist
-from shapely.geometry import Polygon, mapping
-from shapely.wkt import loads
+from pydantic import BaseModel  # ConstrainedFloat, Field, PrivateAttr, conlist
+
+# from typing import Any, List, Optional, Tuple
+
+
+# from shapely.geometry import Polygon, mapping
+# from shapely.wkt import loads
 
 # class Latitude(ConstrainedFloat):
 #     ge = -90

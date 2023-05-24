@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 # local modules
-from app import crud, models, schemas
+from app import crud, schemas
 from app.api_core import deps
 
 router = APIRouter()
@@ -27,7 +27,7 @@ def read_solarpark(
 
 
 @router.get("/{id}", response_model=schemas.SolarPark)
-def read_solarpark(
+def read_solarpark(  # noqa: F811
     *,
     db: Session = Depends(deps.get_db),
     id: int,
