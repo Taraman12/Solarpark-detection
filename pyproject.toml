@@ -19,7 +19,7 @@ types-requests = "^2.29.0.0"
 mypy = "^1.2.0"
 
 [tool.poetry.group.api.dependencies]
-fastapi = "^0.95.0"
+fastapi = {extras = ["all"], version = "^0.95.2"}
 uvicorn = "^0.21.1"
 sqlalchemy = "^2.0.7"
 pydantic = {extras = ["email"], version = "^1.10.7"}
@@ -27,6 +27,9 @@ mypy = "^1.2.0"
 psycopg2 = "^2.9.5"
 load-dotenv = "^0.1.0"
 alembic = "^1.11.1"
+psycopg2-binary = "^2.9.6"
+geoalchemy2 = "^0.13.3"
+celery = "^5.2.7"
 
 
 [tool.poetry.group.downloader.dependencies]
