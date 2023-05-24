@@ -1,12 +1,11 @@
 # build-in
-from typing import Any, List, Optional, Tuple
 from datetime import date
+from typing import Any, List, Optional, Tuple
 
 # third-party
 from pydantic import BaseModel, ConstrainedFloat, Field, PrivateAttr, conlist
 from shapely.geometry import Polygon, mapping
 from shapely.wkt import loads
-
 
 # class Latitude(ConstrainedFloat):
 #     ge = -90
@@ -37,6 +36,7 @@ from shapely.wkt import loads
 # class Geometry:
 #     type: str
 #     coordinates: List[Union[Tuple[float, float], Tuple[float, float, float]]]
+
 
 class SolarParkBase(BaseModel):
     size_in_sq_m: float

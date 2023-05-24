@@ -1,9 +1,10 @@
 # https://pytorch.org/serve/custom_service.html
-import os
 import logging
+import os
 from pathlib import Path
-import yaml
+
 import segmentation_models_pytorch as smp
+import yaml
 
 
 class ModelHandler(object):

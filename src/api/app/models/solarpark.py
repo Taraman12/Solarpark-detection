@@ -1,6 +1,6 @@
 # third-party
-from sqlalchemy import Column, Date, Float, Integer, String
 from geoalchemy2 import Geometry
+from sqlalchemy import Column, Date, Float, Integer, String
 
 # local modules
 from app.db.base_class import Base
@@ -18,4 +18,4 @@ class SolarPark(Base):
     date_of_data = Column(Date)
     first_detection = Column(Date)
     last_detection = Column(Date)
-    geometry = Column(String) # Column(Geometry("POLYGON", srid=4326))
+    geometry = Column(String)  # Column(Geometry("POLYGON", srid=4326))

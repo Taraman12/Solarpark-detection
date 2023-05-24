@@ -2,17 +2,17 @@
 import os
 import re
 from pathlib import Path
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 # third-party
 import boto3
 from boto3 import client
 from botocore.errorfactory import ClientError
-from dotenv import load_dotenv
+from cloud_clients import bucket_name, s3_client
 
 # local-modules
 from constants import IDENTIFIER_REGEX
-from cloud_clients import s3_client, bucket_name
+from dotenv import load_dotenv
 
 
 def download_from_aws(image_input_dir: Path, deployed: bool = False) -> bool:
@@ -96,7 +96,9 @@ def upload_file_to_aws(
     prefix = "data_preprocessed"
     # Upload the file
     try:
-        response = s3_client.upload_file(input_file_path, bucket_name, f"{prefix}/{output_path}")
+        response = s3_client.upload_file(
+            input_file_path, bucket_name, f"{prefix}/{output_path}"
+        )
         return True
     except ClientError as e:
         # logging.error(e)

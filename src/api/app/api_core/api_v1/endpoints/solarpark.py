@@ -67,9 +67,7 @@ def update_solarpark(
     if not solarpark:
         raise HTTPException(status_code=404, detail="solarpark not found")
 
-    solarpark = crud.solarpark.update(
-        db=db, db_obj=solarpark, obj_in=solarpark_in
-    )
+    solarpark = crud.solarpark.update(db=db, db_obj=solarpark, obj_in=solarpark_in)
     return solarpark
 
 

@@ -6,24 +6,24 @@ import tempfile
 import time
 from datetime import date
 from pathlib import Path
-from typing import TypedDict, Union, Optional
+from typing import Optional, TypedDict, Union
 from zipfile import ZipFile
+
+import boto3
 
 # third-party
 import geopandas as gpd
-from geopandas import GeoSeries
-from sentinelsat import SentinelAPI
-from sentinelsat.exceptions import LTATriggered
-from typing_extensions import Unpack
-import boto3
 from boto3 import client
 from botocore.errorfactory import ClientError
-from dotenv import load_dotenv
 
 # local-modules
 from constants import BAND_FILE_MAP
+from dotenv import load_dotenv
+from geopandas import GeoSeries
 from sentinel_on_aws import download_from_aws
-
+from sentinelsat import SentinelAPI
+from sentinelsat.exceptions import LTATriggered
+from typing_extensions import Unpack
 
 # ToDo: change os.path to pathlib
 # ToDo: use sentinelsat get_stream() for streaming data to AWS S3

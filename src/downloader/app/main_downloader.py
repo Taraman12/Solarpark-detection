@@ -8,14 +8,14 @@ from typing import Union
 
 # third-party
 import geopandas as gpd
-from geopandas import GeoDataFrame
-from sentinelsat import SentinelAPI
-from sentinelsat.exceptions import ServerError, UnauthorizedError
 
 # local modules
 from api_call_handler import download_sentinel2_data
-from constants import DOWNLOAD_PATH, PATH_TO_TILES, NOW_DICT
+from constants import DOWNLOAD_PATH, NOW_DICT, PATH_TO_TILES
+from geopandas import GeoDataFrame
 from sentinel_api import connect_to_sentinel_api
+from sentinelsat import SentinelAPI
+from sentinelsat.exceptions import ServerError, UnauthorizedError
 
 """
 ToDo: Add faster way to check if tile is already downloaded

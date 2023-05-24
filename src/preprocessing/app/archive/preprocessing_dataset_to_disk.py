@@ -155,7 +155,7 @@ def open_DatasetReaders_as_dict(
     # return dataset_readers, tile
 
 
-def robust_normalize(band, lower_bound: int=1, upper_bound: int=99):
+def robust_normalize(band, lower_bound: int = 1, upper_bound: int = 99):
     # get lower bound percentile
     percentile_lower_bound = np.percentile(band, lower_bound)
     # set all lower bound outliers to percentile_lower_bound value
@@ -189,14 +189,16 @@ def filter_mask_on_tile(masks: gpd.GeoDataFrame, tile: str) -> gpd.GeoDataFrame:
     return masks[masks.tile_name == tile].geometry.reset_index(drop=True)
 
 
-def padding_tensor(tensor: Tensor, kernel_size: int, fill: int=0) -> Tensor:
+def padding_tensor(tensor: Tensor, kernel_size: int, fill: int = 0) -> Tensor:
     # computes the padding size
     padding = padding_size(tensor.shape[1], kernel_size)
     # Use PyTorch's Pad function to add padding with the fill value
     return Pad(padding, fill=fill)(tensor)
 
 
-def convert_tensor_into_patches(tensor: Tensor, kernel_size: int, fill: int=0) -> Tensor:
+def convert_tensor_into_patches(
+    tensor: Tensor, kernel_size: int, fill: int = 0
+) -> Tensor:
     padding = padding_size(tensor.shape[1], kernel_size)
     tensor_pad = Pad(padding, fill=fill)(tensor)
     tensor_patched = tensor_pad.reshape(

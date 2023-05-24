@@ -2,22 +2,22 @@
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, Tuple, Union, Optional
+from typing import Any, Dict, Optional, Tuple, Union
+
+import boto3
 
 # third-party
 import geopandas as gpd
-from geopandas import GeoDataFrame
 import numpy as np
 import rasterio
-from rasterio import DatasetReader
-from rasterio.features import geometry_mask
-import boto3
-
+from aws_functions import aws_list_files, download_from_aws, upload_file_to_aws
+from cloud_clients import aws_available
 
 # local modules
 from constants import REQUIRED_BANDS
-from aws_functions import aws_list_files, download_from_aws, upload_file_to_aws
-from cloud_clients import aws_available
+from geopandas import GeoDataFrame
+from rasterio import DatasetReader
+from rasterio.features import geometry_mask
 
 """
 ToDo: Add padding to the image/mask

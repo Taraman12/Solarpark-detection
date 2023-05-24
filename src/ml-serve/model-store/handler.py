@@ -1,15 +1,14 @@
-from ts.torch_handler.base_handler import BaseHandler
-from typing import Any
-
-import os
-import logging
-from pathlib import Path
-import yaml
-import segmentation_models_pytorch as smp
-import torch
-import numpy as np
 import json
 import logging
+import os
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import segmentation_models_pytorch as smp
+import torch
+import yaml
+from ts.torch_handler.base_handler import BaseHandler
 
 """
 ToDo: use jit to load the model instead on state_dict

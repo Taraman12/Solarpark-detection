@@ -6,14 +6,14 @@ from typing import Any, Dict, Tuple, Union
 
 # third-party
 import geopandas as gpd
-from geopandas import GeoDataFrame
 import numpy as np
 import rasterio
-from rasterio import DatasetReader
-from rasterio.features import geometry_mask
 
 # local modules
 from constants import BAND_FILE_MAP
+from geopandas import GeoDataFrame
+from rasterio import DatasetReader
+from rasterio.features import geometry_mask
 
 """
 ToDo: Needs better documentation
@@ -66,7 +66,7 @@ def save_patched_data_to_disk(
 
     if len(masks) == 0:
         return 0
-    
+
     # create a raster which matches the image shape
     rasterized_mask = rasterize_mask(masks, bands[list(bands.keys())[0]])
 
@@ -87,7 +87,6 @@ def save_patched_data_to_disk(
     # Iteriere über die Reihen und Spalten, um das Bild in kleine Bilder aufzuteilen
     for row in range(num_rows):
         for col in range(num_cols):
-
             # Definiere die Fensterkoordinaten für den Ausschnitt
             window = rasterio.windows.Window(
                 col * kernel_size, row * kernel_size, kernel_size, kernel_size
@@ -110,10 +109,10 @@ def save_patched_data_to_disk(
             # https://gis.stackexchange.com/questions/380038/reasons-for-partial-tiles-in-sentinel
             if small_image[:, row, col].max() == 0:
                 continue
-            
+
             file_identifier += 1
             file_counter += 1
-            
+
             # Aktualisiere die Metadaten für das kleine Bild
             metadata["width"] = kernel_size
             metadata["height"] = kernel_size

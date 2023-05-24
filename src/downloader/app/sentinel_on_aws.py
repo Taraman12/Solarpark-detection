@@ -9,11 +9,10 @@ from pathlib import Path
 import boto3
 from boto3 import client
 from botocore.errorfactory import ClientError
-from dotenv import load_dotenv
-
 
 # local-modules
 from constants import BAND_FILE_MAP, IDENTIFIER_REGEX
+from dotenv import load_dotenv
 
 # ToDo: add variable for resolution
 

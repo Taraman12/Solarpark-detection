@@ -1,7 +1,8 @@
 # local modules
-from .base import CRUDBase
 from app.models.maillist import MailList
 from app.schemas.maillist import MailListCreate, MailListUpdate
+
+from .base import CRUDBase
 
 
 class CRUDMailList(CRUDBase[MailList, MailListCreate, MailListUpdate]):

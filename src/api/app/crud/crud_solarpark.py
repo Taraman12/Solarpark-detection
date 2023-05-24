@@ -1,25 +1,27 @@
 # build-in
 from typing import Any, List, Optional, TypeVar
-# third-party
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from shapely.geometry import Polygon
+
+import shapely.wkt
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
-import shapely.wkt
 
-# local modules
-from .base import CRUDBase
+# third-party
+from pydantic import BaseModel
+from shapely.geometry import Polygon
+from sqlalchemy.orm import Session
+
 from app.db.base_class import Base
 from app.models.solarpark import SolarPark
 from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 
+# local modules
+from .base import CRUDBase
+
 ModelType = TypeVar("ModelType", bound=Base)
 
+
 class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
-    def get(
-        self, db: Session, id: Any, *, polygon: bool = False
-    ) -> SolarPark:
+    def get(self, db: Session, id: Any, *, polygon: bool = False) -> SolarPark:
         if polygon:
             db_obj = db.query(SolarPark).filter(SolarPark.id == id).first()
             db_obj.geometry = Polygon(db_obj.geometry)
@@ -35,7 +37,7 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
             return db_obj
         return db.query(SolarPark).offset(skip).limit(limit).all()
 
-    #pass
+    # pass
     # def create(self, db: Session, *, obj_in: SolarParkCreate):
     #     polygon = Polygon(zip(obj_in.lon, obj_in.lat))
     #     geometry = WKTElement(polygon.wkt, srid=4326)

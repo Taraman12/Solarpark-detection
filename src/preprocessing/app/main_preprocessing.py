@@ -5,6 +5,8 @@ from pathlib import Path
 
 # third-party
 import geopandas as gpd
+from aws_functions import aws_list_files, aws_list_folders
+from cloud_clients import aws_available, s3_client, verify_aws_credentials
 
 # local-modules
 from constants import (
@@ -17,8 +19,6 @@ from constants import (
 
 # from preprocessing_dataset_to_disk import save_patched_data_to_disk
 from save_to_disk import save_patched_data_to_disk
-from aws_functions import aws_list_files, aws_list_folders
-from cloud_clients import s3_client, verify_aws_credentials, aws_available
 
 """
 ToDo: Add counter for loop
