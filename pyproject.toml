@@ -24,12 +24,12 @@ uvicorn = "^0.21.1"
 sqlalchemy = "^2.0.7"
 pydantic = {extras = ["email"], version = "^1.10.7"}
 mypy = "^1.2.0"
-psycopg2 = "^2.9.5"
+# psycopg2 = "^2.9.5"
 load-dotenv = "^0.1.0"
 alembic = "^1.11.1"
 psycopg2-binary = "^2.9.6"
-geoalchemy2 = "^0.13.3"
-celery = "^5.2.7"
+# geoalchemy2 = "^0.13.3"
+# celery = "^5.2.7"
 
 
 [tool.poetry.group.downloader.dependencies]
@@ -73,8 +73,8 @@ torchvision = "^0.15.1"
 numpy = "^1.23.5"
 geopandas = "^0.12.2"
 rasterio = "^1.3.6"
-torch = "2.0.0"
-torchvision = "^0.15.1"
+# torch = "2.0.0"
+# torchvision = "^0.15.1"
 
 
 [tool.poetry.group.ml-serve.dependencies]
