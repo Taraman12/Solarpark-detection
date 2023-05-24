@@ -1,8 +1,8 @@
-"""create solarpark table
+"""Create base
 
-Revision ID: 13f9cdfd0322
+Revision ID: da7a861fef00
 Revises: 
-Create Date: 2023-05-22 17:37:06.815901
+Create Date: 2023-05-24 09:10:15.805765
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '13f9cdfd0322'
+revision = 'da7a861fef00'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,8 +33,7 @@ def upgrade() -> None:
     sa.Column('first_detection', sa.Date(), nullable=True),
     sa.Column('last_detection', sa.Date(), nullable=True),
     sa.Column('geometry', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('geometry')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_solarpark_id'), 'solarpark', ['id'], unique=False)
     # ### end Alembic commands ###

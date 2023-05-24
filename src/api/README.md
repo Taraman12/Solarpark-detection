@@ -44,6 +44,7 @@ The crud folder contains the functions that are used to interact with the databa
 
 ### Alembic:
 alembic revision --autogenerate -m "Your Comment"
+alembic upgrade head
 
 Links:
 

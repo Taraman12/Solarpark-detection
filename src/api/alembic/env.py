@@ -7,6 +7,10 @@ from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
+# added for geo spacial data support
+# from geoalchemy2 import alembic_helpers
+# import geoalchemy2  # noqa
+
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -82,6 +86,10 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        # added for geo spacial data support
+        # include_object=alembic_helpers.include_object,
+        # process_revision_directives=alembic_helpers.writer,
+        # render_item=alembic_helpers.render_item,
     )
 
     with context.begin_transaction():
@@ -98,7 +106,7 @@ def run_migrations_online() -> None:
     # changed from default
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_url()
-    # changed to cionfiguration
+    # changed to configuration
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
@@ -106,7 +114,14 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            # added for geo spacial data support
+            # include_object=alembic_helpers.include_object,
+            # process_revision_directives=alembic_helpers.writer,
+            # render_item=alembic_helpers.render_item,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

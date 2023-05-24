@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
         "http://localhost",
+        "http://localhost:80",
         "http://localhost:8080",
     ]
 
