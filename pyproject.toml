@@ -30,6 +30,7 @@ alembic = "^1.11.1"
 psycopg2-binary = "^2.9.6"
 # geoalchemy2 = "^0.13.3"
 # celery = "^5.2.7"
+shapely = "^2.0.1"
 
 
 [tool.poetry.group.downloader.dependencies]
