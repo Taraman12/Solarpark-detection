@@ -54,9 +54,5 @@ IMAGE_REGEX = re.compile(
         (?P<resolution>\d{2})m.jp2$""",
     re.VERBOSE,
 )
-BAND_FILE_MAP = {
-    "B02": None,  # blue
-    "B03": None,  # green
-    "B04": None,  # red
-    "B08": None,  # NIR
-}
+
+REQUIRED_BANDS = ["B02", "B03", "B04", "B08", "TCI"]

@@ -15,6 +15,7 @@ def connect_to_sentinel_api() -> Union[SentinelAPI, Exception]:
     api = SentinelAPI(api_user, api_secret, api_url)
     # Connect to the Sentinel API
     try:
+        # example query to test connection
         api.query(date=("NOW-8HOURS", "NOW"), producttype="SLC")
         return api
     except Exception as e:

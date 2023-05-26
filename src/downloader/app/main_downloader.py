@@ -14,22 +14,21 @@ from sentinelsat.exceptions import ServerError, UnauthorizedError
 
 # local modules
 from api_call_handler import download_sentinel2_data
+from cloud_clients import aws_available
 from constants import DOWNLOAD_PATH, NOW_DICT, PATH_TO_TILES
+from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 from sentinel_api import connect_to_sentinel_api
 
+from logging_config import get_logger
+
+# set up logger
+logger = get_logger(__name__)
 
 """
 ToDo: Add faster way to check if tile is already downloaded
 ToDo: Needs better documentation
 ToDo: handle memory consumption (but not so important)
 """
-
-# logging.basicConfig(
-#     filename="app.log",
-#     filemode="w",
-#     format="%(asctime)s - %(levelname)s - %(message)s",
-#     level=logging.INFO,
-# )
 
 
 def load_tiles_file(path: Path) -> GeoDataFrame:
@@ -53,15 +52,13 @@ def load_tiles_file(path: Path) -> GeoDataFrame:
 
     """
     if not path.exists():
-        logging.error(f"Could not find {path}")
-        print(f"Could not find {path}")
+        logger.error(f"Could not find {path}")
         exit()
 
     tiles_file = gpd.read_file(path)
 
     if len(tiles_file) == 0:
-        logging.error(f"Could not read {path.name}")
-        print(f"Could not read {path.name}")
+        logger.error(f"Could not read {path.name} or empty file")
         exit()
 
     return tiles_file
@@ -76,13 +73,12 @@ def create_download_path(path: Path) -> bool:
     Returns:
         bool: True if path was created, False if not
     """
-    if os.environ.get("DOCKERIZED") == "true":
-        # ! add here aws s3 bucket
-        print("Dockerized")
+    if DOCKERIZED:
+        logger.info("Dockerized, input paths will be auto created")
         return True
 
     if not path.exists():
-        print(
+        logger.warning(
             f"The download path: {path} does not exist. \n"
             f" Do you want to create it? [Y/n] (no will exiting program)"
         )
@@ -91,15 +87,15 @@ def create_download_path(path: Path) -> bool:
         try:
             user_input_bool = bool(strtobool(user_input))
         except ValueError:
-            print("Invalid input. Please use Y/n")
+            logger.info("Invalid input. Please use Y/n")
             return False
 
         if user_input_bool:
             path.mkdir(parents=True, exist_ok=False)
-            print("path created")
+            logger.info("path created")
             return True
         else:
-            print("path not created, exiting program")
+            logger.error("path not created, exiting program")
             exit()
 
     else:
@@ -107,12 +103,13 @@ def create_download_path(path: Path) -> bool:
 
 
 def wait_for_api_connection() -> Union[bool, SentinelAPI]:
+    """Connects to sentinelAPI and checks if the connection works"""
     api = connect_to_sentinel_api()
 
     if isinstance(api, ServerError):
         # ToDo: send mail to admin once a day
         # ToDo: check if this works
-        logging.warning(
+        logger.warning(
             """Could not connect to Sentinel API. \n
                 Probably ongoing maintenance. \n
                 Retrying in 5 minutes."""
@@ -122,21 +119,31 @@ def wait_for_api_connection() -> Union[bool, SentinelAPI]:
 
     elif isinstance(api, UnauthorizedError):
         # ToDo: send mail to admin once
-        # ToDo: check if this works (maybe api is not type Exception)
-        logging.error("Wrong credentials for Sentinel API. Please check .env file")
+        logger.error("Wrong credentials for Sentinel API. Please check .env file")
+        exit()
+
+    elif isinstance(api, ConnectionError):
+        logger.warning(
+            """Could not connect to Sentinel API. \n
+                Check your internet connection.
+            """
+        )
         exit()
 
     elif isinstance(api, Exception):
         # ToDo: send mail to admin every time
-        logging.error(f"Unknown error occurred: {api}")
+        logger.error(f"Unknown error occurred: {api}")
         exit()
+
     else:
         return api
 
 
 if __name__ == "__main__":
-    logging.info("Downloader started")
-    print("Downloader started")
+    logger.info("Downloader started, with the settings:")
+    logger.info(f"Dockerized = {DOCKERIZED}")
+    logger.info(f"Make_trainigs_data = {MAKE_TRAININGS_DATA}")
+    logger.info(f"Production = {PRODUCTION}")
 
     tiles_file = load_tiles_file(path=PATH_TO_TILES)
 
@@ -149,37 +156,38 @@ if __name__ == "__main__":
             api = wait_for_api_connection()
             break
         except Exception as e:
-            logging.error(f"Error connecting to API: {e}")
+            logger.error(f"Error connecting to API: {e}")
             exit()
 
+    if not aws_available:
+        logger.warning("AWS credentials not valid, running script anyway")
 
-for season_counter, (season, dates) in enumerate(NOW_DICT.items()):
-    start_date, end_date = dates["start_date"], dates["end_date"]
-    for centroid_counter, centroid in enumerate(set(tiles_file.centroid_of_tile)):
-        # ToDo: add faster way to check if data is already downloaded
-        # see: make_trainings_data.ipynb
-        try:
-            result = download_sentinel2_data(
-                api=api,
-                footprint=centroid,
-                start_date=start_date,
-                end_date=end_date,
-                download_root=DOWNLOAD_PATH,
-                mode="training",
-                deployed=True,
-            )
-            print(
+    # TODO: better input handling of NOW_DICT and date maybe with mode ...
+    for season_counter, (season, dates) in enumerate(NOW_DICT.items()):
+        start_date, end_date = dates["start_date"], dates["end_date"]
+        for centroid_counter, centroid in enumerate(set(tiles_file.centroid_of_tile)):
+            # ToDo: add faster way to check if data is already downloaded
+            # see: make_trainings_data.ipynb
+            try:
+                result = download_sentinel2_data(
+                    api=api,
+                    footprint=centroid,
+                    start_date=start_date,
+                    end_date=end_date,
+                    download_root=DOWNLOAD_PATH,
+                )
+
+            # ! result is type bool not exception
+            except Exception as e:
+                logger.error(
+                    f"Error occurred while downloading data for centroid {centroid}: {e}"
+                )
+                continue
+
+            logger.info(
                 f"season {season} ({season_counter+1}/{len(NOW_DICT.keys())}) "
                 f"for tile {centroid_counter+1}/"
                 f"{len(set(tiles_file.centroid_of_tile))} finished"
             )
-            # ToDo: add tile_name to final dataframe
-        # ! result is type bool not exception
-        except Exception as e:
-            print(f"Error occurred while downloading data for centroid {centroid}: {e}")
-            logging.error(
-                f"Error occurred while downloading data for centroid {centroid}: {e}"
-            )
-            # ToDo: send mail to admin
 
-    logging.info("Program finished successfully")
+    logger.info("Program finished successfully")

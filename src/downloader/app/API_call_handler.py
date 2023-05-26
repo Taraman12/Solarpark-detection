@@ -8,7 +8,7 @@ from datetime import date
 from pathlib import Path
 from typing import Optional, TypedDict, Union
 from zipfile import ZipFile
-
+import re
 
 # third-party
 import geopandas as gpd
@@ -21,8 +21,10 @@ from sentinelsat.exceptions import LTATriggered
 from typing_extensions import Unpack
 
 # local-modules
-from constants import BAND_FILE_MAP
-from sentinel_on_aws import download_from_aws
+from constants import REQUIRED_BANDS, IMAGE_REGEX
+from settings import PRODUCTION, DOCKERIZED
+from cloud_clients import aws_available, s3_client
+from sentinel_on_aws import download_from_aws_handler, upload_to_aws
 
 
 # ToDo: change os.path to pathlib
@@ -34,22 +36,12 @@ class HTTPError(Exception):
     pass
 
 
-# maybe not needed
-class RequestParams(TypedDict):
-    footprint: str
-    start_date: str
-    end_date: str
-    mode: str
-
-
 def download_sentinel2_data(
     api: SentinelAPI,
     footprint: str,
     start_date: date,
     end_date: date,
     download_root: Path = Path("."),
-    mode: str = "production",
-    deployed: bool = False,
 ) -> bool:
     """
     Download Sentinel-2 data for a given footprint and extract the RGB image.
@@ -62,52 +54,27 @@ def download_sentinel2_data(
         tuple: A tuple of gdf product and the path to the extracted RGB image.
 
     """
-
-    # if mode == "production":
-    #     start_date = "NOW-5DAYS"
-    #     end_date = "NOW"
-
-    # elif mode == "training":
-    #     start_date = date(2018, 6, 1)  # type: ignore
-    #     end_date = date(2018, 8, 1)  # type: ignore
-
-    # sentinelsat get_stream() for streaming data to AWS S3
     # Search for products that match the query criteria
-    product = get_product_from_footprint(api, footprint)
+    product = get_product_from_footprint(api, footprint, start_date, end_date)
 
     if len(product) == 0:
+        """No product found"""
         return False
 
     # create target folder
     target_folder = download_root / product.identifier
 
-    # check if product is already downloaded
-    if target_folder.exists():
-        # check if product is complete
-        if len(os.listdir(target_folder)) >= len(BAND_FILE_MAP.keys()):
-            return True
+    # checks if product is already downloaded
+    if check_files_already_downloaded(target_folder):
+        return True
 
     # creates folder
     target_folder.mkdir(parents=True, exist_ok=True)
 
-    if deployed:
-        s3 = login_aws()
-        if not s3:
-            return False
-
-        load_dotenv(os.getcwd())
-        bucket_name = os.getenv("aws_s3_bucket")
-        try:
-            # Skip if file already exists
-            response = s3.head_object(
-                # / changed form \
-                Bucket=bucket_name,
-                Key=f"/data_raw/{product.identifier}",
-            )
-
-        except ClientError as e:
-            if e.response["Error"]["Code"] == "404":
-                print("The object does not exist.")
+    # if deployed to aws prefer download from there
+    # if deployed and aws_available:
+    #     if download_from_aws_handler(product.identifier, target_folder):
+    #         return True
 
     # check if product is online
     is_online = api.is_online(product.uuid)
@@ -117,29 +84,28 @@ def download_sentinel2_data(
             print("Product is online. Starting download.")
             # Download the product using the UUID
             api.download(product.uuid, directory_path=download_root)
+        except HTTPError:
+            # ToDo: Need better error handling
+            return False
+        # Extract the REQUIRED_BANDS from the downloaded ZIP file
+        extract_image_bands(download_root, product.identifier, target_folder)
 
-            # Extract the TCI_10m image from the downloaded ZIP file
-            extract_image_bands(download_root, product.identifier, target_folder)
-
+        if DOCKERIZED:
             # Upload the extracted image to AWS S3
             upload_to_aws(
-                s3,
                 target_folder,
                 bucket=bucket_name,
                 output_path=f"data_raw/{product.identifier}",
             )
-            # Remove the downloaded ZIP file
-            (download_root / (product.identifier + ".zip")).unlink()
-            if deployed:
-                # Remove the downloaded ZIP file
-                (download_root / (product.identifier)).unlink()
-            return True
-        except HTTPError:
-            # ToDo: Need better error handling
-            return False
+            # Remove the downloaded file from docker container
+            (download_root / (product.identifier)).unlink()
+
+        # Remove the downloaded ZIP file
+        (download_root / (product.identifier + ".zip")).unlink()
+        return True
 
     print("Product is not online. Download from AWS S3.")
-    if download_from_aws(product.identifier, target_folder):
+    if download_from_aws_handler(product.identifier, target_folder):
         return True
 
     # trigger LTA
@@ -147,12 +113,6 @@ def download_sentinel2_data(
     print("Product is not online. Triggering LTA.")
     # download from LTA waiting for 10 minutes before trying again
     # result = asyncio.run(download_from_lta(api, product.uuid, download_root))
-
-    # if result:
-    #     return True
-    # else:
-    #     return False
-
     return False
 
 
@@ -161,10 +121,23 @@ def get_product_from_footprint(
     footprint: str,
     start_date: str = "NOW-5DAYS",
     end_date: str = "NOW",
-    mode: str = "production",
-    **kwargs: Unpack[RequestParams],  # type: ignore
 ) -> GeoSeries:
+    """
+    Queries the Sentinel API for products that intersect with a given footprint.
+    Returns the product with the lowest cloud cover percentage.
+
+    Args:
+        api (SentinelAPI): The SentinelAPI instance to use for the query.
+        footprint (str): The footprint to use for the query.
+        start_date (str, optional): The start date of the query. Defaults to "NOW-5DAYS".
+        end_date (str, optional): The end date of the query. Defaults to "NOW".
+
+    Returns:
+        GeoSeries: A GeoSeries containing the product with the lowest cloud cover percentage.
+    """
+    # create empty GeoSeries to return
     products_gdf = gpd.GeoSeries()
+
     products = api.query(
         footprint,
         date=(start_date, end_date),
@@ -172,11 +145,10 @@ def get_product_from_footprint(
         producttype="S2MSI2A",  # S2MSI1C is more data available but stream crashes
         cloudcoverpercentage=(0, 30),
     )
-    # check if a product is found
+
+    # check if no product is found
     if not products:
-        if mode == "production":
-            return products_gdf
-        # ToDo: Need better error handling
+        return products_gdf
 
     # Convert the products to a geopandas dataframe
     products_gdf = api.to_geodataframe(products)
@@ -190,59 +162,13 @@ def get_product_from_footprint(
     return products_gdf_sorted.iloc[0]
 
 
-def login_aws() -> boto3.client:
-    load_dotenv(os.getcwd())
-    aws_access_key_id = os.getenv("aws_access_key_id")
-    aws_secret_access_key = os.getenv("aws_secret_access_key")
-
-    # move somewhere else to avoid multiple calls
-    # add test if credentials are valid
-    # https://stackoverflow.com/questions/53548737/verify-aws-credentials-with-boto3
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-    )
-    try:
-        s3.list_buckets()
-        return s3
-    except boto3.exceptions.ClientError:
-        print("Credentials are NOT valid.")
-        return False
-
-
-def upload_to_aws(
-    s3: boto3.client,
-    input_folder: Path,
-    bucket: Optional[str],
-    output_path: Union[str, None] = None,
-) -> bool:
-    """
-    Uploads a Sentinel-2 image to AWS S3.
-
-    Args:
-        input_folder (Path): The path to the directory where the Sentinel-2 image is
-            located.
-
-    Returns:
-        bool: True if the upload was successful, False otherwise.
-
-    """
-    # If S3 object_name was not specified, use file_name
-    if output_path is None:
-        output_path = os.path.basename(input_folder)
-
-    for root, dirs, files in os.walk(input_folder):
-        for file in files:
-            local_file = os.path.join(root, file)
-
-            # Upload the file
-            try:
-                s3.upload_file(local_file, bucket, f"{output_path}/{file}")
-            except ClientError as e:
-                # logging.error(e)
-                return False
-    return True
+def check_files_already_downloaded(target_folder: Path):
+    """Checks if the all bands of the product are already downloaded"""
+    if target_folder.exists():
+        # check if product is complete
+        if len(os.listdir(target_folder)) >= len(REQUIRED_BANDS):
+            return True
+    return False
 
 
 def extract_image_bands(
@@ -265,36 +191,27 @@ def extract_image_bands(
             and saved to the `target_folder` directory.
 
     """
-    # TODO: Use regex in constants to extract the band images
     with ZipFile(download_root / f"{identifier}.zip", mode="r") as zipped_folder:
         with tempfile.TemporaryDirectory() as tmp_dir:
             zipped_folder.extractall(tmp_dir)
             tmp_dir_path = Path(tmp_dir)
-            p = tmp_dir_path.glob("**/*B0[2438]_10m.jp2")
-            files = [x for x in p if x.is_file()]
+            files = tmp_dir_path.glob("**/*_10m.jp2")
 
             for source_path in files:
-                band_res = source_path.stem.split("_")[2] + "_10m.jp2"
-                target_filename = target_folder / band_res
+                regex_match = re.match(IMAGE_REGEX, source_path.name)
+                if not regex_match:
+                    continue
+                band = regex_match.group("band")
+
+                if band not in REQUIRED_BANDS:
+                    continue
+
+                file_name = f"{band}.jp2"
+
+                target_filename = target_folder / file_name
 
                 with source_path.open("rb") as zf, target_filename.open("wb") as f:
                     shutil.copyfileobj(zf, f)
-
-    # pattern = re.compile(r"_B0[2438]_10m\.jp2$")
-
-    # # Extract the TCI_10m image from the ZIP file
-    # with ZipFile(download_root / f"{identifier}.zip", mode="r") as zipped_folder:
-    #     for source_filename in zipped_folder.namelist():
-    #         if source_filename.endswith("_TCI_10m.jp2") or pattern.search(
-    #             source_filename
-    #         ):
-    #             target_filename = os.path.join(
-    #                 target_folder, os.path.basename(source_filename)
-    #             )
-    #             with zipped_folder.open(source_filename) as zf, open(
-    #                 target_filename, "wb"
-    #             ) as f:
-    #                 shutil.copyfileobj(zf, f)
 
     return True
 
