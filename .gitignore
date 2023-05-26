@@ -167,3 +167,8 @@ cython_debug/
 
 # cloud stuff
 .aws
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
