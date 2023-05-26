@@ -3,21 +3,35 @@ import os
 import re
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
-
-import boto3
+import logging
+import requests
+import json
 
 # third-party
 import geopandas as gpd
 import numpy as np
 import rasterio
-from aws_functions import aws_list_files, download_from_aws, upload_file_to_aws
-from cloud_clients import aws_available
-
-# local modules
-from constants import REQUIRED_BANDS
+import rasterio.features
+from pyproj import Transformer
 from geopandas import GeoDataFrame
 from rasterio import DatasetReader
 from rasterio.features import geometry_mask
+from shapely.geometry import Polygon
+
+# local modules
+from aws_functions import aws_list_files, download_from_aws, upload_file_to_aws
+from cloud_clients import aws_available
+from constants import REQUIRED_BANDS
+from logging_config import get_logger
+
+# set up logging
+logging.getLogger("rasterio").setLevel(logging.WARNING)
+logging.getLogger("fiona").setLevel(logging.WARNING)
+logger = get_logger(__name__)
+# log_file_path = path.join(path.dirname(path.abspath(__file__)), "logging.conf")
+# logging.config.fileConfig(log_file_path)
+# logger = logging.getLogger(__name__)
+
 
 """
 ToDo: Add padding to the image/mask
@@ -28,6 +42,7 @@ ToDo: handle memory consumption (but not so important)
 # Defining constants
 
 # extracts tile, date, band and resolution from filename
+# ! Adjust to TCI band
 FILENAME_REGEX = re.compile(
     r"""(?P<band>B0\d{1})(?:_
         (?P<resolution>\d{2}m))?\..*$""",
@@ -74,7 +89,7 @@ def save_patched_data_to_disk(
     # masks_gdf = gpd.read_file(mask_input_dir)
     first_band = list(bands.keys())[0]
     # filter all masks to selected tile
-    if production:
+    if not production:
         masks = filter_mask_on_tile(masks_gdf, tile)
 
         if len(masks) == 0:
@@ -130,7 +145,7 @@ def save_patched_data_to_disk(
 
             filename = f"{tile}_{file_identifier}_{tile_date}.tif"
 
-            if production:
+            if not production:
                 # Extract the patch from the rasterized_mask
                 mask_patch = rasterized_mask[
                     window.row_off : window.row_off + window.height,
@@ -157,12 +172,99 @@ def save_patched_data_to_disk(
             metadata["driver"] = "GTiff"
             metadata["dtype"] = rasterio.float32
             if production:
-                # send to ml-model
-                pass
+                logger.info(f"sending to ml model")
+                prediction = send_to_ml_model(small_image.transpose(2, 0, 1), metadata)
+                if len(prediction) == 0:
+                    continue
+                # mask = prediction_to_mask(pred)
+                polygons = masks_to_polygons(prediction, metadata)
+                logger.info(f"Found {len(polygons)} polygons")
+                for polygon in polygons:
+                    write_to_db(polygon)
+                return file_counter
+
             save_patch(output_path, metadata, small_image.transpose(2, 0, 1))
     # add check if all images are saved
 
     return file_counter
+
+
+def check_ml_online(url: str):
+    while True:
+        try:
+            response = requests.get("http://ml-serve:8080/ping")
+            if response.status_code == 200:
+                print("TorchServe is running")
+                break
+            else:
+                logger.info("TorchServe is not running. retry in 5 seconds.")
+                time.sleep(5)
+        except requests.exceptions.ConnectionError:
+            print("TorchServe is not running")
+            time.sleep(5)
+
+
+def send_to_ml_model(data_array: np.ndarray, metadata: dict) -> dict:
+    headers = {"Content-Type": "application/json"}
+    json_data = json.dumps(data_array.tolist())
+    req = requests.post(
+        "http://ml-serve:8080/predictions/solar-park-detection",
+        headers=headers,
+        data=json_data,
+    )
+    logger.info(f"Got response from ml model: {req.status_code}")
+    pred = np.array(req.json())
+    mask = np.where(pred[0] < 0.5, 0, 1)
+    if mask.sum() == 0:
+        return {}
+    else:
+        print(f"Found prediction")
+        return pred
+
+
+def masks_to_polygons(masks: np.ndarray, metadata: dict) -> gpd.GeoDataFrame:
+    masks = masks.astype(np.uint8)
+    transform = metadata["transform"]
+    crs = metadata["crs"]
+    transformer = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+    # extract shapes
+    shapes = rasterio.features.shapes(masks, transform=transform)
+    # shapes = shapes.astype(np.uint8)
+    polygons = []
+    for shape in shapes:
+        if shape[1] == 1:
+            polygon = Polygon(shape[0]["coordinates"][0])
+            area = polygon.area
+            if area >= 5000:
+                polygons.append(polygon)
+    return polygons
+
+
+# def masks_to_polygons(masks: np.ndarray, metadata: dict) -> gpd.GeoDataFrame:
+#     masks = masks.astype(np.uint8)
+#     transform = metadata["transform"]
+#     crs = metadata["crs"]
+#     transformer = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+#     # extract shapes
+#     shapes = rasterio.features.shapes(masks, transform=transform)
+#     #shapes = shapes.astype(np.uint8)
+#     return [Polygon(shape[0]["coordinates"][0]) for shape in shapes if shape[1] == 1]
+
+
+def write_to_db(polygon: str) -> bool:
+    data = {
+        "size_in_sq_m": polygon.area,
+        "peak_power": 0,
+        "date_of_data": "2023-05-20",
+        "first_detection": "2023-05-20",
+        "last_detection": "2023-05-20",
+        "geometry": polygon.wkt,
+    }
+    url = "http://api:8000/api/v1/solarpark/"
+    headers = {"Content-type": "application/json"}
+    logger.info(f"Writing to DB: {data}")
+    response = requests.post(url, headers=headers, json=data)
+    return response.status_code
 
 
 def save_patch(output_path: Path, metadata: dict, data_array: np.ndarray) -> bool:

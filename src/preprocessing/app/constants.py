@@ -5,11 +5,13 @@ from pathlib import Path
 # from dataclasses import dataclass
 # from typing import Union
 
-IMAGE_INPUT_DIR = Path(r".\data_raw")
+IMAGE_INPUT_DIR = Path(r"data_raw")
 
-MASK_INPUT_DIR = Path(
-    r".\src\preprocessing\app\data\trn_polygons_germany_tile_names.geojson"
-)
+SCRIPT_DIR = Path(__file__).resolve().parent
+MASK_INPUT_DIR = SCRIPT_DIR / "data" / "trn_polygons_germany_tile_names.geojson"
+# MASK_INPUT_DIR = Path(
+#     r".\src\preprocessing\app\data\trn_polygons_germany_tile_names.geojson"
+# )
 
 # NOTE will be created if not existent
 IMAGE_OUTPUT_DIR = Path(r".\data_local\test_images_geotiff")
