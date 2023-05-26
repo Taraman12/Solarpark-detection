@@ -66,3 +66,9 @@ npm run test:e2e
 ```sh
 npm run lint
 ```
+
+### local development
+
+```
+npm run dev -- --port 80
+```
