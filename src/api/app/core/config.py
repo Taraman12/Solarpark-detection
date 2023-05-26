@@ -26,7 +26,12 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
         "http://localhost",
         "http://localhost:80",
+        "http://frontend:80",
         "http://localhost:8080",
+        "http://frontend:8080",
+        "http://localhost:5000",
+        "http://localhost:5678",
+        "http://preprocessing:5678",
     ]
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
