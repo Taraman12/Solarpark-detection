@@ -8,11 +8,12 @@ from typing import List, Optional, Union
 import boto3
 from boto3 import client
 from botocore.errorfactory import ClientError
-from cloud_clients import bucket_name, s3_client
+from dotenv import load_dotenv
+
 
 # local-modules
+from cloud_clients import bucket_name, s3_client
 from constants import IDENTIFIER_REGEX
-from dotenv import load_dotenv
 
 
 def download_from_aws(image_input_dir: Path, deployed: bool = False) -> bool:
@@ -44,7 +45,7 @@ def download_from_aws(image_input_dir: Path, deployed: bool = False) -> bool:
             return False
 
         response_content = response["Body"].read()
-        # ! add variable for resolution
+        # ToDo: add variable for resolution
         Path(band_file).parent.mkdir(parents=True, exist_ok=True)
         with open(band_file, "wb") as file:
             file.write(response_content)
@@ -74,6 +75,8 @@ def aws_list_files(prefix: str) -> list:
     return file_list
 
 
+# Not used due to a lot of requests to aws
+# images are send directly to ml-serve
 def upload_file_to_aws(
     input_file_path: Path,
     output_path: Optional[str] = None,
@@ -105,6 +108,8 @@ def upload_file_to_aws(
         return False
 
 
+# Not used due to a lot of requests to aws
+# images are send directly to ml-serve
 def upload_folder_to_aws(
     input_folder: Path,
     output_path: Optional[str] = None,

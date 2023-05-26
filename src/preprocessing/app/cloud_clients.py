@@ -7,6 +7,7 @@ from boto3 import client
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 
+load_dotenv()
 # login to aws
 session = boto3.Session(
     aws_access_key_id=os.getenv("aws_access_key_id"),
@@ -29,5 +30,5 @@ def verify_aws_credentials() -> bool:
         return False
 
 
-# aws_available = verify_aws_credentials()
-aws_available = False
+aws_available = verify_aws_credentials()
+
