@@ -10,5 +10,5 @@ COPY ./model-store model-store/
 #replace the existing config.properties with custom one
 # COPY app/model-store/config.properties /home/model-server/config.properties
 #start the server with model named SBERT
-CMD ["torchserve", "--start" ,"--ncs", "--model-store", "model-store" ,"--models" ,"test=test_model.mar"]
+CMD ["torchserve", "--start" ,"--ncs", "--model-store", "model-store" ,"--models" ,"solar-park-detection=solar-park-detection.mar"]
 #"--ts-config", "app/config.properties"

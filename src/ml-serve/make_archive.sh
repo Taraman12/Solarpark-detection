@@ -1,7 +1,8 @@
 #!/bin/bash
 # https://github.com/pytorch/serve/blob/master/model-archiver/README.md
 
-torch-model-archiver --model-name test_model \
+
+torch-model-archiver --model-name solar-park-detection \
                      --version 1.0 \
                      --serialized-file model-store/eff_b0.pth \
                      --handler model-store/handler.py \
@@ -9,5 +10,7 @@ torch-model-archiver --model-name test_model \
                      --requirements-file requirements.txt \
                      --export-path model-store \
                      --force
-                    # Will be available at torchserve version 0.8.0 (current 0.7.1)
+                    # should be available in torchserve 0.8.0
                     # --config-file ml-serve/app/model-store/model-config.yaml
+
+
