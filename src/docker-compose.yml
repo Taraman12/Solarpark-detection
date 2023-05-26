@@ -1,45 +1,43 @@
 version: "3.9"
 services:
-  # db:
-  #   image: postgres:latest
-  #   restart: always
-  #   volumes:
-  #     - data:/var/lib/postgres/data
-  #   environment:
-  #     - POSTGRES_PASSWORD=hallo_api
-  #     - POSTGRES_USER=hallo_api
-  #     - POSTGRES_DB=hallo_api_dev
-  #     - POSTGRES_HOST=db
-  #     - POSTGRES_PORT=5432
-  #     #- POSTGRES_INITDB_ARGS=--encoding=UTF8
-  #     #- POSTGRES_MULTIPLE_EXTENSIONS=postgis,postgis_tiger_geocoder,postgis_topology
+  db:
+    image: postgres:15.3 # alt: postgis/postgis:15-3.3
+    restart: always
+    volumes:
+      - data:/var/lib/postgres/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      #- POSTGRES_INITDB_ARGS=--encoding=UTF8
 
-  # torchserve_docker:
-  #   image: pytorch/torchserve:0.1.1-cpu
-  #   ports:
-  #     - "8080:8080"
-  #     - "8081:8081"
-  #     - "8082:8082"
-  #   volumes:
-  #     - /ml-serve/app/model:/home/model-server/model-store
-  #   command: torchserve --model-store /home/model-server/model-store --models solarDetection=test_model.mar
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    expose:
+      - ${POSTGRES_PORT}
 
-  # api:
-  #   build:
-  #     context: ./api
-  #     dockerfile: api.dockerfile
-  #   depends_on:
-  #     - db
-  #   ports:
-  #     - "5000:80"
-  #     # environment:
-  #     # - POSTGRES_PASSWORD=postgres
-  #     # - POSTGRES_USER=postgres
-  #     # - POSTGRES_DBNAME=postgres
-  #     # - POSTGRES_HOST=db
+  api:
+    build:
+      context: ./api
+      dockerfile: api.dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      - DOCKERIZED=true
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+    expose:
+      - "8000"
 
-  #   volumes:
-  #     - data:/var/lib/postgis/data
+    volumes:
+      - data:/var/lib/postgis/data
 
   # downloader:
   #   build:
@@ -47,40 +45,44 @@ services:
   #     dockerfile: downloader.dockerfile
   #   environment:
   #     - DOCKERIZED=true
+
+  # ml-serve:
+  #   build:
+  #     context: ./ml-serve
+  #     dockerfile: ml-serve.dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #     - "8081:8081"
+  #     - "8082:8082"
+  #   expose:
+  #     - "8080"
+  #     - "8081"
+  #     - "8082"
+  #   # limits the number of cpus the container can use
+  #   # else on each thread (core) a model will be loaded
+  #   cpus: 1.0
+
   # preprocessing:
   #   build:
   #     context: ./preprocessing
   #     dockerfile: preprocessing.dockerfile
+  #   depends_on:
+  #     - ml-serve
   #   environment:
   #     - DOCKERIZED=true
-
-  ml-serve:
-    build:
-      context: ./ml-serve
-      dockerfile: ml-serve.dockerfile
-    ports:
-      - "7070:7070"
-      - "7071:7071"
-      - "0.0.0.0:8080:8080"
-      - "8081:8081"
-      - "8082:8082"
-    expose:
-      - "7070"
-      - "7071"
-      - "8080"
-      - "8081"
-      - "8082"
-    # limits the number of cpus the container can use
-    # else on each thread (core) a model will be loaded
-    cpus: 1.0
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: frontend.dockerfile
   #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - "db"
+  #     - "5678:5678"
+  #   expose:
+  #     - "5678"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: frontend.dockerfile
+    ports:
+      - "80:5000"
+    expose:
+      - "80"
 
 volumes:
   data:
