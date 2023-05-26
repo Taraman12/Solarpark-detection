@@ -8,14 +8,15 @@ from typing import Union
 
 # third-party
 import geopandas as gpd
+from geopandas import GeoDataFrame
+from sentinelsat import SentinelAPI
+from sentinelsat.exceptions import ServerError, UnauthorizedError
 
 # local modules
 from api_call_handler import download_sentinel2_data
 from constants import DOWNLOAD_PATH, NOW_DICT, PATH_TO_TILES
-from geopandas import GeoDataFrame
 from sentinel_api import connect_to_sentinel_api
-from sentinelsat import SentinelAPI
-from sentinelsat.exceptions import ServerError, UnauthorizedError
+
 
 """
 ToDo: Add faster way to check if tile is already downloaded
@@ -78,6 +79,7 @@ def create_download_path(path: Path) -> bool:
     if os.environ.get("DOCKERIZED") == "true":
         # ! add here aws s3 bucket
         print("Dockerized")
+        return True
 
     if not path.exists():
         print(
@@ -120,6 +122,7 @@ def wait_for_api_connection() -> Union[bool, SentinelAPI]:
 
     elif isinstance(api, UnauthorizedError):
         # ToDo: send mail to admin once
+        # ToDo: check if this works (maybe api is not type Exception)
         logging.error("Wrong credentials for Sentinel API. Please check .env file")
         exit()
 
