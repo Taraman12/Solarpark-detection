@@ -9,22 +9,21 @@ from pathlib import Path
 from typing import Optional, TypedDict, Union
 from zipfile import ZipFile
 
-import boto3
 
 # third-party
 import geopandas as gpd
-
-# from boto3 import client
+import boto3
 from botocore.errorfactory import ClientError
-
-# local-modules
-from constants import BAND_FILE_MAP
 from dotenv import load_dotenv
 from geopandas import GeoSeries
-from sentinel_on_aws import download_from_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
 from typing_extensions import Unpack
+
+# local-modules
+from constants import BAND_FILE_MAP
+from sentinel_on_aws import download_from_aws
+
 
 # ToDo: change os.path to pathlib
 # ToDo: use sentinelsat get_stream() for streaming data to AWS S3
@@ -266,7 +265,7 @@ def extract_image_bands(
             and saved to the `target_folder` directory.
 
     """
-
+    # TODO: Use regex in constants to extract the band images
     with ZipFile(download_root / f"{identifier}.zip", mode="r") as zipped_folder:
         with tempfile.TemporaryDirectory() as tmp_dir:
             zipped_folder.extractall(tmp_dir)
