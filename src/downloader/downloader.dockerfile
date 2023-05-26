@@ -1,11 +1,12 @@
 FROM python:3.10-slim-bullseye
 
-WORKDIR /code
+WORKDIR /app
 
-COPY ./requirements.txt /code/requirements.txt
+COPY ./requirements.txt /requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 
-COPY ./app /code/app
+COPY ./app /app
+
 # only difference is the last main file
-CMD ["python", "-m", "app.main_downloader"]
+CMD ["python", "-m", "main_downloader"]
