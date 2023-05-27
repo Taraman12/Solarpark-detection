@@ -152,6 +152,8 @@ plugins = ["pydantic.mypy", "sqlmypy"]
 
 [tool.docformatter]
 recursive = true
+in-place = true
+# black = true
 wrap-summaries = 88
 wrap-descriptions = 88
 blank = true
