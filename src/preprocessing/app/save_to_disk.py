@@ -1,42 +1,42 @@
 # build-in
+import json
+import logging
 import os
 import re
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
-import logging
-import requests
-import json
 
 # third-party
 import geopandas as gpd
 import numpy as np
 import rasterio
 import rasterio.features
-from pyproj import Transformer
-from geopandas import GeoDataFrame
-from rasterio import DatasetReader
-from rasterio.features import geometry_mask
-from shapely.geometry import Polygon
+import requests
 
 # local modules
 from aws_functions import (
     aws_list_files,
+    delete_folder_on_aws,
     download_from_aws,
     upload_file_to_aws,
-    delete_folder_on_aws,
 )
 from cloud_clients import aws_available
 from constants import (
-    REQUIRED_BANDS,
-    KERNEL_SIZE,
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
     IMAGE_OUTPUT_DIR,
+    KERNEL_SIZE,
     MASK_INPUT_DIR,
     MASK_OUTPUT_DIR,
+    REQUIRED_BANDS,
 )
-from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
+from geopandas import GeoDataFrame
 from logging_config import get_logger
+from pyproj import Transformer
+from rasterio import DatasetReader
+from rasterio.features import geometry_mask
+from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
+from shapely.geometry import Polygon
 
 # set up logging
 logging.getLogger("rasterio").setLevel(logging.WARNING)

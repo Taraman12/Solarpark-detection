@@ -1,20 +1,19 @@
 # build-in
 import os
-from os import path
 import re
-from pathlib import Path
 import time
-import requests
+from os import path
+from pathlib import Path
 from typing import List
 
 # third-party
 import debugpy
 import geopandas as gpd
+import requests
 
 # local-modules
 from aws_functions import aws_list_files, aws_list_folders
 from cloud_clients import aws_available
-from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 from constants import (
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
@@ -23,8 +22,9 @@ from constants import (
     MASK_OUTPUT_DIR,
     URL,
 )
-from save_to_disk import preprocess_and_save_data
 from logging_config import get_logger
+from save_to_disk import preprocess_and_save_data
+from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 
 # set up logging
 logger = get_logger(__name__)

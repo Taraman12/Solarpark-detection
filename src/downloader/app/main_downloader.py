@@ -8,18 +8,17 @@ from typing import Union
 
 # third-party
 import geopandas as gpd
-from geopandas import GeoDataFrame
-from sentinelsat import SentinelAPI
-from sentinelsat.exceptions import ServerError, UnauthorizedError
 
 # local modules
 from api_call_handler import download_sentinel2_data
 from cloud_clients import aws_available
 from constants import DOWNLOAD_PATH, NOW_DICT, PATH_TO_TILES
-from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
-from sentinel_api import connect_to_sentinel_api
-
+from geopandas import GeoDataFrame
 from logging_config import get_logger
+from sentinel_api import connect_to_sentinel_api
+from sentinelsat import SentinelAPI
+from sentinelsat.exceptions import ServerError, UnauthorizedError
+from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 
 # set up logger
 logger = get_logger(__name__)

@@ -1,6 +1,7 @@
 # build-in
 import asyncio
 import os
+import re
 import shutil
 import tempfile
 import time
@@ -8,24 +9,23 @@ from datetime import date
 from pathlib import Path
 from typing import Optional, TypedDict, Union
 from zipfile import ZipFile
-import re
+
+import boto3
 
 # third-party
 import geopandas as gpd
-import boto3
 from botocore.errorfactory import ClientError
-from dotenv import load_dotenv
-from geopandas import GeoSeries
-from sentinelsat import SentinelAPI
-from sentinelsat.exceptions import LTATriggered
-from typing_extensions import Unpack
+from cloud_clients import aws_available, s3_client
 
 # local-modules
-from constants import REQUIRED_BANDS, IMAGE_REGEX
-from settings import PRODUCTION, DOCKERIZED
-from cloud_clients import aws_available, s3_client
+from constants import IMAGE_REGEX, REQUIRED_BANDS
+from dotenv import load_dotenv
+from geopandas import GeoSeries
 from sentinel_on_aws import download_from_aws_handler, upload_to_aws
-
+from sentinelsat import SentinelAPI
+from sentinelsat.exceptions import LTATriggered
+from settings import DOCKERIZED, PRODUCTION
+from typing_extensions import Unpack
 
 # ToDo: change os.path to pathlib
 # ToDo: use sentinelsat get_stream() for streaming data to AWS S3

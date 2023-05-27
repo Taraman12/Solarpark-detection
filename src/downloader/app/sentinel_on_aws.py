@@ -4,19 +4,18 @@ import pickle
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 # third-party
 import boto3
 from boto3 import client
 from botocore.errorfactory import ClientError
-from dotenv import load_dotenv
+from cloud_clients import bucket_name, s3_client
 
 # local-modules
-from constants import REQUIRED_BANDS, IDENTIFIER_REGEX
-from cloud_clients import s3_client, bucket_name
+from constants import IDENTIFIER_REGEX, REQUIRED_BANDS
+from dotenv import load_dotenv
 from settings import PRODUCTION
-
 
 # ToDo: add variable for resolution
 # ToDo: replace hard-coded value with a constant

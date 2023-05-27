@@ -31,4 +31,3 @@ def verify_aws_credentials() -> bool:
 
 
 aws_available = verify_aws_credentials()
-

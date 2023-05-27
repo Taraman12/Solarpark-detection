@@ -8,12 +8,11 @@ from typing import List, Optional, Union
 import boto3
 from boto3 import client
 from botocore.errorfactory import ClientError
-from dotenv import load_dotenv
-
 
 # local-modules
 from cloud_clients import bucket_name, s3_client
 from constants import IDENTIFIER_REGEX
+from dotenv import load_dotenv
 
 
 def download_from_aws(identifier: Path) -> bool:
