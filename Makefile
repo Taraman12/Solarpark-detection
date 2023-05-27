@@ -41,7 +41,7 @@ dev-requirements:
 # lint-mypy-report:
 # 	@mypy ./src --html-report ./mypy_html
 
-format: format-black format-isort format-docformatter
+format: format-black format-isort # format-docformatter
 
 lint: lint-black lint-isort lint-flake8
 # lint-mypy
