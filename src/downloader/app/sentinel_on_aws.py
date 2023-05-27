@@ -21,8 +21,7 @@ from settings import PRODUCTION
 def download_from_aws_handler(
     identifier: str, target_folder: Path, deployed: bool = False
 ) -> bool:
-    """
-    Downloads Sentinel data from AWS S3.
+    """Downloads Sentinel data from AWS S3.
 
     Args:
         identifier (str): The Sentinel identifier (folder name).
@@ -31,7 +30,6 @@ def download_from_aws_handler(
 
     Returns:
         bool: True if the download was successful, False otherwise.
-
     """
     # if deployed in production on aws no transfer limit
     if not PRODUCTION and not check_aws_free_tier_available(target_folder.parents[0]):
@@ -180,8 +178,7 @@ def upload_to_aws(
     bucket: Optional[str] = None,
     output_path: Optional[str] = None,
 ) -> bool:
-    """
-    Uploads a Sentinel-2 image to AWS S3.
+    """Uploads a Sentinel-2 image to AWS S3.
 
     Args:
         input_folder (Path): The path to the directory where the Sentinel-2 image is
@@ -189,7 +186,6 @@ def upload_to_aws(
 
     Returns:
         bool: True if the upload was successful, False otherwise.
-
     """
     # If S3 object_name was not specified, use file_name
     if output_path is None:

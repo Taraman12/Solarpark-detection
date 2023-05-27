@@ -22,7 +22,7 @@ bucket_name = os.getenv("aws_s3_bucket")
 
 def verify_aws_credentials() -> bool:
     try:
-        response = s3_client.list_buckets()
+        s3_client.list_buckets()
         return True
     except ClientError:
         print("Credentials are NOT valid.")

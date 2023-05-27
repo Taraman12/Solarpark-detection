@@ -86,8 +86,7 @@ def get_api() -> SentinelAPI:
 
 
 def load_tiles_file(path: Path) -> GeoDataFrame:
-    """
-    Load a GeoDataFrame from a GeoJSON file.
+    """Load a GeoDataFrame from a GeoJSON file.
 
     Parameters
     ----------
@@ -103,7 +102,6 @@ def load_tiles_file(path: Path) -> GeoDataFrame:
     ------
     SystemExit
         If the GeoDataFrame loaded from the GeoJSON file is empty.
-
     """
     if not path.exists():
         logger.error(f"Could not find {path}")

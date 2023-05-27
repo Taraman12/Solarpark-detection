@@ -1,10 +1,8 @@
-"""
-Create base.
+"""Create base.
 
 Revision ID: da7a861fef00
 Revises:
 Create Date: 2023-05-24 09:10:15.805765
-
 """
 import sqlalchemy as sa
 from alembic import op

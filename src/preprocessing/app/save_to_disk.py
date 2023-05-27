@@ -4,7 +4,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple
 
 # third-party
 import geopandas as gpd
@@ -14,29 +14,25 @@ import rasterio.features
 import requests
 
 # local modules
-from aws_functions import (
-    aws_list_files,
-    delete_folder_on_aws,
-    download_from_aws,
-    upload_file_to_aws,
-)
+from aws_functions import delete_folder_on_aws, download_from_aws
 from cloud_clients import aws_available
 from constants import (
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
     IMAGE_OUTPUT_DIR,
     KERNEL_SIZE,
-    MASK_INPUT_DIR,
     MASK_OUTPUT_DIR,
     REQUIRED_BANDS,
 )
 from geopandas import GeoDataFrame
 from logging_config import get_logger
-from pyproj import Transformer
 from rasterio import DatasetReader
 from rasterio.features import geometry_mask
-from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
+from settings import MAKE_TRAININGS_DATA, PRODUCTION
 from shapely.geometry import Polygon
+
+# from pyproj import Transformer
+
 
 # set up logging
 logging.getLogger("rasterio").setLevel(logging.WARNING)
@@ -62,7 +58,7 @@ FILENAME_REGEX = re.compile(
 )
 
 
-def preprocess_and_save_data(
+def preprocess_and_save_data(  # noqa: C901
     identifier: str,
     masks_gdf: GeoDataFrame,
 ) -> int:
@@ -71,7 +67,6 @@ def preprocess_and_save_data(
     if tile is None or tile_date is None:
         return 0
 
-    PRODUCTION = False
     if aws_available and PRODUCTION:
         result = download_from_aws(identifier)
         if not result:
@@ -145,7 +140,13 @@ def preprocess_and_save_data(
 
             if MAKE_TRAININGS_DATA:
                 filename = f"{tile}_{file_identifier}_{tile_date}.tif"
-                trainings_data_handler(file_name, rasterize_mask, window)
+                trainings_data_handler(
+                    small_image.transpose(2, 0, 1),
+                    metadata,
+                    filename,
+                    rasterized_mask,
+                    window,
+                )
 
     if PRODUCTION:
         # delete the bigger image on aws
@@ -155,7 +156,11 @@ def preprocess_and_save_data(
 
 
 def trainings_data_handler(
-    file_name: str, rasterize_mask: np.array, window: rasterio.windows.Window
+    small_image: np.ndarray,
+    metadata: dict,
+    filename: str,
+    rasterized_mask: np.array,
+    window: rasterio.windows.Window,
 ) -> None:
     # Extract the patch from the rasterized_mask
     mask_patch = rasterized_mask[
@@ -189,7 +194,7 @@ def prediction_handler(
     data: np.array,
     metadata: dict,
 ) -> None:
-    prediction = send_to_ml_model(small_image.transpose(2, 0, 1), metadata)
+    prediction = send_to_ml_model(data.transpose(2, 0, 1), metadata)
     if not len(prediction) == 0:
         # mask = prediction_to_mask(pred)
         polygons = masks_to_polygons(prediction, metadata)
@@ -232,15 +237,15 @@ def send_to_ml_model(data_array: np.ndarray, metadata: dict) -> dict:
     if mask.sum() == 0:
         return {}
     else:
-        print(f"Found prediction")
+        print("Found prediction")
         return pred
 
 
 def masks_to_polygons(masks: np.ndarray, metadata: dict) -> gpd.GeoDataFrame:
     masks = masks.astype(np.uint8)
     transform = metadata["transform"]
-    crs = metadata["crs"]
-    transformer = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+    # crs = metadata["crs"]
+    # transformer = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
     # extract shapes
     shapes = rasterio.features.shapes(masks, transform=transform)
     # shapes = shapes.astype(np.uint8)
@@ -306,8 +311,7 @@ def save_patch(output_path: Path, metadata: dict, data_array: np.ndarray) -> boo
 
 
 def find_band_paths(image_dir: Path) -> Dict[str, Path]:
-    """
-    Find band files in the specified image directory.
+    """Find band files in the specified image directory.
 
     Args:
         image_dir (Path): The directory containing the band image files.
@@ -317,7 +321,6 @@ def find_band_paths(image_dir: Path) -> Dict[str, Path]:
 
     Raises:
         Exception: If any of the required band files are missing.
-
     """
     band_paths: Dict[str, Path] = {band: Path() for band in REQUIRED_BANDS}
 
@@ -346,15 +349,13 @@ def find_band_paths(image_dir: Path) -> Dict[str, Path]:
 def open_dataset_readers(
     band_paths: Dict[str, Path]
 ) -> Dict[str, rasterio.DatasetReader]:
-    """
-    Open dataset readers for each band in the specified image directory.
+    """Open dataset readers for each band in the specified image directory.
 
     Args:
         band_paths (Dict[str, Path]): A dictionary mapping band names to their corresponding file paths.
 
     Returns:
         Dict[str, rasterio.DatasetReader]: A dictionary mapping band names to their corresponding dataset readers.
-
     """
     # store open DatasetReaders in dict
     band_files: Dict[str, rasterio.DatasetReader] = {
@@ -366,22 +367,20 @@ def open_dataset_readers(
 
 
 def preprocess_bands(bands: Dict[str, np.ndarray]) -> np.ndarray:
-    """
-    Preprocess a dictionary of bands.
+    """Preprocess a dictionary of bands.
 
     Args:
         bands: A dictionary of bands, where the keys are band names and the values are numpy arrays.
 
     Returns:
         A numpy array of preprocessed bands.
-
     """
     # ToDo: add padding
     stacked_bands = stack_bands(bands)
     stacked_bands = color_correction(stacked_bands)
     stacked_bands = robust_normalize(stacked_bands)
 
-    return stacked_bands.transpose(2, 0, 1)
+    return stacked_bands
 
 
 def stack_bands(bands: Dict[str, rasterio.DatasetReader]) -> np.ndarray:
@@ -401,15 +400,13 @@ def stack_bands(bands: Dict[str, rasterio.DatasetReader]) -> np.ndarray:
 
 
 def color_correction(stacked_bands: np.ndarray) -> np.ndarray:
-    """
-    Perform color correction on the stacked bands array.
+    """Perform color correction on the stacked bands array.
 
     Args:
         stacked_bands (np.ndarray): The stacked bands array.
 
     Returns:
         np.ndarray: The color-corrected stacked bands array.
-
     """
     return (stacked_bands / 8).astype(int)
 
@@ -465,6 +462,7 @@ def padding_size(image_size: int, KERNEL_SIZE: int) -> int:
 
 
 def transform_to_patched_array(stacked_bands, num_rows, num_cols):
+    stacked_bands = stacked_bands.transpose(2, 0, 1)
     # Calculate the shape of the padded array
     padded_shape = (
         stacked_bands.shape[0],

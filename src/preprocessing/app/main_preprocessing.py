@@ -1,8 +1,6 @@
 # build-in
 import os
-import re
 import time
-from os import path
 from pathlib import Path
 from typing import List
 
@@ -12,10 +10,9 @@ import geopandas as gpd
 import requests
 
 # local-modules
-from aws_functions import aws_list_files, aws_list_folders
+from aws_functions import aws_list_folders
 from cloud_clients import aws_available
 from constants import (
-    IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
     IMAGE_OUTPUT_DIR,
     MASK_INPUT_DIR,
@@ -49,8 +46,7 @@ ToDo: Needs better everything
 
 
 def validate_input_paths(input_dirs: List[Path]) -> bool:
-    """
-    Validates that the input directories exist.
+    """Validates that the input directories exist.
 
     Args:
         input_dirs (List[Path]): A list of input directories to validate.
@@ -58,7 +54,6 @@ def validate_input_paths(input_dirs: List[Path]) -> bool:
 
     Returns:
         bool: True if all input directories exist, False otherwise.
-
     """
     all_dirs_exist = True
     for input_dir in input_dirs:
@@ -69,13 +64,11 @@ def validate_input_paths(input_dirs: List[Path]) -> bool:
 
 
 def create_output_directories(output_dirs: List[Path]) -> None:
-    """
-    Creates the output directories if they do not exist.
+    """Creates the output directories if they do not exist.
 
     Args:
         output_dirs (List[Path]): A list of output directories to create.
         logger: A logger instance to use for logging.
-
     """
     for output_dir in output_dirs:
         if not output_dir.exists():

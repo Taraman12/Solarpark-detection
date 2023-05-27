@@ -76,8 +76,7 @@ def upload_file_to_aws(
     input_file_path: Path,
     output_path: Optional[str] = None,
 ) -> bool:
-    """
-    Uploads a Sentinel-2 image to AWS S3.
+    """Uploads a Sentinel-2 image to AWS S3.
 
     Args:
         input_file_path (Path): The path to the directory where the Sentinel-2 image is
@@ -85,7 +84,6 @@ def upload_file_to_aws(
 
     Returns:
         bool: True if the upload was successful, False otherwise.
-
     """
     # If S3 object_name was not specified, use file_name
     if output_path is None:
@@ -102,13 +100,11 @@ def upload_file_to_aws(
 
 
 def delete_folder_on_aws(folder_path: str) -> None:
-    """
-    Deletes a folder and all its contents from an S3 bucket.
+    """Deletes a folder and all its contents from an S3 bucket.
 
     Args:
         bucket_name (str): The name of the S3 bucket.
         folder_path (str): The path of the folder to delete.
-
     """
     bucket = s3_client.Bucket(bucket_name)
     try:
@@ -126,8 +122,7 @@ def upload_folder_to_aws(
     input_folder: Path,
     output_path: Optional[str] = None,
 ) -> bool:
-    """
-    Uploads a Sentinel-2 image to AWS S3.
+    """Uploads a Sentinel-2 image to AWS S3.
 
     Args:
         input_folder (Path): The path to the directory where the Sentinel-2 image is
@@ -135,7 +130,6 @@ def upload_folder_to_aws(
 
     Returns:
         bool: True if the upload was successful, False otherwise.
-
     """
     # If S3 object_name was not specified, use file_name
     if output_path is None:

@@ -36,8 +36,8 @@ def download_sentinel2_data(
     end_date: date,
     download_root: Path = Path("."),
 ) -> bool:
-    """
-    Download Sentinel-2 data for a given footprint and extract the RGB image.
+    """Download Sentinel-2 data for a given footprint and extract the RGB
+    image.
 
     Args:
         footprint (str): WKT formatted string of the area of interest.
@@ -45,7 +45,6 @@ def download_sentinel2_data(
 
     Returns:
         tuple: A tuple of gdf product and the path to the extracted RGB image.
-
     """
     # Search for products that match the query criteria
     product = get_product_from_footprint(api, footprint, start_date, end_date)
@@ -114,8 +113,7 @@ def get_product_from_footprint(
     start_date: str = "NOW-5DAYS",
     end_date: str = "NOW",
 ) -> GeoSeries:
-    """
-    Queries the Sentinel API for products that intersect with a given
+    """Queries the Sentinel API for products that intersect with a given
     footprint. Returns the product with the lowest cloud cover percentage.
 
     Args:
@@ -129,7 +127,6 @@ def get_product_from_footprint(
     Returns:
         GeoSeries: A GeoSeries containing the product with the lowest cloud cover
         percentage.
-
     """
     # create empty GeoSeries to return
     products_gdf = gpd.GeoSeries()
@@ -170,8 +167,7 @@ def check_files_already_downloaded(target_folder: Path):
 def extract_image_bands(
     download_root: Path, identifier: str, target_folder: Path
 ) -> bool:
-    """
-    Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a
+    """Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a
     Sentinel-2 ZIP folder and saves them as separate files with the format
     <band>_10m.jp2.
 
@@ -186,7 +182,6 @@ def extract_image_bands(
     Returns:
         str: A message indicating that the band images have been successfully extracted
             and saved to the `target_folder` directory.
-
     """
     with ZipFile(download_root / f"{identifier}.zip", mode="r") as zipped_folder:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -216,13 +211,11 @@ def extract_image_bands(
 async def download_from_lta(
     api: SentinelAPI, product_uuid: str, download_root: Path, timeout_hours: int = 24
 ) -> bool:
-    """
-    Downloads a product from the Long-Term Archive (LTA).
+    """Downloads a product from the Long-Term Archive (LTA).
 
     :param api: SentinelAPI instance
     :param product_id: ID of the product to download
     :param timeout_hours: Maximal number of hours to keep retrying
-
     """
     timeout = timeout_hours * 3600  # Convert hours to seconds
     start_time = time.monotonic()

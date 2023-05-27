@@ -7,6 +7,7 @@ import segmentation_models_pytorch as smp
 import torch
 import yaml
 from ts.torch_handler.base_handler import BaseHandler
+
 """
 ToDo: use jit to load the model instead on state_dict
 Needs be be saved as a script model first
@@ -30,13 +31,11 @@ class ModelHandler(BaseHandler):
         self.target = 0
 
     def initialize(self, context: Any) -> None:
-        """
-        Initialize model.
+        """Initialize model.
 
         This will be called during model loading time
         :param context: Initial context contains model server system properties. (config.properties file)
         :return:
-
         """
         self._context = context
         logging.info("initialize...")
@@ -75,12 +74,10 @@ class ModelHandler(BaseHandler):
         self.initialized = True
 
     def preprocess(self, data: Any) -> Any:
-        """
-        Transform raw input into model input data.
+        """Transform raw input into model input data.
 
         :param batch: list of raw requests, should match batch size
         :return: list of preprocessed model input data
-
         """
         # Take the input data and make it inference ready
         preprocessed_data = data[0].get("data")
@@ -105,12 +102,10 @@ class ModelHandler(BaseHandler):
         return model_output
 
     def postprocess(self, inference_output: Any) -> Any:
-        """
-        Return inference result.
+        """Return inference result.
 
         :param inference_output: list of inference output
         :return: list of predict results
-
         """
         # Take output from network and post-process to desired format
         postprocess_output = inference_output.tolist()
@@ -118,14 +113,12 @@ class ModelHandler(BaseHandler):
         return postprocess_output
 
     def handle(self, data: Any, context: Any) -> Any:
-        """
-        Invoke by TorchServe for prediction request.
+        """Invoke by TorchServe for prediction request.
 
         Do pre-processing of data, prediction using model and postprocessing of prediciton output
         :param data: Input data for prediction
         :param context: Initial context contains model server system properties.
         :return: prediction output
-
         """
         # model_input = self.preprocess(data)
         model_input = self.preprocess(data)
