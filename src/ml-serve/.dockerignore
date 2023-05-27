@@ -1,0 +1,8 @@
+# ignore folders:
+notebooks/
+archive/
+
+# ignore files:
+README.md
+
+# ? ignore .env

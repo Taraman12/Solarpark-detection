@@ -1,0 +1,23 @@
+{
+    "Version": "2012-10-17", 
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": "ec2-instance-connect:SendSSHPublicKey",
+        "Resource": [
+            "arn:aws:ec2:region:account-id:instance/i-1234567890abcdef0",
+            "arn:aws:ec2:region:account-id:instance/i-0598c7d356eba48d7"
+        ],
+        "Condition": {
+            "StringEquals": {
+                "ec2:osuser": "ami-username"
+            }
+        }
+      },
+      {
+        "Effect": "Allow",
+        "Action": "ec2:DescribeInstances",
+        "Resource": "*"
+      }
+    ]
+}

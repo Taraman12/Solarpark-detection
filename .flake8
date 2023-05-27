@@ -1,6 +1,6 @@
 [flake8]
 max-line-length = 88
-extend-ignore = E203, D
+extend-ignore = E203, D, E501
 exclude = .git, __pycache__, docs/source/conf.py, old, build, dist, .venv
 max_complexity = 10
 docstring-convention = numpy

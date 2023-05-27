@@ -7,16 +7,33 @@ readme = "README.md"
 #packages = [{include = "solarpark_detection"}]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = ">=3.8.1,<3.11"
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+ipykernel = "^6.22.0"
+boto3 = {extras = ["crt"], version = "^1.26.104"}
+rasterio = "^1.3.6"
+matplotlib = "^3.7.1"
+types-requests = "^2.29.0.0"
+mypy = "^1.2.0"
+debugpy = "^1.6.7"
 
 [tool.poetry.group.api.dependencies]
-fastapi = "^0.95.0"
+fastapi = {extras = ["all"], version = "^0.95.2"}
 uvicorn = "^0.21.1"
 sqlalchemy = "^2.0.7"
-pydantic = "^1.10.7"
-psycopg2 = "^2.9.5"
+pydantic = {extras = ["email"], version = "^1.10.7"}
+mypy = "^1.2.0"
+# psycopg2 = "^2.9.5"
+load-dotenv = "^0.1.0"
+alembic = "^1.11.1"
+psycopg2-binary = "^2.9.6"
+# geoalchemy2 = "^0.13.3"
+# celery = "^5.2.7"
+shapely = "^2.0.1"
 
-# ToDo: remame
+
 [tool.poetry.group.downloader.dependencies]
 sentinelsat = "^1.2.1"
 geopandas = "^0.12.2"
@@ -29,29 +46,38 @@ isort = "^5.12.0"
 black = "^23.1.0"
 flake8 = "^6.0.0"
 flake8-docstrings = "^1.7.0"
-mypy = "^1.1.1"
 docformatter = {extras = ["tomli"], version = "^1.5.1"}
 
-[tool.poetry.group.dev.dependencies]
-jupyter = "^1.0.0"
-ipykernel = "^6.22.0"
-boto3 = {extras = ["crt"], version = "^1.26.104"}
-rasterio = "^1.3.6"
-matplotlib = "^3.7.1"
 
+[tool.poetry.group.ml-model.dependencies]
 # installation of pytorch with poetry can lead to errors
 # hopefully this will be fixed in the future
 # however, it is possible to install it manually with pip
 # https://stackoverflow.com/questions/68892660/cannot-install-the-gpu-version-of-torch-and-torchvision-in-poetry-due-to-a-depen
 # https://github.com/python-poetry/poetry/issues/6409
-[tool.poetry.group.ml-model.dependencies]
+# Needs to be tested:
+# since poetry 1.5.0 it is possible to use the source attribute
+# use poetry add torch --platform linux --source https://download.pytorch.org/whl/cpu
 numpy = "^1.23.5"
 segmentation-models-pytorch = "^0.3.2"
 tensorflow-io-gcs-filesystem = "0.31.0"
 tensorflow = "^2.12.0"
 torchmetrics = "^0.11.4"
-torch = "^2.0.0"
-torchvision = "^0.15.1"
+torch = [
+     {version = "^2.0.1", platform = "linux", source = "torch-cpu"},
+     {version = "^2.0.1", platform = "win32", source = "torch-cuda"},
+ ]
+# torchvision = "^0.15.1"
+
+[[tool.poetry.source]]
+ name = "torch-cuda"
+ url = "https://download.pytorch.org/whl/cu117"
+ priority = "explicit"
+
+[[tool.poetry.source]]
+ name = "torch-cpu"
+ url = "https://download.pytorch.org/whl/cpu"
+ priority = "explicit"
 
 #torchvision = { version = "0.15.0+cu117", source = "pytorch" }
 
@@ -65,19 +91,25 @@ torchvision = "^0.15.1"
 numpy = "^1.23.5"
 geopandas = "^0.12.2"
 rasterio = "^1.3.6"
-torch = "2.0.0"
-torchvision = "^0.15.1"
+boto3 = "^1.26.125"
+load-dotenv = "^0.1.0"
+requests = "^2.31.0"
+debugpy = "^1.6.7"
 
 
 [tool.poetry.group.ml-serve.dependencies]
-psycopg2 = "^2.9.6"
-torch = "^2.0.0"
-torchvision = "^0.15.1"
-torchserve = "^0.7.1"
-torch-model-archiver = "^0.7.1"
+# psycopg2 = "^2.9.6"
+# torch = "^2.0.0"
+# torchvision = "^0.15.1"
+# torchserve = "0.8.0"
+# torch-model-archiver = "^0.7.1"
 segmentation-models-pytorch = "^0.3.2"
-nvgpu = {version = "^0.10.0", platform = "linux"}
-types-pyyaml = "^6.0.12.9"
+# nvgpu = {version = "^0.10.0", platform = "linux"}
+# types-pyyaml = "^6.0.12.9"
+
+
+[tool.poetry.group.ml-feeder.dependencies]
+rasterio = {extras = ["s3"], version = "^1.3.6"}
 
 [tool.isort]
 profile = "black"
@@ -87,13 +119,16 @@ known_first_party="app"
 [tool.mypy]
 # 3rd party import
 ignore_missing_imports = true
+# known issues if not in config file
+# https://github.com/python/mypy/issues/10709
+ignore_missing_imports_per_module = true
 # dynamic typing
 disallow_any_unimported = false
 disallow_any_expr = false
 disallow_any_decorated = false
 disallow_any_explicit = false
 disallow_any_generics = false
-disallow_subclassing_any = true
+disallow_subclassing_any = false
 # platform
 python_version = "3.10"
 # untyped
@@ -107,18 +142,22 @@ no_implicit_optional = true
 warn_return_any = false
 warn_unreachable = true
 #
-enable-incomplete-features = "Unpack"
+# enable-incomplete-feature = "Unpack"
 # Misc
 pretty = true
 #
-ignore = "*__init__.py"
+exclude = ['__init__.py', 'archive/', 'preprocessing/']
+# ignore = "*__init__.py"
+plugins = ["pydantic.mypy", "sqlmypy"]
 
 [tool.docformatter]
 recursive = true
-wrap-summaries = 88
-wrap-descriptions = 88
-blank = true
-pre-summary-newline = true
+in-place = true
+black = true
+# wrap-summaries = 88
+# wrap-descriptions = 88
+# blank = true
+# pre-summary-newline = true
 
 [build-system]
 requires = ["poetry-core"]

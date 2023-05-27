@@ -1,4 +1,5 @@
 data_local
+data_raw
 
 Create_figures_thesis/*.jpg
 Create_figures_thesis/*.pdf
@@ -166,3 +167,8 @@ cython_debug/
 
 # cloud stuff
 .aws
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

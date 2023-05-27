@@ -4,17 +4,15 @@ import { ref } from 'vue'
 const data = ref(null)
 const error = ref(null)
 
-const options = {
+const settings = {
   method: "GET",
   mode: "cors",
   headers: {
-    Accept: "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Content-Type": "application/json",
   },
 }
 
-fetch("http://localhost:5000/", options)
+fetch("http://localhost:8000/api/v1/solarpark/", settings)
 .then((res) => res.json())
 .then((json) => (data.value = json))
 .then(data => console.log(data))
@@ -32,7 +30,7 @@ fetch("http://localhost:5000/", options)
       <div v-else>Loading...</div>
   </div>
   </template>
-  
+
   <style>
   @media (min-width: 1024px) {
     .about {

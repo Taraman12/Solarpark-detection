@@ -2,7 +2,7 @@ format-black:
 	@black ./src --exclude ./src/frontend
 
 format-docformatter:
-	@docformatter --in-place --recursive ./src
+	@docformatter --config ./pyproject.toml ./src
 
 format-isort:
 	@isort ./src --skip ./src/frontend

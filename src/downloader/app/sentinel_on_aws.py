@@ -4,78 +4,53 @@ import pickle
 import re
 from datetime import datetime
 from pathlib import Path
+from typing import Optional, Tuple
 
 # third-party
-import boto3
-from dotenv import load_dotenv
+from botocore.errorfactory import ClientError
+from cloud_clients import BUCKET_NAME, s3_client
 
 # local-modules
-from app.constants import BAND_FILE_MAP, IDENTIFIER_REGEX
+from constants import IDENTIFIER_REGEX, REQUIRED_BANDS
+from settings import PRODUCTION
 
 # ToDo: add variable for resolution
+# ToDo: replace hard-coded value with a constant
 
 
-def download_from_aws(identifier: str, target_folder: Path) -> bool:
-    if not check_aws_free_tier_available(target_folder.parents[0]):
+def download_from_aws_handler(
+    identifier: str, target_folder: Path, deployed: bool = False
+) -> bool:
+    """Downloads Sentinel data from AWS S3.
+
+    Args:
+        identifier (str): The Sentinel identifier (folder name).
+        target_folder (Path): The target folder to download the data to.
+        deployed (bool, optional): Whether the code is deployed to AWS. Defaults to False.
+
+    Returns:
+        bool: True if the download was successful, False otherwise.
+    """
+    # if deployed in production on aws no transfer limit
+    if not PRODUCTION and not check_aws_free_tier_available(target_folder.parents[0]):
         return False
 
-    load_dotenv(os.getcwd())
-    aws_access_key_id = os.getenv("aws_access_key_id")
-    aws_secret_access_key = os.getenv("aws_secret_access_key")
+    sentinel_bucket, prefix = make_aws_path(identifier)
 
-    # move somewhere else to avoid multiple calls
-    # add test if credentials are valid
-    # https://stackoverflow.com/questions/53548737/verify-aws-credentials-with-boto3
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-    )
-    try:
-        response = s3.list_buckets()
-    except boto3.exceptions.ClientError:
-        print("Credentials are NOT valid.")
-        return False
-
-    # ! changed to match instead of search
-    regex_match = re.match(IDENTIFIER_REGEX, identifier)
-
-    if regex_match:
-        # mission = regex_match.group("mission")
-        utm_code = regex_match.group("utm_code")
-        product_level = regex_match.group("product_level").lower()
-        latitude_band = regex_match.group("latitude_band")
-        square = regex_match.group("square")
-        year = regex_match.group("year")
-        month = str(int(regex_match.group("month")))
-        day = str(int(regex_match.group("day")))
-
-    # https://roda.sentinel-hub.com/sentinel-s2-l2a/readme.html
-    bucket = f"sentinel-s2-{product_level}"
-    prefix = f"tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0/R10m"
-
-    for band in BAND_FILE_MAP:
+    for band in REQUIRED_BANDS:
         band_file = f"{band}.jp2"
         band_file_path = target_folder / band_file
-        # Skip if file already exists
+        if PRODUCTION:
+            # https://stackoverflow.com/questions/63323425/download-sentinel-file-from-s3-using-python-boto3
+            if copy_from_aws(sentinel_bucket, prefix, band_file):
+                continue
+
+            return True
+
         if band_file_path.exists():
             continue
-        # add try except block
-        # https://stackoverflow.com/questions/63323425/download-sentinel-file-from-s3-using-python-boto3
-        try:
-            response = s3.get_object(
-                Bucket=bucket, Key=f"{prefix}/{band_file}", RequestPayer="requester"
-            )
-        except s3.exceptions.NoSuchKey:
-            # ToDo: Need better error handling
-            # should trigger LTA
-            print("No such key in bucket")
-            return False
 
-        response_content = response["Body"].read()
-        # ! add variable for resolution
-        with open(target_folder / f"{band}_10m.jp2", "wb") as file:
-            file.write(response_content)
+        download_from_aws(sentinel_bucket, prefix, band_file, target_folder)
 
     write_downloaded_size(target_folder)
     return True
@@ -108,6 +83,67 @@ def check_aws_free_tier_available(root_folder: Path) -> bool:
         return False
 
 
+def make_aws_path(identifier: str) -> Tuple[str, str]:
+    """Returns sentinel_bucket and prefix."""
+    regex_match = re.match(IDENTIFIER_REGEX, identifier)
+
+    if regex_match:
+        # mission = regex_match.group("mission")
+        utm_code = regex_match.group("utm_code")
+        product_level = regex_match.group("product_level").lower()
+        latitude_band = regex_match.group("latitude_band")
+        square = regex_match.group("square")
+        year = regex_match.group("year")
+        month = str(int(regex_match.group("month")))
+        day = str(int(regex_match.group("day")))
+
+    # https://roda.sentinel-hub.com/sentinel-s2-l2a/readme.html
+    sentinel_bucket = f"sentinel-s2-{product_level}"
+    prefix = f"tiles/{utm_code}/{latitude_band}/{square}/{year}/{month}/{day}/0/R10m"
+    return sentinel_bucket, prefix
+
+
+def copy_from_aws(sentinel_bucket: str, prefix: str, band_file: str) -> bool:
+    try:
+        s3_client.copy_object(
+            Bucket=BUCKET_NAME,
+            Key=f"{prefix}/{band_file}",
+            CopySource={
+                "Bucket": sentinel_bucket,
+                "Key": f"{prefix}/{band_file}",
+            },
+            RequestPayer="requester",
+        )
+        return True
+    except s3_client.exceptions.NoSuchKey:
+        # ToDo: Need better error handling
+        # should trigger LTA
+        print("No such key in bucket")
+        return False
+
+
+def download_from_aws(
+    sentinel_bucket: str, prefix: str, band_file: str, target_folder: Path
+) -> bool:
+    try:
+        response = s3_client.get_object(
+            Bucket=sentinel_bucket,
+            Key=f"{prefix}/{band_file}",
+            RequestPayer="requester",
+        )
+    except s3_client.exceptions.NoSuchKey:
+        # ToDo: Need better error handling
+        # should trigger LTA
+        print("No such key in bucket")
+        return False
+
+    response_content = response["Body"].read()
+    # TODO: add variable for resolution
+    with open(target_folder / band_file, "wb") as file:
+        file.write(response_content)
+    return True
+
+
 def write_downloaded_size(target_folder: Path) -> None:
     # Get all files in folder
     files = list(target_folder.iterdir())
@@ -119,7 +155,7 @@ def write_downloaded_size(target_folder: Path) -> None:
 
     # Load existing pickle file or create empty dictionary
     if (root_folder / "downloaded_size_logs.pickle").exists():
-        # ? wrb is used due to an error with mypy
+        # ? r+b is used due to an error with mypy
         with open((root_folder / "downloaded_size_logs.pickle"), "r+b") as f:
             size_logs = pickle.load(f)
     else:
@@ -135,3 +171,34 @@ def write_downloaded_size(target_folder: Path) -> None:
     # Save the updated size logs to the pickle file
     with open((root_folder / "downloaded_size_logs.pickle"), "w+b") as f:
         pickle.dump(size_logs, f)
+
+
+def upload_to_aws(
+    input_folder: Path,
+    bucket: Optional[str] = None,
+    output_path: Optional[str] = None,
+) -> bool:
+    """Uploads a Sentinel-2 image to AWS S3.
+
+    Args:
+        input_folder (Path): The path to the directory where the Sentinel-2 image is
+            located.
+
+    Returns:
+        bool: True if the upload was successful, False otherwise.
+    """
+    # If S3 object_name was not specified, use file_name
+    if output_path is None:
+        output_path = os.path.basename(input_folder)
+
+    for root, dirs, files in os.walk(input_folder):
+        for file in files:
+            local_file = os.path.join(root, file)
+
+            # Upload the file
+            try:
+                s3_client.upload_file(local_file, BUCKET_NAME, f"{output_path}/{file}")
+            except ClientError as e:
+                print(e)
+                return False
+    return True
