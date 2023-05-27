@@ -16,9 +16,8 @@ from cloud_clients import bucket_name, s3_client
 from constants import IDENTIFIER_REGEX
 
 
-def download_from_aws(image_input_dir: Path, deployed: bool = False) -> bool:
-    prefix = image_input_dir.parent.name
-    identifier = image_input_dir.name
+def download_from_aws(identifier: Path) -> bool:
+    prefix = IMAGE_INPUT_DIR
 
     regex_match = re.search(IDENTIFIER_REGEX, identifier)
 
@@ -106,6 +105,24 @@ def upload_file_to_aws(
     except ClientError as e:
         # logging.error(e)
         return False
+
+
+def delete_folder_on_aws(folder_path: str) -> None:
+    """
+    Deletes a folder and all its contents from an S3 bucket.
+
+    Args:
+        bucket_name (str): The name of the S3 bucket.
+        folder_path (str): The path of the folder to delete.
+    """
+    bucket = s3_client.Bucket(bucket_name)
+    try:
+        # Delete all objects in the folder
+        bucket.objects.filter(Prefix=folder_path).delete()
+        # Delete the folder itself
+        bucket.objects.filter(Prefix=folder_path + "/").delete()
+    except ClientError as e:
+        logging.error(f"Folder could not be deleted. Error: {e}")
 
 
 # Not used due to a lot of requests to aws

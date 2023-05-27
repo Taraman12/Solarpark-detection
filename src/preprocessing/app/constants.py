@@ -2,21 +2,21 @@
 import re
 from pathlib import Path
 
-# from dataclasses import dataclass
-# from typing import Union
-
+# where will the images be stored/ name of the folder in s3 bucket
 IMAGE_INPUT_DIR = Path(r"data_raw")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 MASK_INPUT_DIR = SCRIPT_DIR / "data" / "trn_polygons_germany_tile_names.geojson"
-# MASK_INPUT_DIR = Path(
-#     r".\src\preprocessing\app\data\trn_polygons_germany_tile_names.geojson"
-# )
 
 # NOTE will be created if not existent
 IMAGE_OUTPUT_DIR = Path(r".\data_local\test_images_geotiff")
+
 # NOTE will be created if not existent
 MASK_OUTPUT_DIR = Path(r".\data_local\test_mask_patches")
+
+KERNEL_SIZE = 256
+
+URL = "http://ml-serve:8080"
 
 IDENTIFIER_REGEX = re.compile(
     r"""(?P<mission>S2[A-B])_MSI
@@ -35,19 +35,5 @@ IDENTIFIER_REGEX = re.compile(
 )
 
 
-# @dataclass
-# class BandFileMap:
-#     B02: Union[Path, None]
-#     B03: Union[Path, None]
-#     B04: Union[Path, None]
-#     B08: Union[Path, None]
-
-
-# BAND_FILE_MAP = {
-#     "B02": None,  # blue
-#     "B03": None,  # green
-#     "B04": None,  # red
-#     "B08": None,  # NIR
-# }
-
+# NOTE if you change this, you have to change in save_to_disk.py -> stack_bands() as well (due to the order of the bands)
 REQUIRED_BANDS = ["B02", "B03", "B04", "B08"]

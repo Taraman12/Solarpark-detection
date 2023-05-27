@@ -5,9 +5,7 @@ import re
 from pathlib import Path
 import time
 import requests
-
-# import logging
-# import logging.config
+from typing import List
 
 # third-party
 import debugpy
@@ -15,15 +13,17 @@ import geopandas as gpd
 
 # local-modules
 from aws_functions import aws_list_files, aws_list_folders
-from cloud_clients import aws_available, s3_client, verify_aws_credentials
+from cloud_clients import aws_available
+from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 from constants import (
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
     IMAGE_OUTPUT_DIR,
     MASK_INPUT_DIR,
     MASK_OUTPUT_DIR,
+    URL,
 )
-from save_to_disk import save_patched_data_to_disk
+from save_to_disk import preprocess_and_save_data
 from logging_config import get_logger
 
 # set up logging
@@ -48,24 +48,64 @@ ToDo: Needs better everything
 """
 
 
+def validate_input_paths(input_dirs: List[Path]) -> bool:
+    """
+    Validates that the input directories exist.
+
+    Args:
+        input_dirs (List[Path]): A list of input directories to validate.
+        logger: A logger instance to use for logging.
+
+    Returns:
+        bool: True if all input directories exist, False otherwise.
+    """
+    all_dirs_exist = True
+    for input_dir in input_dirs:
+        if not input_dir.exists():
+            logger.error(f"Input path: {input_dir} does not exist")
+            all_dirs_exist = False
+    return all_dirs_exist
+
+
+def create_output_directories(output_dirs: List[Path]) -> None:
+    """
+    Creates the output directories if they do not exist.
+
+    Args:
+        output_dirs (List[Path]): A list of output directories to create.
+        logger: A logger instance to use for logging.
+    """
+    for output_dir in output_dirs:
+        if not output_dir.exists():
+            output_dir.mkdir(parents=True, exist_ok=False)
+            logger.info(
+                f"Output path: {output_dir} does not exist \n" f"Directory created"
+            )
+
+
+def check_ml_serve_online() -> bool:
+    retries = 5
+    while retries > 0:
+        try:
+            response = requests.get(f"{URL}/ping")
+            if response.status_code == 200:
+                logger.info("TorchServe is running")
+                return True
+            else:
+                logger.info("TorchServe is not running. retry in 5 seconds.")
+                time.sleep(5)
+        except requests.exceptions.ConnectionError:
+            logger.info("TorchServe is not running. retry in 5 seconds.")
+            time.sleep(5)
+        retries -= 1
+    return False
+
+
 if __name__ == "__main__":
-    # logger.info("Waiting for client to attach...")
-    # debugpy.wait_for_client()
-    # time.sleep(15)
-    logger.info("Program started")
-    # debugpy.breakpoint()
-    # print("Program started")
-    # root_dir = Path(__file__).resolve().parent.parent
-    # os.chdir(Path(__file__).parent)
-
-    if os.environ.get("DOCKERIZED") == "true":
-        logger.info("Running in docker container")
-        # print("Running in docker container")
-        # exit()
-
-    # if os.environ.get("Training") == "false":
-    training = False
-    logger.info("Running in production mode")
+    logger.info("Preprocessing started, with the settings:")
+    logger.info(f"Dockerized = {DOCKERIZED}")
+    logger.info(f"Make_trainings_data = {MAKE_TRAININGS_DATA}")
+    logger.info(f"Production = {PRODUCTION}")
 
     ##########################################
     # data = {
@@ -90,99 +130,50 @@ if __name__ == "__main__":
     # req.request.url
     # req.request.headers
     # req.request.body
-
-    # rename
-    image_input_dir = IMAGE_INPUT_DIR
-    mask_input_dir = MASK_INPUT_DIR  # root_dir
-    image_output_dir = IMAGE_OUTPUT_DIR
-    mask_output_dir = MASK_OUTPUT_DIR
+    input_dirs = [IMAGE_INPUT_DIR, MASK_INPUT_DIR]
+    output_dirs = [IMAGE_OUTPUT_DIR, MASK_OUTPUT_DIR]
 
     # mandatory if trainings data should be created
-    if training:
-        for input_directory in [image_input_dir, mask_input_dir]:
-            if not input_directory.exists():
-                logger.error(f"Input path: {input_directory} does not exist")
-                # print(f"Input path: {input_directory} does not exist")
-                exit()
+    if MAKE_TRAININGS_DATA and not validate_input_paths(input_dirs):
+        exit()
+
+    create_output_directories(output_dirs)
 
     # optional
-    for output_directory in [image_output_dir, mask_output_dir]:
-        if not output_directory.exists():
-            output_directory.mkdir(parents=True, exist_ok=False)
-            logger.info(
-                f"Output path: {output_directory} does not exist \n"
-                f"Directory created"
-            )
-            # print(
-            #     f"Output path: {output_directory} does not exist \n"
-            #     f"Directory created"
-            # )
-
-    # optional
-
     if not aws_available:
-        # ToDo: set up logging
-        # ToDo: make it possible to run without aws credentials
         logger.warning("AWS credentials not valid")
-        # print("AWS credentials not valid")
 
-    masks_gdf = gpd.read_file(mask_input_dir)
+    PRODUCTION = False
+    if PRODUCTION:
+        if not check_ml_serve_online():
+            logger.error("ml-serve not online. Exiting.")
+            exit()
 
-    kernel_size = 256
+    masks_gdf = gpd.read_file(MASK_INPUT_DIR)
 
-    # aws_available = False
-    if training:
-        folder_list = os.listdir(image_input_dir)
+    if MAKE_TRAININGS_DATA:
+        folder_list = os.listdir(IMAGE_INPUT_DIR)
     else:
         # ! change to raw_data
         # ToDo: import from constants
-        folder_list = aws_list_folders(prefix=str(image_input_dir))
-        image_input_dir = Path()
+        folder_list = aws_list_folders(prefix=str(IMAGE_INPUT_DIR))
+        IMAGE_INPUT_DIR = Path()
 
-        # folder_list_raw = [
-        #     folder.replace("data_raw/", "") for folder in folder_list_raw
-        # ]
-        # folder_list = [folder.strip("/") for folder in folder_list_raw]
-    # ToDo: add loop over all folders in image_dir (it is only a single one)
-    # open mask_gdf outside the loop
-    result_total = 0
+    saved_total = 0
     logger.info(f"Number of files to process: {len(folder_list)}")
-    # print(folder_list)
+
     for i, tile_folder in enumerate(folder_list):
         logger.info(f"Processing file {i+1} of {len(folder_list)}")
         # print(f"Processing file {i+1} of {len(folder_list)}")
-
-        regex_match = re.search(IDENTIFIER_REGEX, tile_folder)
-
-        if not regex_match:
-            continue
-
-        else:
-            utm_code = regex_match.group("utm_code")
-            latitude_band = regex_match.group("latitude_band")
-            square = regex_match.group("square")
-            year = regex_match.group("year")
-            month = str(int(regex_match.group("month")))
-            day = str(int(regex_match.group("day")))
-            tile = f"{utm_code}{latitude_band}{square}"
-
         try:
-            result = save_patched_data_to_disk(
-                image_input_dir / tile_folder,
-                masks_gdf,
-                image_output_dir,
-                mask_output_dir,
-                tile=tile,
-                tile_date=f"{year}-{month}-{day}",
-                kernel_size=kernel_size,
-                production=True,
+            saved_patches = preprocess_and_save_data(
+                identifier=tile_folder, masks_gdf=masks_gdf
             )
+
         except Exception as e:
             logger.error(e)
             continue
-        #! Remove
-        # exit()
-        result_total += result
-        print(f"Number of files saved: {result}")
-    print(f"Number of total files saved: {result_total}")
-    print("program finished")
+
+        saved_total += saved_patches
+        print(f"Number of files saved: {saved_patches}")
+    print(f"program finished. Total images saved: {saved_total}")

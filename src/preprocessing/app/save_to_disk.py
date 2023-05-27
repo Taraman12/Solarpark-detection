@@ -19,9 +19,23 @@ from rasterio.features import geometry_mask
 from shapely.geometry import Polygon
 
 # local modules
-from aws_functions import aws_list_files, download_from_aws, upload_file_to_aws
+from aws_functions import (
+    aws_list_files,
+    download_from_aws,
+    upload_file_to_aws,
+    delete_folder_on_aws,
+)
 from cloud_clients import aws_available
-from constants import REQUIRED_BANDS
+from constants import (
+    REQUIRED_BANDS,
+    KERNEL_SIZE,
+    IDENTIFIER_REGEX,
+    IMAGE_INPUT_DIR,
+    IMAGE_OUTPUT_DIR,
+    MASK_INPUT_DIR,
+    MASK_OUTPUT_DIR,
+)
+from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 from logging_config import get_logger
 
 # set up logging
@@ -44,52 +58,40 @@ ToDo: handle memory consumption (but not so important)
 # extracts tile, date, band and resolution from filename
 # ! Adjust to TCI band
 FILENAME_REGEX = re.compile(
-    r"""(?P<band>B0\d{1})(?:_
+    r"""(?P<band>.{3})(?:_
         (?P<resolution>\d{2}m))?\..*$""",
     re.VERBOSE,
 )
 
 
-def save_patched_data_to_disk(
-    image_input_dir: Path,
+def preprocess_and_save_data(
+    identifier: str,
     masks_gdf: GeoDataFrame,
-    image_output_dir: Path,
-    mask_output_dir: Path,
-    tile: str,
-    tile_date: str,
-    kernel_size: int = 256,
-    production: bool = True,
-    deployed: bool = False,
 ) -> int:
-    if aws_available:
-        result = download_from_aws(image_input_dir, deployed=deployed)
+    tile, tile_date = get_tile_and_date(identifier)
+
+    if tile is None or tile_date is None:
+        return 0
+
+    PRODUCTION = False
+    if aws_available and PRODUCTION:
+        result = download_from_aws(identifier)
         if not result:
             return 0
 
     # find paths to all REQUIRED_BANDS
-    band_paths = find_band_paths(image_dir=image_input_dir)
+    band_paths = find_band_paths(image_dir=IMAGE_INPUT_DIR / identifier)
+
     # open all REQUIRED_BANDS
     bands = open_dataset_readers(band_paths=band_paths)
-    # bands = open_dataset_readers_as_dict(image_input_dir)
 
     stacked_bands = preprocess_bands(bands)
 
-    # stacked_bands_tensor = torch.from_numpy(stacked_bands.transpose((2, 0, 1)))
-
-    # image_tensor_pad = padding_tensor(stacked_bands_tensor, kernel_size)
-
-    # image_tensor_patched = image_tensor_pad.reshape(
-    #     image_tensor_pad.shape[0],
-    #     image_tensor_pad.shape[1] // kernel_size,
-    #     kernel_size,
-    #     image_tensor_pad.shape[1] // kernel_size,
-    #     kernel_size,
-    # )
     # ! MASK #
     # masks_gdf = gpd.read_file(mask_input_dir)
     first_band = list(bands.keys())[0]
     # filter all masks to selected tile
-    if not production:
+    if MAKE_TRAININGS_DATA:
         masks = filter_mask_on_tile(masks_gdf, tile)
 
         if len(masks) == 0:
@@ -98,31 +100,29 @@ def save_patched_data_to_disk(
         # create a raster which matches the image shape
         rasterized_mask = rasterize_mask(masks, bands[first_band])
 
-    # convert to tensor to use efficient padding from torchvision
-    # mask_tensor = torch.from_numpy(rasterized_mask)
-    # image_tensor_patched = image_tensor_patched.swapaxes(-3, -2)
-
     metadata = bands[first_band].meta
 
-    # Berechne die Anzahl der Reihen und Spalten für die Aufteilung
-    num_rows = metadata["height"] // kernel_size
-    num_cols = metadata["width"] // kernel_size
+    num_rows = metadata["height"] // KERNEL_SIZE
+    num_cols = metadata["width"] // KERNEL_SIZE
 
-    # Berechne das Padding für die kleinen Bilder
-    pad_rows = metadata["height"] % kernel_size
-    pad_cols = metadata["width"] % kernel_size
+    # unused, but start for more
+    # arr = transform_to_patched_array(stacked_bands, num_rows, num_cols)
+
+    metadata["width"] = KERNEL_SIZE
+    metadata["height"] = KERNEL_SIZE
 
     file_counter = 0
     file_identifier = 0
-    # Iteriere über die Reihen und Spalten, um das Bild in kleine Bilder aufzuteilen
+
+    # Iterate over the rows and columns to split the image into small images
     for row in range(num_rows):
         for col in range(num_cols):
-            # Definiere die Fensterkoordinaten für den Ausschnitt
+            # Define the window coordinates for the snippet
             window = rasterio.windows.Window(
-                col * kernel_size, row * kernel_size, kernel_size, kernel_size
+                col * KERNEL_SIZE, row * KERNEL_SIZE, KERNEL_SIZE, KERNEL_SIZE
             )
 
-            # Schneide den Ausschnitt aus dem zusammengefügten Bild aus
+            # Cut out the snippet from the merged image
             small_image = stacked_bands[
                 window.row_off : window.row_off + window.height,
                 window.col_off : window.col_off + window.width,
@@ -136,72 +136,88 @@ def save_patched_data_to_disk(
             file_identifier += 1
             file_counter += 1
 
-            # Aktualisiere die Metadaten für das kleine Bild
-            metadata["width"] = kernel_size
-            metadata["height"] = kernel_size
+            # update metadata for small image patch
             metadata["transform"] = rasterio.windows.transform(
                 window, bands[list(bands.keys())[0]].transform
             )
 
-            filename = f"{tile}_{file_identifier}_{tile_date}.tif"
+            if PRODUCTION:
+                prediction_handler(small_image.transpose(2, 0, 1), metadata)
+                continue
 
-            if not production:
-                # Extract the patch from the rasterized_mask
-                mask_patch = rasterized_mask[
-                    window.row_off : window.row_off + window.height,
-                    window.col_off : window.col_off + window.width,
-                ]
-                if not mask_patch.sum() >= 200:
-                    continue
+            if MAKE_TRAININGS_DATA:
+                filename = f"{tile}_{file_identifier}_{tile_date}.tif"
+                trainings_data_handler(file_name, rasterize_mask, window)
 
-                metadata["count"] = 1
-                # Save the mask patch as GeoTIFF (similar to saving small_image)
-
-                mask_output_path = mask_output_dir / filename
-                # Assuming the metadata for the mask GeoTIFF is the same as the small_image GeoTIFF
-                save_patch(
-                    mask_output_path,
-                    metadata,
-                    np.expand_dims(mask_patch, axis=0),
-                )
-                # ToDo: delete the bigger image if production is false
-
-            # Speichere das kleine Bild als GeoTIFF
-            output_path = image_output_dir / filename
-            metadata["count"] = 4
-            metadata["driver"] = "GTiff"
-            metadata["dtype"] = rasterio.float32
-            if production:
-                logger.info(f"sending to ml model")
-                prediction = send_to_ml_model(small_image.transpose(2, 0, 1), metadata)
-                if len(prediction) == 0:
-                    continue
-                # mask = prediction_to_mask(pred)
-                polygons = masks_to_polygons(prediction, metadata)
-                logger.info(f"Found {len(polygons)} polygons")
-                for polygon in polygons:
-                    write_to_db(polygon)
-                return file_counter
-
-            save_patch(output_path, metadata, small_image.transpose(2, 0, 1))
-    # add check if all images are saved
+    if PRODUCTION:
+        # delete the bigger image on aws
+        delete_folder_on_aws(folder_path=identifier)
 
     return file_counter
 
 
-def check_ml_online(url: str):
-    while True:
-        try:
-            response = requests.get("http://ml-serve:8080/ping")
-            if response.status_code == 200:
-                print("TorchServe is running")
-                break
-            else:
-                logger.info("TorchServe is not running. retry in 5 seconds.")
-                time.sleep(5)
-        except requests.exceptions.ConnectionError:
-            print("TorchServe is not running")
-            time.sleep(5)
+def trainings_data_handler(
+    file_name: str, rasterize_mask: np.array, window: rasterio.windows.Window
+) -> None:
+    # Extract the patch from the rasterized_mask
+    mask_patch = rasterized_mask[
+        window.row_off : window.row_off + window.height,
+        window.col_off : window.col_off + window.width,
+    ]
+    if not mask_patch.sum() >= 200:
+        return None
+
+    metadata["count"] = 1
+    # Save the mask patch as GeoTIFF (similar to saving small_image)
+
+    mask_output_path = MASK_OUTPUT_DIR / filename
+    # Assuming the metadata for the mask GeoTIFF is the same as the small_image GeoTIFF
+    save_patch(
+        mask_output_path,
+        metadata,
+        np.expand_dims(mask_patch, axis=0),
+    )
+    # ToDo: delete the bigger image if production is false
+
+    # store small images as GeoTIFF
+    metadata["count"] = 4
+    metadata["driver"] = "GTiff"
+    metadata["dtype"] = rasterio.float32
+    output_path = IMAGE_OUTPUT_DIR / filename
+    save_patch(output_path, metadata, small_image.transpose(2, 0, 1))
+
+
+def prediction_handler(
+    data: np.array,
+    metadata: dict,
+) -> None:
+    prediction = send_to_ml_model(small_image.transpose(2, 0, 1), metadata)
+    if not len(prediction) == 0:
+        # mask = prediction_to_mask(pred)
+        polygons = masks_to_polygons(prediction, metadata)
+        logger.info(f"Found {len(polygons)} polygons")
+        for polygon in polygons:
+            write_to_db(polygon)
+
+
+def get_tile_and_date(identifier: str) -> Tuple[Optional[str], Optional[str]]:
+    regex_match = re.search(IDENTIFIER_REGEX, identifier)
+
+    if not regex_match:
+        return None, None
+
+    utm_code = regex_match.group("utm_code")
+    latitude_band = regex_match.group("latitude_band")
+    square = regex_match.group("square")
+    year = regex_match.group("year")
+    # remove leading zeros
+    month = str(int(regex_match.group("month")))
+    day = str(int(regex_match.group("day")))
+
+    tile = f"{utm_code}{latitude_band}{square}"
+    tile_date = f"{year}-{month}-{day}"
+
+    return tile, tile_date
 
 
 def send_to_ml_model(data_array: np.ndarray, metadata: dict) -> dict:
@@ -279,7 +295,7 @@ def save_patch(output_path: Path, metadata: dict, data_array: np.ndarray) -> boo
     # therefore, this is commented out by default
     #
     # if aws_available:
-    #     #
+    #
     #     result = upload_file_to_aws(
     #         input_file_path=output_path, output_path=output_path.name
     #     )
@@ -364,7 +380,7 @@ def preprocess_bands(bands: Dict[str, np.ndarray]) -> np.ndarray:
     stacked_bands = color_correction(stacked_bands)
     stacked_bands = robust_normalize(stacked_bands)
 
-    return stacked_bands
+    return stacked_bands.transpose(2, 0, 1)
 
 
 def stack_bands(bands: Dict[str, rasterio.DatasetReader]) -> np.ndarray:
@@ -414,12 +430,12 @@ def robust_normalize(
 
 
 def get_num_rows_cols_and_padding(
-    metadata: Dict[str, Any], kernel_size: int
+    metadata: Dict[str, Any], KERNEL_SIZE: int
 ) -> Tuple[int, int, int, int]:
-    num_rows = metadata["height"] // kernel_size
-    num_cols = metadata["width"] // kernel_size
-    pad_rows = metadata["height"] % kernel_size
-    pad_cols = metadata["width"] % kernel_size
+    num_rows = metadata["height"] // KERNEL_SIZE
+    num_cols = metadata["width"] // KERNEL_SIZE
+    pad_rows = metadata["height"] % KERNEL_SIZE
+    pad_cols = metadata["width"] % KERNEL_SIZE
     return num_rows, num_cols, pad_rows, pad_cols
 
 
@@ -440,6 +456,29 @@ def filter_mask_on_tile(masks: gpd.GeoDataFrame, tile: str) -> gpd.GeoDataFrame:
     return masks[masks.tile_name == tile].geometry.reset_index(drop=True)
 
 
-def padding_size(image_size: int, kernel_size: int) -> int:
+def padding_size(image_size: int, KERNEL_SIZE: int) -> int:
     """Computes the padding size, which is needed so that the kernel fits the image."""
-    return int(((image_size // kernel_size + 1) * kernel_size - image_size) / 2)
+    return int(((image_size // KERNEL_SIZE + 1) * KERNEL_SIZE - image_size) / 2)
+
+
+def transform_to_patched_array(stacked_bands, num_rows, num_cols):
+    # Calculate the shape of the padded array
+    padded_shape = (
+        stacked_bands.shape[0],
+        (num_rows + 1) * KERNEL_SIZE,
+        (num_cols + 1) * KERNEL_SIZE,
+    )
+
+    # Create a padded array
+    padded_image = np.zeros(padded_shape, dtype=stacked_bands.dtype)
+    padded_image[:, : stacked_bands.shape[1], : stacked_bands.shape[2]] = stacked_bands
+
+    image_patched = padded_image.reshape(
+        padded_image.shape[0],
+        padded_image.shape[1] // KERNEL_SIZE,
+        KERNEL_SIZE,
+        padded_image.shape[1] // KERNEL_SIZE,
+        KERNEL_SIZE,
+    )
+
+    return image_patched.transpose(1, 3, 0, 2, -1)
