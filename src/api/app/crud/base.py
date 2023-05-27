@@ -23,6 +23,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         * `model`: A SQLAlchemy model class
         * `schema`: A Pydantic model (schema) class
+
         """
         self.model = model
 

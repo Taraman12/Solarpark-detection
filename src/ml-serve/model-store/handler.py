@@ -23,9 +23,7 @@ logger.setLevel(logging.INFO)
 
 
 class ModelHandler(BaseHandler):
-    """
-    A custom model handler implementation.
-    """
+    """A custom model handler implementation."""
 
     def __init__(self) -> None:
         # super().__init__()
@@ -36,9 +34,12 @@ class ModelHandler(BaseHandler):
 
     def initialize(self, context: Any) -> None:
         """
-        Initialize model. This will be called during model loading time
+        Initialize model.
+
+        This will be called during model loading time
         :param context: Initial context contains model server system properties. (config.properties file)
         :return:
+
         """
         self._context = context
         logging.info("initialize...")
@@ -79,8 +80,10 @@ class ModelHandler(BaseHandler):
     def preprocess(self, data: Any) -> Any:
         """
         Transform raw input into model input data.
+
         :param batch: list of raw requests, should match batch size
         :return: list of preprocessed model input data
+
         """
         # Take the input data and make it inference ready
         preprocessed_data = data[0].get("data")
@@ -107,8 +110,10 @@ class ModelHandler(BaseHandler):
     def postprocess(self, inference_output: Any) -> Any:
         """
         Return inference result.
+
         :param inference_output: list of inference output
         :return: list of predict results
+
         """
         # Take output from network and post-process to desired format
         postprocess_output = inference_output.tolist()
@@ -118,10 +123,12 @@ class ModelHandler(BaseHandler):
     def handle(self, data: Any, context: Any) -> Any:
         """
         Invoke by TorchServe for prediction request.
+
         Do pre-processing of data, prediction using model and postprocessing of prediciton output
         :param data: Input data for prediction
         :param context: Initial context contains model server system properties.
         :return: prediction output
+
         """
         # model_input = self.preprocess(data)
         model_input = self.preprocess(data)

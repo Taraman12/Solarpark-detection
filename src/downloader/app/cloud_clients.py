@@ -18,7 +18,7 @@ session = boto3.Session(
 # create s3 client
 s3_client = session.client("s3")
 
-bucket_name = os.getenv("aws_s3_bucket")
+BUCKET_NAME = os.getenv("aws_s3_bucket")
 
 
 def verify_aws_credentials() -> bool:

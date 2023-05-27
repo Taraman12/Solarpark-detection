@@ -45,8 +45,6 @@ logger = get_logger(__name__)
 # log_file_path = path.join(path.dirname(path.abspath(__file__)), "logging.conf")
 # logging.config.fileConfig(log_file_path)
 # logger = logging.getLogger(__name__)
-
-
 """
 ToDo: Add padding to the image/mask
 ToDo: Needs better documentation
@@ -319,6 +317,7 @@ def find_band_paths(image_dir: Path) -> Dict[str, Path]:
 
     Raises:
         Exception: If any of the required band files are missing.
+
     """
     band_paths: Dict[str, Path] = {band: Path() for band in REQUIRED_BANDS}
 
@@ -355,6 +354,7 @@ def open_dataset_readers(
 
     Returns:
         Dict[str, rasterio.DatasetReader]: A dictionary mapping band names to their corresponding dataset readers.
+
     """
     # store open DatasetReaders in dict
     band_files: Dict[str, rasterio.DatasetReader] = {
@@ -374,6 +374,7 @@ def preprocess_bands(bands: Dict[str, np.ndarray]) -> np.ndarray:
 
     Returns:
         A numpy array of preprocessed bands.
+
     """
     # ToDo: add padding
     stacked_bands = stack_bands(bands)
@@ -408,6 +409,7 @@ def color_correction(stacked_bands: np.ndarray) -> np.ndarray:
 
     Returns:
         np.ndarray: The color-corrected stacked bands array.
+
     """
     return (stacked_bands / 8).astype(int)
 

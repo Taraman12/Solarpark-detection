@@ -10,7 +10,7 @@ from typing import Optional, Tuple
 import boto3
 from boto3 import client
 from botocore.errorfactory import ClientError
-from cloud_clients import bucket_name, s3_client
+from cloud_clients import BUCKET_NAME, s3_client
 
 # local-modules
 from constants import IDENTIFIER_REGEX, REQUIRED_BANDS
@@ -34,6 +34,7 @@ def download_from_aws_handler(
 
     Returns:
         bool: True if the download was successful, False otherwise.
+
     """
     # if deployed in production on aws no transfer limit
     if not PRODUCTION and not check_aws_free_tier_available(target_folder.parents[0]):
@@ -88,7 +89,7 @@ def check_aws_free_tier_available(root_folder: Path) -> bool:
 
 
 def make_aws_path(identifier: str) -> Tuple[str, str]:
-    """Returns sentinel_bucket and prefix"""
+    """Returns sentinel_bucket and prefix."""
     regex_match = re.match(IDENTIFIER_REGEX, identifier)
 
     if regex_match:
@@ -110,7 +111,7 @@ def make_aws_path(identifier: str) -> Tuple[str, str]:
 def copy_from_aws(sentinel_bucket: str, prefix: str, band_file: str) -> bool:
     try:
         response = s3_client.copy_object(
-            Bucket=bucket_name,
+            Bucket=BUCKET_NAME,
             Key=f"{prefix}/{band_file}",
             CopySource={
                 "Bucket": sentinel_bucket,
@@ -179,7 +180,7 @@ def write_downloaded_size(target_folder: Path) -> None:
 
 def upload_to_aws(
     input_folder: Path,
-    bucket: Optional[str],
+    bucket: Optional[str] = None,
     output_path: Optional[str] = None,
 ) -> bool:
     """
@@ -203,7 +204,7 @@ def upload_to_aws(
 
             # Upload the file
             try:
-                s3_client.upload_file(local_file, bucket, f"{output_path}/{file}")
+                s3_client.upload_file(local_file, BUCKET_NAME, f"{output_path}/{file}")
             except ClientError as e:
                 # logging.error(e)
                 return False

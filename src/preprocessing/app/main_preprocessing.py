@@ -58,6 +58,7 @@ def validate_input_paths(input_dirs: List[Path]) -> bool:
 
     Returns:
         bool: True if all input directories exist, False otherwise.
+
     """
     all_dirs_exist = True
     for input_dir in input_dirs:
@@ -74,6 +75,7 @@ def create_output_directories(output_dirs: List[Path]) -> None:
     Args:
         output_dirs (List[Path]): A list of output directories to create.
         logger: A logger instance to use for logging.
+
     """
     for output_dir in output_dirs:
         if not output_dir.exists():

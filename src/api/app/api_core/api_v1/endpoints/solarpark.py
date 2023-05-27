@@ -19,9 +19,7 @@ def read_solarpark(
     limit: int = 100,
     polygon: bool = False,
 ) -> Any:
-    """
-    Retrieve solarpark.
-    """
+    """Retrieve solarpark."""
     solarpark = crud.solarpark.get_multi(db, skip=skip, limit=limit)
     return solarpark
 
@@ -33,9 +31,7 @@ def read_solarpark(  # noqa: F811
     id: int,
     polygon: bool = False,
 ) -> Any:
-    """
-    Get solarpark by ID.
-    """
+    """Get solarpark by ID."""
     solarpark = crud.solarpark.get(db=db, id=id)
     if not solarpark:
         raise HTTPException(status_code=404, detail="solarpark not found")
@@ -46,9 +42,7 @@ def read_solarpark(  # noqa: F811
 def create_solarpark(
     *, db: Session = Depends(deps.get_db), solarpark_in: schemas.SolarParkCreate
 ) -> Any:
-    """
-    Create new solarpark.
-    """
+    """Create new solarpark."""
     solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
     return solarpark
 
@@ -60,9 +54,7 @@ def update_solarpark(
     id: int,
     solarpark_in: schemas.SolarParkUpdate,
 ) -> Any:
-    """
-    Update an solarpark.
-    """
+    """Update an solarpark."""
     solarpark = crud.solarpark.get(db=db, id=id)
     if not solarpark:
         raise HTTPException(status_code=404, detail="solarpark not found")
@@ -77,9 +69,7 @@ def delete_solarpark(
     db: Session = Depends(deps.get_db),
     id: int,
 ) -> Any:
-    """
-    Delete an solarpark.
-    """
+    """Delete an solarpark."""
     solarpark = crud.solarpark.get(db=db, id=id)
     if not solarpark:
         raise HTTPException(status_code=404, detail="solarpark not found")

@@ -7,25 +7,18 @@ import tempfile
 import time
 from datetime import date
 from pathlib import Path
-from typing import Optional, TypedDict, Union
 from zipfile import ZipFile
-
-import boto3
 
 # third-party
 import geopandas as gpd
-from botocore.errorfactory import ClientError
-from cloud_clients import aws_available, s3_client
 
 # local-modules
 from constants import IMAGE_REGEX, REQUIRED_BANDS
-from dotenv import load_dotenv
 from geopandas import GeoSeries
 from sentinel_on_aws import download_from_aws_handler, upload_to_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
-from settings import DOCKERIZED, PRODUCTION
-from typing_extensions import Unpack
+from settings import DOCKERIZED
 
 # ToDo: change os.path to pathlib
 # ToDo: use sentinelsat get_stream() for streaming data to AWS S3
@@ -58,7 +51,7 @@ def download_sentinel2_data(
     product = get_product_from_footprint(api, footprint, start_date, end_date)
 
     if len(product) == 0:
-        """No product found"""
+        """No product found."""
         return False
 
     # create target folder
@@ -94,7 +87,6 @@ def download_sentinel2_data(
             # Upload the extracted image to AWS S3
             upload_to_aws(
                 target_folder,
-                bucket=bucket_name,
                 output_path=f"data_raw/{product.identifier}",
             )
             # Remove the downloaded file from docker container
@@ -123,17 +115,19 @@ def get_product_from_footprint(
     end_date: str = "NOW",
 ) -> GeoSeries:
     """
-    Queries the Sentinel API for products that intersect with a given footprint.
-    Returns the product with the lowest cloud cover percentage.
+    Queries the Sentinel API for products that intersect with a given footprint. Returns
+    the product with the lowest cloud cover percentage.
 
     Args:
         api (SentinelAPI): The SentinelAPI instance to use for the query.
         footprint (str): The footprint to use for the query.
-        start_date (str, optional): The start date of the query. Defaults to "NOW-5DAYS".
+        start_date (str, optional): The start date of the query.
+        Defaults to "NOW-5DAYS".
         end_date (str, optional): The end date of the query. Defaults to "NOW".
 
     Returns:
         GeoSeries: A GeoSeries containing the product with the lowest cloud cover percentage.
+
     """
     # create empty GeoSeries to return
     products_gdf = gpd.GeoSeries()
@@ -163,7 +157,7 @@ def get_product_from_footprint(
 
 
 def check_files_already_downloaded(target_folder: Path):
-    """Checks if the all bands of the product are already downloaded"""
+    """Checks if the all bands of the product are already downloaded."""
     if target_folder.exists():
         # check if product is complete
         if len(os.listdir(target_folder)) >= len(REQUIRED_BANDS):

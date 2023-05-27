@@ -22,7 +22,6 @@ from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 
 # set up logger
 logger = get_logger(__name__)
-
 """
 ToDo: Add faster way to check if tile is already downloaded
 ToDo: Needs better documentation
@@ -102,7 +101,7 @@ def create_download_path(path: Path) -> bool:
 
 
 def wait_for_api_connection() -> Union[bool, SentinelAPI]:
-    """Connects to sentinelAPI and checks if the connection works"""
+    """Connects to sentinelAPI and checks if the connection works."""
     api = connect_to_sentinel_api()
 
     if isinstance(api, ServerError):

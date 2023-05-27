@@ -1,4 +1,5 @@
-"""Create base
+"""
+Create base.
 
 Revision ID: da7a861fef00
 Revises:

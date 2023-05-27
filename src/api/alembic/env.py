@@ -47,10 +47,8 @@ def get_src_path():
 
 
 def get_url():
-    """
-    Builds the url for the database connection from .env
-    or docker environment variables
-    """
+    """Builds the url for the database connection from .env or docker environment
+    variables."""
     if os.environ.get("DOCKERIZED") == "true":
         USER = os.getenv("POSTGRES_USER", "postgres")
         PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
@@ -68,15 +66,14 @@ def get_url():
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
+    """
+    Run migrations in 'offline' mode.
 
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
+    This configures the context with just a URL and not an Engine, though an Engine is
+    acceptable here as well.  By skipping the Engine creation we don't even need a DBAPI
+    to be available.
 
-    Calls to context.execute() here emit the given string to the
-    script output.
+    Calls to context.execute() here emit the given string to the script output.
 
     """
     # changed from default
@@ -98,10 +95,11 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+    """
+    Run migrations in 'online' mode.
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
+    In this scenario we need to create an Engine and associate a connection with the
+    context.
 
     """
     # changed from default

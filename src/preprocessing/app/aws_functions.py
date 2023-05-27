@@ -52,7 +52,7 @@ def download_from_aws(identifier: Path) -> bool:
 
 
 def aws_list_folders(prefix: str) -> list:
-    """List folders in specific S3 URL"""
+    """List folders in specific S3 URL."""
     s3_folders = s3_client.list_objects_v2(
         Bucket=bucket_name, Prefix=f"{prefix}/", Delimiter="/"
     )
@@ -63,7 +63,7 @@ def aws_list_folders(prefix: str) -> list:
 
 
 def aws_list_files(prefix: str) -> list:
-    """List files in specific S3 URL"""
+    """List files in specific S3 URL."""
     s3_files = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
     file_list: List[str] = []
     if s3_files["KeyCount"] == 0:
@@ -113,6 +113,7 @@ def delete_folder_on_aws(folder_path: str) -> None:
     Args:
         bucket_name (str): The name of the S3 bucket.
         folder_path (str): The path of the folder to delete.
+
     """
     bucket = s3_client.Bucket(bucket_name)
     try:
