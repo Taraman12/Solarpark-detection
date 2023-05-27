@@ -2,17 +2,14 @@
 import os
 import re
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional
 
 # third-party
-import boto3
-from boto3 import client
 from botocore.errorfactory import ClientError
 
 # local-modules
 from cloud_clients import bucket_name, s3_client
-from constants import IDENTIFIER_REGEX
-from dotenv import load_dotenv
+from constants import IDENTIFIER_REGEX, IMAGE_INPUT_DIR
 
 
 def download_from_aws(identifier: Path) -> bool:
@@ -97,12 +94,10 @@ def upload_file_to_aws(
     prefix = "data_preprocessed"
     # Upload the file
     try:
-        response = s3_client.upload_file(
-            input_file_path, bucket_name, f"{prefix}/{output_path}"
-        )
+        s3_client.upload_file(input_file_path, bucket_name, f"{prefix}/{output_path}")
         return True
     except ClientError as e:
-        # logging.error(e)
+        print(e)
         return False
 
 
@@ -122,7 +117,7 @@ def delete_folder_on_aws(folder_path: str) -> None:
         # Delete the folder itself
         bucket.objects.filter(Prefix=folder_path + "/").delete()
     except ClientError as e:
-        logging.error(f"Folder could not be deleted. Error: {e}")
+        print(e)
 
 
 # Not used due to a lot of requests to aws
@@ -152,10 +147,8 @@ def upload_folder_to_aws(
 
             # Upload the file
             try:
-                response = s3_client.upload_file(
-                    local_file, bucket_name, f"{output_path}/{file}"
-                )
+                s3_client.upload_file(local_file, bucket_name, f"{output_path}/{file}")
             except ClientError as e:
-                # logging.error(e)
+                print(e)
                 return False
     return True

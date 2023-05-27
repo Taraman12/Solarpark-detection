@@ -7,14 +7,11 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 # third-party
-import boto3
-from boto3 import client
 from botocore.errorfactory import ClientError
 from cloud_clients import BUCKET_NAME, s3_client
 
 # local-modules
 from constants import IDENTIFIER_REGEX, REQUIRED_BANDS
-from dotenv import load_dotenv
 from settings import PRODUCTION
 
 # ToDo: add variable for resolution
@@ -110,7 +107,7 @@ def make_aws_path(identifier: str) -> Tuple[str, str]:
 
 def copy_from_aws(sentinel_bucket: str, prefix: str, band_file: str) -> bool:
     try:
-        response = s3_client.copy_object(
+        s3_client.copy_object(
             Bucket=BUCKET_NAME,
             Key=f"{prefix}/{band_file}",
             CopySource={
@@ -120,7 +117,7 @@ def copy_from_aws(sentinel_bucket: str, prefix: str, band_file: str) -> bool:
             RequestPayer="requester",
         )
         return True
-    except s3.exceptions.NoSuchKey:
+    except s3_client.exceptions.NoSuchKey:
         # ToDo: Need better error handling
         # should trigger LTA
         print("No such key in bucket")
@@ -136,7 +133,7 @@ def download_from_aws(
             Key=f"{prefix}/{band_file}",
             RequestPayer="requester",
         )
-    except ClientError as e:
+    except s3_client.exceptions.NoSuchKey:
         # ToDo: Need better error handling
         # should trigger LTA
         print("No such key in bucket")
@@ -206,6 +203,6 @@ def upload_to_aws(
             try:
                 s3_client.upload_file(local_file, BUCKET_NAME, f"{output_path}/{file}")
             except ClientError as e:
-                # logging.error(e)
+                print(e)
                 return False
     return True

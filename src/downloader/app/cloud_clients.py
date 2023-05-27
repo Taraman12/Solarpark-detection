@@ -3,7 +3,6 @@ import os
 
 # third-party
 import boto3
-from boto3 import client
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 
@@ -23,7 +22,7 @@ BUCKET_NAME = os.getenv("aws_s3_bucket")
 
 def verify_aws_credentials() -> bool:
     try:
-        response = s3_client.list_buckets()
+        s3_client.list_buckets()
         return True
     except ClientError:
         print("Credentials are NOT valid.")

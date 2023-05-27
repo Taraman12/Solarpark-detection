@@ -3,7 +3,6 @@ import os
 
 # third-party
 import boto3
-from boto3 import client
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 

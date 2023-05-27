@@ -115,18 +115,20 @@ def get_product_from_footprint(
     end_date: str = "NOW",
 ) -> GeoSeries:
     """
-    Queries the Sentinel API for products that intersect with a given footprint. Returns
-    the product with the lowest cloud cover percentage.
+    Queries the Sentinel API for products that intersect with a given
+    footprint. Returns the product with the lowest cloud cover percentage.
 
     Args:
         api (SentinelAPI): The SentinelAPI instance to use for the query.
         footprint (str): The footprint to use for the query.
         start_date (str, optional): The start date of the query.
         Defaults to "NOW-5DAYS".
-        end_date (str, optional): The end date of the query. Defaults to "NOW".
+        end_date (str, optional): The end date of the query.
+        Defaults to "NOW".
 
     Returns:
-        GeoSeries: A GeoSeries containing the product with the lowest cloud cover percentage.
+        GeoSeries: A GeoSeries containing the product with the lowest cloud cover
+        percentage.
 
     """
     # create empty GeoSeries to return
@@ -169,8 +171,9 @@ def extract_image_bands(
     download_root: Path, identifier: str, target_folder: Path
 ) -> bool:
     """
-    Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a Sentinel-2
-    ZIP folder and saves them as separate files with the format <band>_10m.jp2.
+    Extracts 10-meter resolution band images (B02, B03, B04, and B08) from a
+    Sentinel-2 ZIP folder and saves them as separate files with the format
+    <band>_10m.jp2.
 
     Args:
         download_root (Path): The path to the root directory where the Sentinel-2 image

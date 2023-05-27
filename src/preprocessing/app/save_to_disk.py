@@ -459,7 +459,8 @@ def filter_mask_on_tile(masks: gpd.GeoDataFrame, tile: str) -> gpd.GeoDataFrame:
 
 
 def padding_size(image_size: int, KERNEL_SIZE: int) -> int:
-    """Computes the padding size, which is needed so that the kernel fits the image."""
+    """Computes the padding size, which is needed so that the kernel fits the
+    image."""
     return int(((image_size // KERNEL_SIZE + 1) * KERNEL_SIZE - image_size) / 2)
 
 

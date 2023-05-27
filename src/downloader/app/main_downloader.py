@@ -1,6 +1,4 @@
 # build-in
-import logging
-import os
 import time
 from distutils.util import strtobool
 from pathlib import Path
@@ -27,6 +25,64 @@ ToDo: Add faster way to check if tile is already downloaded
 ToDo: Needs better documentation
 ToDo: handle memory consumption (but not so important)
 """
+
+
+def main():
+    check_requirements()
+    api = get_api()
+    tiles_file = load_tiles_file(path=PATH_TO_TILES)
+
+    # TODO: better input handling of NOW_DICT and date maybe with mode ...
+    for season_counter, (season, dates) in enumerate(NOW_DICT.items()):
+        start_date, end_date = dates["start_date"], dates["end_date"]
+        for centroid_counter, centroid in enumerate(set(tiles_file.centroid_of_tile)):
+            # ToDo: add faster way to check if data is already downloaded
+            # see: make_trainings_data.ipynb
+            try:
+                download_sentinel2_data(
+                    api=api,
+                    footprint=centroid,
+                    start_date=start_date,
+                    end_date=end_date,
+                    download_root=DOWNLOAD_PATH,
+                )
+
+            # ! result is type bool not exception
+            except Exception as e:
+                logger.error(f"Error occurred while downloading data: {e}")
+                continue
+
+            logger.info(
+                f"season {season} ({season_counter+1}/{len(NOW_DICT.keys())}) "
+                f"for tile {centroid_counter+1}/"
+                f"{len(set(tiles_file.centroid_of_tile))} finished"
+            )
+
+    logger.info("Program finished successfully")
+
+
+def check_requirements() -> None:
+    logger.info("Downloader started, with the settings:")
+    logger.info(f"Dockerized = {DOCKERIZED}")
+    logger.info(f"Make_trainings_data = {MAKE_TRAININGS_DATA}")
+    logger.info(f"Production = {PRODUCTION}")
+
+    while True:
+        if create_download_path(path=DOWNLOAD_PATH):
+            break
+
+    if not aws_available:
+        logger.warning("AWS credentials not valid, running script anyway")
+
+
+def get_api() -> SentinelAPI:
+    while True:
+        try:
+            api = wait_for_api_connection()
+            return api
+        except Exception as e:
+            logger.error(f"Error connecting to API: {e}")
+            exit()
 
 
 def load_tiles_file(path: Path) -> GeoDataFrame:
@@ -138,54 +194,4 @@ def wait_for_api_connection() -> Union[bool, SentinelAPI]:
 
 
 if __name__ == "__main__":
-    logger.info("Downloader started, with the settings:")
-    logger.info(f"Dockerized = {DOCKERIZED}")
-    logger.info(f"Make_trainings_data = {MAKE_TRAININGS_DATA}")
-    logger.info(f"Production = {PRODUCTION}")
-
-    tiles_file = load_tiles_file(path=PATH_TO_TILES)
-
-    while True:
-        if create_download_path(path=DOWNLOAD_PATH):
-            break
-
-    while True:
-        try:
-            api = wait_for_api_connection()
-            break
-        except Exception as e:
-            logger.error(f"Error connecting to API: {e}")
-            exit()
-
-    if not aws_available:
-        logger.warning("AWS credentials not valid, running script anyway")
-
-    # TODO: better input handling of NOW_DICT and date maybe with mode ...
-    for season_counter, (season, dates) in enumerate(NOW_DICT.items()):
-        start_date, end_date = dates["start_date"], dates["end_date"]
-        for centroid_counter, centroid in enumerate(set(tiles_file.centroid_of_tile)):
-            # ToDo: add faster way to check if data is already downloaded
-            # see: make_trainings_data.ipynb
-            try:
-                result = download_sentinel2_data(
-                    api=api,
-                    footprint=centroid,
-                    start_date=start_date,
-                    end_date=end_date,
-                    download_root=DOWNLOAD_PATH,
-                )
-
-            # ! result is type bool not exception
-            except Exception as e:
-                logger.error(
-                    f"Error occurred while downloading data for centroid {centroid}: {e}"
-                )
-                continue
-
-            logger.info(
-                f"season {season} ({season_counter+1}/{len(NOW_DICT.keys())}) "
-                f"for tile {centroid_counter+1}/"
-                f"{len(set(tiles_file.centroid_of_tile))} finished"
-            )
-
-    logger.info("Program finished successfully")
+    main()

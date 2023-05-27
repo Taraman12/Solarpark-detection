@@ -1,7 +1,5 @@
-import json
 import logging
 import os
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -9,7 +7,6 @@ import segmentation_models_pytorch as smp
 import torch
 import yaml
 from ts.torch_handler.base_handler import BaseHandler
-
 """
 ToDo: use jit to load the model instead on state_dict
 Needs be be saved as a script model first
@@ -45,8 +42,8 @@ class ModelHandler(BaseHandler):
         logging.info("initialize...")
         self.manifest = context.manifest
 
-        properties = context.system_properties
-        model_dir = properties.get("model_dir")
+        # properties = context.system_properties
+        # model_dir = properties.get("model_dir")
 
         self.device = "cpu"
         if not os.path.isfile("eff_b0.pth"):
