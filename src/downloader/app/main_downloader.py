@@ -142,7 +142,7 @@ def wait_for_api_connection() -> Union[bool, SentinelAPI]:
 if __name__ == "__main__":
     logger.info("Downloader started, with the settings:")
     logger.info(f"Dockerized = {DOCKERIZED}")
-    logger.info(f"Make_trainigs_data = {MAKE_TRAININGS_DATA}")
+    logger.info(f"Make_trainings_data = {MAKE_TRAININGS_DATA}")
     logger.info(f"Production = {PRODUCTION}")
 
     tiles_file = load_tiles_file(path=PATH_TO_TILES)
