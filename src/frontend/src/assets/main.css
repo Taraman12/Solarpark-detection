@@ -1,5 +1,9 @@
-@import './base.css';
-
+/* @import './base.css'; */
+@import "./tailwind/_base.css";
+@import "./tailwind/_components.css";
+@import "./tailwind/_utilities.css";
+@import "./_table.css";
+/*
 #app {
   max-width: 1280px;
   margin: 0 auto;
@@ -33,3 +37,4 @@ a,
     padding: 0 2rem;
   }
 }
+*/
