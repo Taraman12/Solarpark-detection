@@ -1,6 +1,6 @@
 # commented code is for poetry
 # https://fastapi.tiangolo.com/deployment/docker/#docker-compose
-# FROM python:3.9 as requirements-stage
+# FROM python:3.10 as requirements-stage
 
 # WORKDIR /tmp
 

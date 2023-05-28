@@ -3,6 +3,7 @@ from typing import Any, TypeVar
 
 # third-party
 # from pydantic import BaseModel
+from fastapi.encoders import jsonable_encoder
 from shapely.geometry import Polygon
 from sqlalchemy.orm import Session
 
@@ -14,7 +15,8 @@ from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 from .base import CRUDBase
 
 # import shapely.wkt
-# from geoalchemy2.elements import WKTElement
+from geoalchemy2.elements import WKTElement
+
 # from geoalchemy2.shape import to_shape
 
 
@@ -22,21 +24,24 @@ ModelType = TypeVar("ModelType", bound=Base)
 
 
 class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
-    def get(self, db: Session, id: Any, *, polygon: bool = False) -> SolarPark:
-        if polygon:
-            db_obj = db.query(SolarPark).filter(SolarPark.id == id).first()
-            db_obj.geometry = Polygon(db_obj.geometry)
-            return db_obj
-        return db.query(SolarPark).filter(SolarPark.id == id).first()
+    pass
+    # def get(self, db: Session, id: Any, *, polygon: bool = False) -> SolarPark:
+    #     if polygon:
+    #         db_obj = db.query(SolarPark).filter(SolarPark.id == id).first()
+    #         db_obj.geometry = Polygon(db_obj.geometry)
+    #         return db_obj
+    #     return db.query(SolarPark).filter(SolarPark.id == id).first()
 
-    def get_multi(
-        self, db: Session, *, skip: int = 0, limit: int = 100, polygon: bool = False
-    ) -> SolarPark:
-        if polygon:
-            db_obj = db.query(SolarPark).offset(skip).limit(limit).all()
-            db_obj.geometry = Polygon(db_obj.geometry)
-            return db_obj
-        return db.query(SolarPark).offset(skip).limit(limit).all()
+    # def get_multi(
+    #     self, db: Session, *, skip: int = 0, limit: int = 100, polygon: bool = False
+    # ) -> SolarPark:
+    #     if polygon:
+    #         db_obj = db.query(SolarPark).offset(skip).limit(limit).all()
+    #         db_obj.geometry = Polygon(db_obj.geometry)
+    #         return db_obj
+    #     return db.query(SolarPark).offset(skip).limit(limit).all()
+
+
 
     # pass
     # def create(self, db: Session, *, obj_in: SolarParkCreate):
