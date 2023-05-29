@@ -8,6 +8,8 @@ RUN npm install
 
 COPY ./ /app/
 
+RUN chmod +x /app/vite.config.ts
+
 EXPOSE 5000
 
 # change to production for production
