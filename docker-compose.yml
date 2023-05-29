@@ -83,6 +83,9 @@ services:
       - "80:5000"
     expose:
       - "80"
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
 
 volumes:
   data:
