@@ -1,11 +1,12 @@
 # build-in
 from datetime import date
+from typing import Any, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, validator, BaseConfig
 from geoalchemy2 import WKTElement
 from geoalchemy2.shape import to_shape
-from typing import Any, List, Optional, Union, Tuple
 from geojson_pydantic.geometries import Polygon
+from pydantic import BaseConfig, BaseModel, validator
+
 """Minimum working example snippet for handling lat lng coordinates and geometry types using Fastapi"""
 
 # app = FastAPI()

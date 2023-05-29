@@ -1,11 +1,17 @@
 # build-in
 from datetime import date
+from typing import Any, List, Optional, Tuple, Union
+
+from geoalchemy2 import WKTElement
+from geoalchemy2.types import Geometry
 
 # third-party
-from pydantic import BaseModel, Field, validator, BaseConfig  # ConstrainedFloat, Field, PrivateAttr, conlist
-from geoalchemy2.types import Geometry
-from geoalchemy2 import WKTElement
-from typing import Any, List, Optional, Union, Tuple
+from pydantic import (  # ConstrainedFloat, Field, PrivateAttr, conlist
+    BaseConfig,
+    BaseModel,
+    Field,
+    validator,
+)
 
 """
 Related Links:
@@ -45,6 +51,7 @@ https://fastapi.tiangolo.com/tutorial/response-model/
 # from typing import List, Tuple, Union
 # from pydantic.dataclasses import dataclass
 
+
 # @dataclass
 # class Geometry:
 #     type: str
@@ -53,24 +60,28 @@ class Coordinates(BaseModel):
     lat: float = 0
     lng: float = 0
 
-    @validator('lat')
+    @validator("lat")
     def lat_within_range(cls, v):
         if not -90 < v < 90:
-            raise ValueError('Latitude outside allowed range')
+            raise ValueError("Latitude outside allowed range")
         return v
 
-    @validator('lng')
+    @validator("lng")
     def lng_within_range(cls, v):
         if not -180 < v < 180:
-            raise ValueError('Longitude outside allowed range')
+            raise ValueError("Longitude outside allowed range")
         return v
+
+
 class UserIn(BaseModel):
     username: str
     coordinates: Coordinates
 
+
 class UserOut(BaseModel):
     username: str
     coordinates: Coordinates
+
 
 class UserInDB(BaseModel):
     username: str
@@ -79,8 +90,10 @@ class UserInDB(BaseModel):
     class Config(BaseConfig):
         arbitrary_types_allowed = True
 
+
 # class Position(BaseModel):
 #     Position = Union[Tuple[float, float], Tuple[float, float, float]]
+
 
 class SolarParkBase(BaseModel):
     name_of_model: str
@@ -92,7 +105,7 @@ class SolarParkBase(BaseModel):
     avg_confidence: float
     lat: List[float]
     lon: List[float]
-    geom: WKTElement # List[conlist(Position, min_items=4)]
+    geom: WKTElement  # List[conlist(Position, min_items=4)]
 
     class Config(BaseConfig):
         arbitrary_types_allowed = True
@@ -100,10 +113,10 @@ class SolarParkBase(BaseModel):
     # @validator("geom", pre=True, always=True)
     # def assemble_geometry(cls, v, values):
     #     pass
-        # print(values)
+    # print(values)
 
-        # use_enum_values = True
-     # Any # = Field(sa_column=Geometry(geometry_type='POLYGON', srid=4326))
+    # use_enum_values = True
+    # Any # = Field(sa_column=Geometry(geometry_type='POLYGON', srid=4326))
 
     # lat: List[float]=0
     # lon: List[float]=0

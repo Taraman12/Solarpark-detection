@@ -1,6 +1,6 @@
 # third-party
 from geoalchemy2 import Geometry
-from sqlalchemy import Column, Date, Float, Integer, String, ARRAY
+from sqlalchemy import ARRAY, Column, Date, Float, Integer, String
 
 # local modules
 from app.db.base_class import Base

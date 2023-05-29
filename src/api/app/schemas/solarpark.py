@@ -1,11 +1,12 @@
 # build-in
 from datetime import date
 
-# third-party
-from pydantic import BaseModel
 # from geoalchemy2.types import Geometry
 # from geoalchemy2 import WKTElement
 from typing import List
+
+# third-party
+from pydantic import BaseModel
 
 
 class SolarParkBase(BaseModel):

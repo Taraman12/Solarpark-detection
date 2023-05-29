@@ -4,6 +4,9 @@ from typing import Any, TypeVar
 # third-party
 # from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
+
+# import shapely.wkt
+from geoalchemy2.elements import WKTElement
 from shapely.geometry import Polygon
 from sqlalchemy.orm import Session
 
@@ -13,9 +16,6 @@ from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 
 # local modules
 from .base import CRUDBase
-
-# import shapely.wkt
-from geoalchemy2.elements import WKTElement
 
 # from geoalchemy2.shape import to_shape
 
@@ -41,7 +41,7 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         return db.query(SolarPark).offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: SolarParkCreate) -> SolarPark:
-        print('here')
+        print("here")
         # db_obj = SolarPark(
         #     name_of_model=obj_in.name_of_model,
         #     size_in_sq_m=obj_in.size_in_sq_m,
@@ -60,7 +60,7 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         if len(obj_in.lat) >= 4 and len(obj_in.lon) >= 4:
             polygon = Polygon(zip(db_obj.lon, db_obj.lat))
             print(polygon.wkt)
-            db_obj.geom = str(polygon.wkt) #WKTElement(polygon.wkt, srid=4326)
+            db_obj.geom = str(polygon.wkt)  # WKTElement(polygon.wkt, srid=4326)
             print(db_obj.geom)
         print(db_obj)
         print(type(db_obj.geom))

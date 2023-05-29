@@ -3,7 +3,7 @@ from typing import Any, List
 
 # third-party
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse, FileResponse, Response
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from sqlalchemy.orm import Session
 
 # local modules
@@ -84,7 +84,7 @@ async def get_geojson(
     db: Session = Depends(deps.get_db),
 ) -> Any:
     """Retrieve solarpark."""
-    #response = crud.solarpark.get_geojson(db)
+    # response = crud.solarpark.get_geojson(db)
     # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
-   # print(response)
-    return crud.solarpark.get_geojson(db) # response #crud.solarpark.get_geojson(db)
+    # print(response)
+    return crud.solarpark.get_geojson(db)  # response #crud.solarpark.get_geojson(db)

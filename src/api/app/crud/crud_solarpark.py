@@ -1,25 +1,26 @@
 # build-in
 from typing import Any, TypeVar
 
+import geojson
+from fastapi.encoders import jsonable_encoder
+
 # third-party
 # from pydantic import BaseModel
-from fastapi.responses import StreamingResponse, Response
-from fastapi.encoders import jsonable_encoder
+from fastapi.responses import Response, StreamingResponse
+
+# import shapely.wkt
+from geoalchemy2.elements import WKTElement
+from geojson import Feature, FeatureCollection, Polygon
 
 # from shapely.geometry import Polygon
 from sqlalchemy.orm import Session
-from geojson import Feature, FeatureCollection, Polygon
-import geojson
 
-
-# local modules
-from .base import CRUDBase
 from app.db.base_class import Base
 from app.models.solarpark import SolarPark
 from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 
-# import shapely.wkt
-from geoalchemy2.elements import WKTElement
+# local modules
+from .base import CRUDBase
 
 # from geoalchemy2.shape import to_shape
 
@@ -64,14 +65,16 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
             feature = Feature(geometry=polygon, properties=properties)
             features.append(feature)
         feature_collection = FeatureCollection(features)
-           # GeoJSON-Datei als Stream senden
+
+        # GeoJSON-Datei als Stream senden
         async def generate():
             yield '{"type": "FeatureCollection", "features": ['
-            for i, feature in enumerate(feature_collection['features']):
+            for i, feature in enumerate(feature_collection["features"]):
                 if i > 0:
-                    yield ','
+                    yield ","
                 yield str(feature)
-            yield ']}'
+            yield "]}"
+
         # geojson_data = str(feature_collection).encode("utf-8")
         # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
         return StreamingResponse(
