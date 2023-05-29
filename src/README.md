@@ -32,3 +32,5 @@ enable spot fleet -> no
 CMD eb status eb-env
 
 CMD eb health eb-env
+
+ eb logs --zip

@@ -11,4 +11,4 @@ COPY ./ /app/
 EXPOSE 5000
 
 # change to production for production
-CMD [ "npm", "run" ,"dev", "--", "--host", "--port", "5000"]
+CMD [ "npm", "run" ,"dev", "--", "--host","--port", "5000"]
