@@ -7,6 +7,15 @@ from geoalchemy2.types import Geometry
 from geoalchemy2 import WKTElement
 from typing import Any, List, Optional, Union, Tuple
 
+"""
+Related Links:
+https://github.com/tiangolo/fastapi/issues/315
+https://github.com/tiangolo/fastapi/issues/1246
+
+Solution could be to use a custom response model for each input and output:
+https://fastapi.tiangolo.com/tutorial/response-model/
+"""
+
 
 # from shapely.geometry import Polygon, mapping
 # from shapely.wkt import loads
