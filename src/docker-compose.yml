@@ -1,7 +1,25 @@
 version: "3.9"
 services:
+  # db-postgis:
+  #   image: postgis/postgis:15-3.3 # alt: postgres:15.3
+  #   restart: always
+  #   volumes:
+  #     - data:/var/lib/postgres/data
+  #   environment:
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - POSTGRES_HOST=${POSTGRES_HOST}
+  #     - POSTGRES_PORT=${POSTGRES_PORT}
+  #     #- POSTGRES_INITDB_ARGS=--encoding=UTF8
+
+  #   ports:
+  #     - ${POSTGRES_PORT}:${POSTGRES_PORT}
+  #   expose:
+  #     - ${POSTGRES_PORT}
+
   db:
-    image: postgres:15.3 # alt: postgis/postgis:15-3.3
+    image: postgres:15.3 # alt: postgres:15.3
     restart: always
     volumes:
       - data:/var/lib/postgres/data
@@ -18,26 +36,26 @@ services:
     expose:
       - ${POSTGRES_PORT}
 
-  api:
-    build:
-      context: ./api
-      dockerfile: api.dockerfile
-    depends_on:
-      - db
-    ports:
-      - "8000:8000"
-    environment:
-      - DOCKERIZED=true
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-    expose:
-      - "8000"
+  # api:
+  #   build:
+  #     context: ./api
+  #     dockerfile: api.dockerfile
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DOCKERIZED=true
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - POSTGRES_HOST=${POSTGRES_HOST}
+  #     - POSTGRES_PORT=${POSTGRES_PORT}
+  #   expose:
+  #     - "8000"
 
-    volumes:
-      - data:/var/lib/postgis/data
+  #   volumes:
+  #     - data:/var/lib/postgis/data
 
   # downloader:
   #   build:
@@ -75,14 +93,14 @@ services:
   #   expose:
   #     - "5678"
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: frontend.dockerfile
-    ports:
-      - "80:5000"
-    expose:
-      - "80"
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: frontend.dockerfile
+  #   ports:
+  #     - "80:5000"
+  #   expose:
+  #     - "80"
 
 volumes:
   data:
