@@ -1,4 +1,4 @@
-FROM pytorch/torchserve:latest-cpu
+FROM pytorch/torchserve:0.8.0-cpu
 
 COPY ./requirements.txt requirements.txt
 

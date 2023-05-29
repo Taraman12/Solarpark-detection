@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 </script>
@@ -14,10 +14,14 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/testview">Test Seite</RouterLink>
+        <RouterLink to="/table">Table View</RouterLink>
+        <RouterLink to="/map">Map View</RouterLink>
+        <RouterLink to="/mapWithPoly">mapWithPolyView</RouterLink>
+        <RouterLink to="/selectPolyFromTableView">SelectPolyFromTableView</RouterLink>
+        <RouterLink to="/modelsView">Models</RouterLink>
       </nav>
     </div>
   </header>
-
   <RouterView />
 </template>
 

@@ -21,7 +21,32 @@ const router = createRouter({
       path: '/testview',
       name: 'testview',
       component: () => import('../views/TestView.vue')
-    }
+    },
+    {
+      path: '/table',
+      name: 'table',
+      component: () => import('../views/TableView.vue')
+    },
+    {
+      path: '/map',
+      name: 'map',
+      component: () => import('../views/MapView.vue')
+    },
+    {
+      path: '/mapWithPoly',
+      name: 'mapWithPoly',
+      component: () => import('../views/MapWithPolyView.vue')
+    },
+    {
+      path: '/selectPolyFromTableView',
+      name: 'selectPolyFromTableView',
+      component: () => import('../views/SelectPolyFromTableView.vue')
+    },
+    {
+      path: '/modelsView',
+      name: 'modelsView',
+      component: () => import('../views/ModelsView.vue')
+    },
   ]
 })
 

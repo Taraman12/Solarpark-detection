@@ -29,6 +29,7 @@ class Settings(BaseSettings):
         "http://frontend:80",
         "http://localhost:8080",
         "http://frontend:8080",
+        "http://frontend:5000",
         "http://localhost:5000",
         "http://localhost:5678",
         "http://preprocessing:5678",

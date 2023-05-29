@@ -3,6 +3,7 @@ from typing import Any, List
 
 # third-party
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 # local modules
@@ -75,3 +76,15 @@ def delete_solarpark(
         raise HTTPException(status_code=404, detail="solarpark not found")
     solarpark = crud.solarpark.remove(db=db, id=id)
     return solarpark
+
+
+@router.get("/download/as-geojson", response_class=StreamingResponse)
+async def get_geojson(
+    *,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """Retrieve solarpark."""
+    # response = crud.solarpark.get_geojson(db)
+    # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
+    # print(response)
+    return crud.solarpark.get_geojson(db)  # response #crud.solarpark.get_geojson(db)

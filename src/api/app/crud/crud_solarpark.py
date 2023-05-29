@@ -1,9 +1,18 @@
 # build-in
 from typing import Any, TypeVar
 
+# import geojson
+from fastapi.encoders import jsonable_encoder
+
 # third-party
 # from pydantic import BaseModel
-from shapely.geometry import Polygon
+from fastapi.responses import StreamingResponse
+
+# import shapely.wkt
+# from geoalchemy2.elements import WKTElement
+from geojson import Feature, FeatureCollection, Polygon
+
+# from shapely.geometry import Polygon
 from sqlalchemy.orm import Session
 
 from app.db.base_class import Base
@@ -13,30 +22,82 @@ from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 # local modules
 from .base import CRUDBase
 
-# import shapely.wkt
-# from geoalchemy2.elements import WKTElement
 # from geoalchemy2.shape import to_shape
 
 
 ModelType = TypeVar("ModelType", bound=Base)
 
 
-class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
-    def get(self, db: Session, id: Any, *, polygon: bool = False) -> SolarPark:
-        if polygon:
-            db_obj = db.query(SolarPark).filter(SolarPark.id == id).first()
-            db_obj.geometry = Polygon(db_obj.geometry)
-            return db_obj
-        return db.query(SolarPark).filter(SolarPark.id == id).first()
+# GeoJSON-Datei als Stream senden
+def generate(feature_collection: FeatureCollection):
+    yield '{"type": "FeatureCollection", "features": ['
+    for i, feature in enumerate(feature_collection["features"]):
+        if i > 0:
+            yield ","
+        yield str(feature)
+    yield "]}"
 
-    def get_multi(
-        self, db: Session, *, skip: int = 0, limit: int = 100, polygon: bool = False
-    ) -> SolarPark:
-        if polygon:
-            db_obj = db.query(SolarPark).offset(skip).limit(limit).all()
-            db_obj.geometry = Polygon(db_obj.geometry)
-            return db_obj
-        return db.query(SolarPark).offset(skip).limit(limit).all()
+
+class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
+    # pass
+    def get_geojson(
+        self,
+        db: Session,
+    ) -> Any:
+        db_obj = db.query(SolarPark).all()
+        obj_data = jsonable_encoder(db_obj)
+        # GeoJSON-FeatureCollection erstellen
+        features = []
+        for row in obj_data:
+            lat = row["lat"]
+            lon = row["lon"]
+            coords = [(lon[i], lat[i]) for i in range(len(lat))]
+            polygon = Polygon([coords])
+            properties = {
+                "name_of_model": row["name_of_model"],
+                "size_in_sq_m": row["size_in_sq_m"],
+                "peak_power": row["peak_power"],
+                "date_of_data": row["date_of_data"],  # .strftime('%Y-%m-%d'),
+                "first_detection": row["first_detection"],  # .strftime('%Y-%m-%d'),
+                "last_detection": row["last_detection"],  # .strftime('%Y-%m-%d'),
+                "avg_confidence": row["avg_confidence"],
+            }
+            feature = Feature(geometry=polygon, properties=properties)
+            features.append(feature)
+        feature_collection = FeatureCollection(features)
+
+        # GeoJSON-Datei als Stream senden
+        async def generate():
+            yield '{"type": "FeatureCollection", "features": ['
+            for i, feature in enumerate(feature_collection["features"]):
+                if i > 0:
+                    yield ","
+                yield str(feature)
+            yield "]}"
+
+        # geojson_data = str(feature_collection).encode("utf-8")
+        # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
+        return StreamingResponse(
+            content=generate(),
+            media_type="application/json",
+            headers={"Content-Disposition": "attachment; filename=geodata.geojson"},
+        )
+
+    # def get(self, db: Session, id: Any, *, polygon: bool = False) -> SolarPark:
+    #     if polygon:
+    #         db_obj = db.query(SolarPark).filter(SolarPark.id == id).first()
+    #         db_obj.geometry = Polygon(db_obj.geometry)
+    #         return db_obj
+    #     return db.query(SolarPark).filter(SolarPark.id == id).first()
+
+    # def get_multi(
+    #     self, db: Session, *, skip: int = 0, limit: int = 100, polygon: bool = False
+    # ) -> SolarPark:
+    #     if polygon:
+    #         db_obj = db.query(SolarPark).offset(skip).limit(limit).all()
+    #         db_obj.geometry = Polygon(db_obj.geometry)
+    #         return db_obj
+    #     return db.query(SolarPark).offset(skip).limit(limit).all()
 
     # pass
     # def create(self, db: Session, *, obj_in: SolarParkCreate):
