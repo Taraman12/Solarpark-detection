@@ -80,9 +80,9 @@ services:
       context: ./src/frontend
       dockerfile: frontend.dockerfile
     ports:
-      - "80:5000"
+      - "5000:5000"
     expose:
-      - "80"
+      - "5000"
 
 volumes:
   data:

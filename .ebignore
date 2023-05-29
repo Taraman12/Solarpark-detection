@@ -1,11 +1,14 @@
 data_local
 data_raw
 
+raw_data
+src/api-postgis
+src/ML_Modell
 Create_figures_thesis/*.jpg
 Create_figures_thesis/*.pdf
 Notebooks/*.ipynb
 **/*.ipynb
-
+.venv
 Archive/
 
 ### VisualStudioCode ###
