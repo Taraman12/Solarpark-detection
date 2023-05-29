@@ -57,4 +57,4 @@ function createFetch(baseURL) {
     }
 }
 
-export const useApiFetch = createFetch('http://192.168.178.21:8000/api/v1')
+export const useApiFetch = createFetch('http://localhost:8000/api/v1')
