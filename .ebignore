@@ -5,6 +5,7 @@ Create_figures_thesis/*.jpg
 Create_figures_thesis/*.pdf
 Notebooks/*.ipynb
 **/*.ipynb
+
 Archive/
 
 ### VisualStudioCode ###
