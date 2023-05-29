@@ -16,6 +16,7 @@ class SolarParkBase(BaseModel):
     first_detection: date
     last_detection: date
     avg_confidence: float
+    is_valid: str = "None"
     lat: List[float]
     lon: List[float]
 
