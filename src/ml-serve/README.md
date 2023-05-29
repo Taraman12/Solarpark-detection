@@ -38,4 +38,4 @@ curl "http://localhost:8081/models"
 
 #### make .mar file
 ##### run this in (git) bash shell (from ml-serve folder)
-.//make_archive.sh
+./make-archive.sh
