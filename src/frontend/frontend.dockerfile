@@ -9,6 +9,7 @@ RUN npm install
 COPY ./ /app/
 
 RUN chmod +x /app/vite.config.ts
+RUN chmod -R a+x /app/node_modules
 
 EXPOSE 5000
 
