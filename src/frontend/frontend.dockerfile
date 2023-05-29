@@ -8,7 +8,7 @@ RUN npm install
 
 COPY ./ /app/
 
-EXPOSE 5000
+EXPOSE 80
 
 # change to production for production
-CMD [ "npm", "run" ,"dev", "--", "--host","--port", "5000"]
+CMD [ "npm", "run" ,"dev", "--", "--host","--port", "80"]
