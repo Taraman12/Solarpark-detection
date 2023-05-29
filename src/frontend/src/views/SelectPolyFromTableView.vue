@@ -10,7 +10,7 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 // to delete polygons later
 // import {toRaw} from 'vue';
 // this.markers.map((marker) => toRaw(marker).setMap(null))
-const { dataSinglePoly, errorSinglePoly, get } = useApiFetch()
+const { dataSinglePoly, errorSinglePoly, get, put } = useApiFetch()
 
 //* Google Map instances
 const loader = new Loader({
@@ -124,10 +124,28 @@ async function handleRowClick(id) {
     // });
 }
 
+async function handleCheckboxClick(item) {
+    try {
+        // copy item object and update is_valid property
+        const updatedItem = { ...item, is_valid: "True" };
+
+        const response = await fetch(`http://localhost:8000/api/v1/solarpark/${item.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedItem)
+        });
+        console.log(response);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 onMounted(async () => { //create map
     dataTable.value = await fetchData("");
     // ! Hardcoded for now
-    data.value = await fetchData(2)
+    data.value = await fetchData(4)
     await loader.load();
     map.value = new google.maps.Map(mapDiv.value, {
         // center: currPos.value,
@@ -156,7 +174,6 @@ onMounted(async () => { //create map
                         <th>first_detection</th>
                         <th>last_detection</th>
                         <th>Valid</th>
-                        <th>Invalid</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -166,8 +183,17 @@ onMounted(async () => { //create map
                         <td>{{ item.peak_power }}</td>
                         <td>{{ item.first_detection }}</td>
                         <td>{{ item.last_detection }}</td>
-                        <td>
+                        <td v-if="item.is_valid === 'None'">
                             <input type="checkbox" v-model="item.selected" @click="handleCheckboxClick(item)">
+                        </td>
+                        <td v-else-if="item.is_valid === 'True'">
+                            <span class="text-green-500">Valid</span>
+                        </td>
+                        <td v-else-if="item.is_valid === 'False'">
+                            <span class="text-red-500">Invalid</span>
+                        </td>
+                        <td v-else-if="item.is_valid === 'Unsure'">
+                            <span class="text-yellow-500">Unsure</span>
                         </td>
                     </tr>
                 </tbody>
