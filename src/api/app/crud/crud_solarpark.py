@@ -1,15 +1,15 @@
 # build-in
 from typing import Any, TypeVar
 
-import geojson
+# import geojson
 from fastapi.encoders import jsonable_encoder
 
 # third-party
 # from pydantic import BaseModel
-from fastapi.responses import Response, StreamingResponse
+from fastapi.responses import StreamingResponse
 
 # import shapely.wkt
-from geoalchemy2.elements import WKTElement
+# from geoalchemy2.elements import WKTElement
 from geojson import Feature, FeatureCollection, Polygon
 
 # from shapely.geometry import Polygon

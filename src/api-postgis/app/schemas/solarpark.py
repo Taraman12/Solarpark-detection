@@ -1,17 +1,18 @@
 # build-in
 from datetime import date
-from typing import Any, List, Optional, Tuple, Union
+from typing import List  # , Optional, Tuple, Union, Any
 
 from geoalchemy2 import WKTElement
-from geoalchemy2.types import Geometry
 
 # third-party
-from pydantic import (  # ConstrainedFloat, Field, PrivateAttr, conlist
+from pydantic import (  # ConstrainedFloat, Field, PrivateAttr, conlist; Field,
     BaseConfig,
     BaseModel,
-    Field,
     validator,
 )
+
+# from geoalchemy2.types import Geometry
+
 
 """
 Related Links:

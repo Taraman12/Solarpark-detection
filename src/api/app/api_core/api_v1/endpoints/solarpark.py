@@ -3,7 +3,7 @@ from typing import Any, List
 
 # third-party
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import FileResponse, Response, StreamingResponse
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 # local modules

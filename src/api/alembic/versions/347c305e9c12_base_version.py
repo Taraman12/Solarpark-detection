@@ -1,7 +1,7 @@
 """Base Version
 
 Revision ID: 347c305e9c12
-Revises: 
+Revises:
 Create Date: 2023-05-28 17:00:29.844749
 
 """

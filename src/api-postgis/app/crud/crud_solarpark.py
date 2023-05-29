@@ -6,7 +6,7 @@ from typing import Any, TypeVar
 from fastapi.encoders import jsonable_encoder
 
 # import shapely.wkt
-from geoalchemy2.elements import WKTElement
+# from geoalchemy2.elements import WKTElement
 from shapely.geometry import Polygon
 from sqlalchemy.orm import Session
 

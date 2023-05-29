@@ -8,7 +8,8 @@ Create Date: 2023-05-28 12:14:59.027615
 import sqlalchemy as sa
 from alembic import op
 from geoalchemy2 import Geometry
-from sqlalchemy.dialects import postgresql
+
+# from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "bba5f69bb1ae"
