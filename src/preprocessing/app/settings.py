@@ -1,8 +1,12 @@
 # build-in
 import os
 
-DOCKERIZED = bool(os.getenv("DOCKERIZED", False))
+DOCKERIZED = os.getenv("DOCKERIZED", "False").lower() in ("true", "1", "t")
 
-MAKE_TRAININGS_DATA = bool(os.getenv("MAKE_TRAININGS_DATA", True))
+MAKE_TRAININGS_DATA = os.getenv("MAKE_TRAININGS_DATA", "True").lower() in (
+    "true",
+    "1",
+    "t",
+)
 
-PRODUCTION = bool(os.getenv("PRODUCTION", False))
+PRODUCTION = os.getenv("PRODUCTION", "False").lower() in ("true", "1", "t")

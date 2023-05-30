@@ -2,7 +2,8 @@
 import time
 from distutils.util import strtobool
 from pathlib import Path
-from typing import Union
+from typing import Union, Tuple
+from datetime import date
 
 # third-party
 import geopandas as gpd
@@ -10,7 +11,7 @@ import geopandas as gpd
 # local modules
 from api_call_handler import download_sentinel2_data
 from cloud_clients import aws_available
-from constants import DOWNLOAD_PATH, NOW_DICT, PATH_TO_TILES
+from constants import DOWNLOAD_PATH, NOW_DICT, SEASONS_DICT, PATH_TO_TILES
 from geopandas import GeoDataFrame
 from logging_config import get_logger
 from sentinel_api import connect_to_sentinel_api
@@ -21,44 +22,50 @@ from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 # set up logger
 logger = get_logger(__name__)
 """
-ToDo: Add faster way to check if tile is already downloaded
+ToDo: Check logger settings
+ToDo: logger in submodules
+ToDo: 
 ToDo: Needs better documentation
-ToDo: handle memory consumption (but not so important)
+
 """
 
 
 def main():
     check_requirements()
     api = get_api()
-    tiles_file = load_tiles_file(path=PATH_TO_TILES)
+    tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
 
-    # TODO: better input handling of NOW_DICT and date maybe with mode ...
-    for season_counter, (season, dates) in enumerate(NOW_DICT.items()):
+    if MAKE_TRAININGS_DATA:
+        dates_dict = SEASONS_DICT
+    else:
+        dates_dict = NOW_DICT
+
+    for season_counter, (season, dates) in enumerate(dates_dict.items()):
         start_date, end_date = dates["start_date"], dates["end_date"]
-        for centroid_counter, centroid in enumerate(set(tiles_file.centroid_of_tile)):
-            # ToDo: add faster way to check if data is already downloaded
-            # see: make_trainings_data.ipynb
-            try:
-                download_sentinel2_data(
-                    api=api,
-                    footprint=centroid,
-                    start_date=start_date,
-                    end_date=end_date,
-                    download_root=DOWNLOAD_PATH,
-                )
-
-            # ! result is type bool not exception
-            except Exception as e:
-                logger.error(f"Error occurred while downloading data: {e}")
-                continue
-
+        for centroid_counter, centroid in enumerate(set(tiles_gdf.centroid_of_tile)):
+            download_data(api, centroid, start_date, end_date)
             logger.info(
-                f"season {season} ({season_counter+1}/{len(NOW_DICT.keys())}) "
+                f"season {season} ({season_counter+1}/{len(dates_dict.keys())}) "
                 f"for tile {centroid_counter+1}/"
-                f"{len(set(tiles_file.centroid_of_tile))} finished"
+                f"{len(set(tiles_gdf.centroid_of_tile))} finished"
             )
-
     logger.info("Program finished successfully")
+
+
+def download_data(
+    api: SentinelAPI, footprint: str, start_date: date, end_date: date
+) -> None:
+    try:
+        download_sentinel2_data(
+            api=api,
+            footprint=footprint,
+            start_date=start_date,
+            end_date=end_date,
+            download_root=DOWNLOAD_PATH,
+        )
+
+    except Exception as e:
+        logger.error(f"Error occurred while downloading data: {e}")
 
 
 def check_requirements() -> None:

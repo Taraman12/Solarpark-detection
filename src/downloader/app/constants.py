@@ -8,7 +8,7 @@ from datetime import date
 from pathlib import Path
 
 # NOTE file path can be created on the fly
-DOWNLOAD_PATH = Path(r".\data_local\training_data_raw_test")
+DOWNLOAD_PATH = Path(r".\data_local\training_data_raw")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PATH_TO_TILES = SCRIPT_DIR / "data" / "tiles_germany.geojson"

@@ -38,11 +38,12 @@ def download_from_aws_handler(
     sentinel_bucket, prefix = make_aws_path(identifier)
 
     for band in REQUIRED_BANDS:
-        band_file = f"{band}.jp2"
+        band_file = f"{band}_10m.jp2"
         band_file_path = target_folder / band_file
         if PRODUCTION:
+            #! leads to
             # https://stackoverflow.com/questions/63323425/download-sentinel-file-from-s3-using-python-boto3
-            if copy_from_aws(sentinel_bucket, prefix, band_file):
+            if copy_from_aws(sentinel_bucket, identifier, prefix, band):
                 continue
 
             return True
@@ -50,7 +51,7 @@ def download_from_aws_handler(
         if band_file_path.exists():
             continue
 
-        download_from_aws(sentinel_bucket, prefix, band_file, target_folder)
+        download_from_aws(sentinel_bucket, prefix, band, target_folder)
 
     write_downloaded_size(target_folder)
     return True
@@ -103,14 +104,16 @@ def make_aws_path(identifier: str) -> Tuple[str, str]:
     return sentinel_bucket, prefix
 
 
-def copy_from_aws(sentinel_bucket: str, prefix: str, band_file: str) -> bool:
+def copy_from_aws(sentinel_bucket: str, identifier: str, prefix: str, band: str) -> bool:
     try:
+        band_file_input = f"{band}.jp2"
+        band_file_output = f"{band}_10m.jp2"
         s3_client.copy_object(
             Bucket=BUCKET_NAME,
-            Key=f"{prefix}/{band_file}",
+            Key=f"{identifier}/{band_file_output}",
             CopySource={
                 "Bucket": sentinel_bucket,
-                "Key": f"{prefix}/{band_file}",
+                "Key": f"{prefix}/{band_file_input}",
             },
             RequestPayer="requester",
         )
@@ -123,12 +126,14 @@ def copy_from_aws(sentinel_bucket: str, prefix: str, band_file: str) -> bool:
 
 
 def download_from_aws(
-    sentinel_bucket: str, prefix: str, band_file: str, target_folder: Path
+    sentinel_bucket: str, prefix: str, band: str, target_folder: Path
 ) -> bool:
+    band_file_input = f"{band}.jp2"
+    band_file_output = f"{band}_10m.jp2"
     try:
         response = s3_client.get_object(
             Bucket=sentinel_bucket,
-            Key=f"{prefix}/{band_file}",
+            Key=f"{prefix}/{band_file_input}",
             RequestPayer="requester",
         )
     except s3_client.exceptions.NoSuchKey:
@@ -139,7 +144,7 @@ def download_from_aws(
 
     response_content = response["Body"].read()
     # TODO: add variable for resolution
-    with open(target_folder / band_file, "wb") as file:
+    with open(target_folder / band_file_output, "wb") as file:
         file.write(response_content)
     return True
 
