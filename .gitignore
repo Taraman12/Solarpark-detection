@@ -4,6 +4,8 @@ data_raw
 Create_figures_thesis/*.jpg
 Create_figures_thesis/*.pdf
 
+Notebooks/ML_Modell/data/
+
 ### VisualStudioCode ###
 .vscode/*      # Maybe .vscode/**/* instead - see comments
 !.vscode/settings.json
