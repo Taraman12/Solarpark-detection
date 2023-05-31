@@ -41,7 +41,7 @@ def download_from_aws_handler(
         band_file = f"{band}_10m.jp2"
         band_file_path = target_folder / band_file
         if PRODUCTION:
-            #! leads to
+            # ! leads to
             # https://stackoverflow.com/questions/63323425/download-sentinel-file-from-s3-using-python-boto3
             if copy_from_aws(sentinel_bucket, identifier, prefix, band):
                 continue
@@ -104,7 +104,9 @@ def make_aws_path(identifier: str) -> Tuple[str, str]:
     return sentinel_bucket, prefix
 
 
-def copy_from_aws(sentinel_bucket: str, identifier: str, prefix: str, band: str) -> bool:
+def copy_from_aws(
+    sentinel_bucket: str, identifier: str, prefix: str, band: str
+) -> bool:
     try:
         band_file_input = f"{band}.jp2"
         band_file_output = f"{band}_10m.jp2"

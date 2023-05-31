@@ -1,9 +1,9 @@
 # build-in
 import time
+from datetime import date
 from distutils.util import strtobool
 from pathlib import Path
-from typing import Union, Tuple
-from datetime import date
+from typing import Union
 
 # third-party
 import geopandas as gpd
@@ -11,7 +11,7 @@ import geopandas as gpd
 # local modules
 from api_call_handler import download_sentinel2_data
 from cloud_clients import aws_available
-from constants import DOWNLOAD_PATH, NOW_DICT, SEASONS_DICT, PATH_TO_TILES
+from constants import DOWNLOAD_PATH, NOW_DICT, PATH_TO_TILES, SEASONS_DICT
 from geopandas import GeoDataFrame
 from logging_config import get_logger
 from sentinel_api import connect_to_sentinel_api
@@ -24,7 +24,6 @@ logger = get_logger(__name__)
 """
 ToDo: Check logger settings
 ToDo: logger in submodules
-ToDo: 
 ToDo: Needs better documentation
 
 """
