@@ -10,6 +10,7 @@ Notebooks/*.ipynb
 **/*.ipynb
 .venv
 Archive/
+Notebooks/
 
 ### VisualStudioCode ###
 .vscode/*      # Maybe .vscode/**/* instead - see comments
