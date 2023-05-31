@@ -3,8 +3,8 @@ FROM pytorch/torchserve:0.8.0-cpu
 COPY ./requirements.txt requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
-RUN pip uninstall torch torchaudio torchvision -y
-RUN pip install torch==2.0.0+cpu torchvision==0.15.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+# RUN pip uninstall torch torchaudio torchvision -y
+# RUN pip install torch==2.0.0+cpu torchvision==0.15.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
 COPY ./model-store model-store/
 #copy the .mar file created in previous step
