@@ -46,21 +46,21 @@ services:
   #   environment:
   #     - DOCKERIZED=true
 
-  ml-serve:
-    build:
-      context: ./src/ml-serve
-      dockerfile: ml-serve.dockerfile
-    ports:
-      - "8080:8080"
-      - "8081:8081"
-      - "8082:8082"
-    expose:
-      - "8080"
-      - "8081"
-      - "8082"
-    # limits the number of cpus the container can use
-    # else on each thread (core) a model will be loaded
-    cpus: 1.0
+  # ml-serve:
+  #   build:
+  #     context: ./src/ml-serve
+  #     dockerfile: ml-serve.dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #     - "8081:8081"
+  #     - "8082:8082"
+  #   expose:
+  #     - "8080"
+  #     - "8081"
+  #     - "8082"
+  #   # limits the number of cpus the container can use
+  #   # else on each thread (core) a model will be loaded
+  #   cpus: 1.0
   # preprocessing:
   #   build:
   #     context: ./src/preprocessing
