@@ -46,6 +46,10 @@ The crud folder contains the functions that are used to interact with the databa
 alembic revision --autogenerate -m "Your Comment"
 alembic upgrade head
 
+alembic downgrade -1
+or 
+alembic downgrade base
+
 Links:
 
 Annotations:

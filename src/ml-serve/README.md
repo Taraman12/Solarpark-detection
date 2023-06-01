@@ -1,3 +1,6 @@
+### Notes on deployment
+delete torch, torchvision, torchaudio from the requirements.txt file
+
 ### Notes on ml-serve
 https://github.com/pytorch/serve/blob/master/docs/getting_started.md
 cli:  

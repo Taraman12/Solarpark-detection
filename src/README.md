@@ -5,7 +5,7 @@ Role EC2
 
 add SSH port 22 in security group
 
-do not select default security group
+do not select default security group (Create a new one instead, and add SSH port 22)
 
 #### NOTE: eb cli will use the main branch for deployment
 even if you are on a different branch
