@@ -44,7 +44,13 @@ class ModelHandler(BaseHandler):
         # properties = context.system_properties
         # model_dir = properties.get("model_dir")
 
-        self.device = "cpu"
+        self.device = (
+            "cuda"
+            if torch.cuda.is_available()
+            else "mps"
+            if torch.backends.mps.is_available()
+            else "cpu"
+        )
         if not os.path.isfile("eff_b0.pth"):
             raise RuntimeError("Missing the model.pt file")
 
