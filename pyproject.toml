@@ -41,6 +41,7 @@ geopandas = "^0.12.2"
 load-dotenv = "^0.1.0"
 boto3 = "^1.26.125"
 typing-extensions = "^4.5.0"
+requests = "^2.31.0"
 
 [tool.poetry.group.lint.dependencies]
 isort = "^5.12.0"
