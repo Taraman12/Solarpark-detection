@@ -79,7 +79,7 @@ def delete_solarpark(
 
 
 @router.get("/download/as-geojson", response_class=StreamingResponse)
-async def get_geojson(
+async def get_as_geojson(
     *,
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -87,4 +87,4 @@ async def get_geojson(
     # response = crud.solarpark.get_geojson(db)
     # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
     # print(response)
-    return crud.solarpark.get_geojson(db)  # response #crud.solarpark.get_geojson(db)
+    return crud.solarpark.get_as_geojson(db)  # response #crud.solarpark.get_geojson(db)

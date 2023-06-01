@@ -39,8 +39,14 @@ def generate(feature_collection: FeatureCollection):
 
 
 class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
-    # pass
-    def get_geojson(
+    # super().__init__(model=SolarPark)
+    # def create(self, db):
+    #     # check if SolarPark already exists
+    #     # if not, create new SolarPark
+    #     query = get_multi()
+
+
+    def get_as_geojson(
         self,
         db: Session,
     ) -> Any:
