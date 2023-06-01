@@ -7,6 +7,9 @@ import re
 from datetime import date
 from pathlib import Path
 
+# where will the images be stored/ name of the folder in s3 bucket
+DATA_OUTPUT_PREFIX_AWS = Path(r"data_raw")
+
 # NOTE file path can be created on the fly
 DOWNLOAD_PATH = Path(r".\data_local\training_data_raw")
 
@@ -22,7 +25,7 @@ SEASONS_DICT = {
 }
 
 NOW_DICT = {
-    "now": {"start_date": date(2023, 5, 1), "end_date": date(2023, 5, 17)},
+    "now": {"start_date": "NOW-30DAYS", "end_date": "NOW"},
 }
 
 IDENTIFIER_REGEX = re.compile(

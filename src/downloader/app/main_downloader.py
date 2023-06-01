@@ -4,6 +4,7 @@ from datetime import date
 from distutils.util import strtobool
 from pathlib import Path
 from typing import Union
+import requests
 
 # third-party
 import geopandas as gpd
@@ -20,7 +21,7 @@ from sentinelsat.exceptions import ServerError, UnauthorizedError
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 
 # set up logger
-logger = get_logger(__name__)
+logger = get_logger('BaseConfig')
 """
 ToDo: Check logger settings
 ToDo: logger in submodules

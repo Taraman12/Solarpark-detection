@@ -11,8 +11,13 @@ from botocore.errorfactory import ClientError
 from cloud_clients import BUCKET_NAME, s3_client
 
 # local-modules
-from constants import IDENTIFIER_REGEX, REQUIRED_BANDS
+from logging_config import get_logger
+from constants import IDENTIFIER_REGEX, REQUIRED_BANDS, DATA_OUTPUT_PREFIX_AWS
 from settings import PRODUCTION
+
+
+# set up logger
+logger = get_logger("BaseConfig")
 
 # ToDo: add variable for resolution
 # ToDo: replace hard-coded value with a constant
@@ -53,7 +58,7 @@ def download_from_aws_handler(
 
         download_from_aws(sentinel_bucket, prefix, band, target_folder)
 
-    write_downloaded_size(target_folder)
+        write_downloaded_size(target_folder)
     return True
 
 
@@ -77,10 +82,10 @@ def check_aws_free_tier_available(root_folder: Path) -> bool:
     )
     # ToDo: replace hard-coded value with a constant
     if current_month_sum < 90 * (1024**3):
-        print(f"Current month sum is: {current_month_sum/(1024**3):.2f} GB.")
+        logger.info(f"Current month sum is: {current_month_sum/(1024**3):.2f} GB.")
         return True
     else:
-        print("Current month sum is 90 GB or above.")
+        logger.warning("Current month sum is 90 GB or above.")
         return False
 
 
@@ -110,20 +115,24 @@ def copy_from_aws(
     try:
         band_file_input = f"{band}.jp2"
         band_file_output = f"{band}_10m.jp2"
-        s3_client.copy_object(
+        response = s3_client.copy_object(
             Bucket=BUCKET_NAME,
-            Key=f"{identifier}/{band_file_output}",
+            Key=f"{DATA_OUTPUT_PREFIX_AWS}/{identifier}/{band_file_output}",
             CopySource={
                 "Bucket": sentinel_bucket,
                 "Key": f"{prefix}/{band_file_input}",
             },
             RequestPayer="requester",
         )
-        return True
+        if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+            return True
+        else:
+            logger.warning("Copy object on AWS failed")
+            return False
     except s3_client.exceptions.NoSuchKey:
         # ToDo: Need better error handling
         # should trigger LTA
-        print("No such key in bucket")
+        logger.warning("No such key in bucket")
         return False
 
 
@@ -141,7 +150,7 @@ def download_from_aws(
     except s3_client.exceptions.NoSuchKey:
         # ToDo: Need better error handling
         # should trigger LTA
-        print("No such key in bucket")
+        logger.warning("No such key in bucket")
         return False
 
     response_content = response["Body"].read()
@@ -206,6 +215,6 @@ def upload_to_aws(
             try:
                 s3_client.upload_file(local_file, BUCKET_NAME, f"{output_path}/{file}")
             except ClientError as e:
-                print(e)
+                logger.warning(e)
                 return False
     return True

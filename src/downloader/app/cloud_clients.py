@@ -6,6 +6,13 @@ import boto3
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 
+# local-modules
+from logging_config import get_logger
+
+# set up logger
+logger = get_logger('BaseConfig')
+
+
 load_dotenv()
 # login to aws
 session = boto3.Session(
@@ -25,7 +32,7 @@ def verify_aws_credentials() -> bool:
         s3_client.list_buckets()
         return True
     except ClientError:
-        print("Credentials are NOT valid.")
+        logger.warning("Credentials are NOT valid.")
         return False
 
 
