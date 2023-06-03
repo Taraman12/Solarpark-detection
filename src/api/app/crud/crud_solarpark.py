@@ -28,7 +28,7 @@ from .base import CRUDBase
 ModelType = TypeVar("ModelType", bound=Base)
 
 
-# GeoJSON-Datei als Stream senden
+# send geojson-file as stream
 def generate(feature_collection: FeatureCollection):
     yield '{"type": "FeatureCollection", "features": ['
     for i, feature in enumerate(feature_collection["features"]):

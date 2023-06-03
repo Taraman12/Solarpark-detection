@@ -11,7 +11,7 @@ from app import crud, schemas
 from app.api_core import deps
 
 router = APIRouter()
-
+# The Docstring are shown in the Swagger UI as the description of the endpoint.
 
 @router.get("/", response_model=List[schemas.SolarPark])
 def read_solarpark(
@@ -83,7 +83,7 @@ async def get_as_geojson(
     *,
     db: Session = Depends(deps.get_db),
 ) -> Any:
-    """Retrieve solarpark."""
+    """Retrieve all solar parks as geojson."""
     # response = crud.solarpark.get_geojson(db)
     # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
     # print(response)
