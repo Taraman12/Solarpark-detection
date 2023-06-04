@@ -33,6 +33,8 @@ psycopg2-binary = "^2.9.6"
 # celery = "^5.2.7"
 shapely = "^2.0.1"
 geojson = "^3.0.1"
+boto3 = "^1.26.146"
+docker = "^6.1.3"
 
 
 [tool.poetry.group.downloader.dependencies]
