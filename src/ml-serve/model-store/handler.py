@@ -41,7 +41,7 @@ class ModelHandler(BaseHandler):
         logging.info("initialize...")
         self.manifest = context.manifest
 
-        # properties = context.system_properties
+        properties = context.system_properties
         # model_dir = properties.get("model_dir")
 
         self.device = (

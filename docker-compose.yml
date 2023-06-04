@@ -33,11 +33,16 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
+      - aws_access_key_id = ${aws_access_key_id}
+      - aws_secret_access_key = ${aws_secret_access_key}
+      - aws_s3_bucket = ${aws_s3_bucket}
+      - region_name = ${region_name}
     expose:
       - "8000"
 
     volumes:
       - data:/var/lib/postgis/data
+      - /var/run/docker.sock:/var/run/docker.sock
 
   # downloader:
   #   build:
@@ -61,6 +66,7 @@ services:
   #   # limits the number of cpus the container can use
   #   # else on each thread (core) a model will be loaded
   #   cpus: 1.0
+
   # preprocessing:
   #   build:
   #     context: ./src/preprocessing
