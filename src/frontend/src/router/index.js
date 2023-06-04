@@ -47,6 +47,16 @@ const router = createRouter({
       name: 'modelsView',
       component: () => import('../views/ModelsView.vue')
     },
+    {
+      path: '/showImageAwsView',
+      name: 'showImageAwsView',
+      component: () => import('../views/ShowImageAwsView.vue')
+    },
+    {
+      path: '/sideBarView',
+      name: 'sideBarView',
+      component: () => import('../views/SideBarView.vue')
+    },
   ]
 })
 

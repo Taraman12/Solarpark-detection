@@ -19,6 +19,8 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/mapWithPoly">mapWithPolyView</RouterLink>
         <RouterLink to="/selectPolyFromTableView">SelectPolyFromTableView</RouterLink>
         <RouterLink to="/modelsView">Models</RouterLink>
+        <RouterLink to="/showImageAwsView">ShowImageAwsView</RouterLink>
+        <RouterLink to="/sideBarView">sideBarView</RouterLink>
       </nav>
     </div>
   </header>
