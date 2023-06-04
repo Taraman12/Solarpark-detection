@@ -47,6 +47,11 @@ def verify_aws_credentials() -> bool:
 
 aws_available = verify_aws_credentials()
 
+import docker
+
+client = docker.from_env()
+logging.info(client.containers.list())
+
 EC2_KWARGS = {
     "ImageId": "ami-07151644aeb34558a",  # ID des Amazon Linux 2 AMI
     "InstanceType": "t3.micro",  # Instanztyp t3.medium

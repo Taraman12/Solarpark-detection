@@ -2,7 +2,7 @@ import logging.config
 from os import path
 
 # Configure root logger object
-logging.getLogger().setLevel(logging.WARNING)
+# logging.getLogger().setLevel(logging.WARNING)
 
 # # Disable logging from third-party modules
 # for name in logging.Logger.manager.loggerDict.keys():
