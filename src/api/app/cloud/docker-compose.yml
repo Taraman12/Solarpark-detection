@@ -35,3 +35,8 @@ services:
       - "5678:5678"
     expose:
       - "5678"
+
+# networks:
+#   default:
+#       name: my-net
+#       external: true

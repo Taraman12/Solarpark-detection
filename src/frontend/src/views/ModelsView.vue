@@ -35,7 +35,7 @@ const options = {
 
 async function fetchModel() {
     try {
-        const response = await fetch(`http://localhost:8000/api/v1/ml-server`, options);
+        const response = await fetch(`http://ml-serve:8000/api/v1/ml-server`, options);
         const data = response.json();
         console.log("data " + data);
         return data;
