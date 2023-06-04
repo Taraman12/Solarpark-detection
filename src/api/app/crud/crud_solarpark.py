@@ -45,7 +45,6 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
     #     # if not, create new SolarPark
     #     query = get_multi()
 
-
     def get_as_geojson(
         self,
         db: Session,

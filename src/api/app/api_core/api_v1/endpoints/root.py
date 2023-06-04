@@ -1,6 +1,6 @@
 # third-party
-from fastapi import APIRouter
 import requests
+from fastapi import APIRouter
 
 router = APIRouter()
 

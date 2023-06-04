@@ -7,16 +7,16 @@ import tempfile
 import time
 from datetime import date
 from pathlib import Path
-from zipfile import ZipFile
 from typing import Union
+from zipfile import ZipFile
 
 # third-party
 import geopandas as gpd
+from constants import IMAGE_REGEX, REQUIRED_BANDS
+from geopandas import GeoSeries
 
 # local-modules
 from logging_config import get_logger
-from constants import IMAGE_REGEX, REQUIRED_BANDS
-from geopandas import GeoSeries
 from sentinel_on_aws import download_from_aws_handler, upload_to_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
@@ -26,7 +26,8 @@ from settings import DOCKERIZED, PRODUCTION
 # ToDo: use sentinelsat get_stream() for streaming data to AWS S3
 
 # set up logger
-logger = get_logger('BaseConfig')
+logger = get_logger("BaseConfig")
+
 
 class HTTPError(Exception):
     "Raised by sentinelsat"

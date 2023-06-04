@@ -1,6 +1,6 @@
 # build-in
-from typing import Any, List
 import logging
+from typing import Any, List
 
 # third-party
 from fastapi import APIRouter, Depends, HTTPException

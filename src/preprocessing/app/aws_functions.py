@@ -70,7 +70,6 @@ def aws_list_files(prefix: str) -> list:
     return file_list
 
 
-
 def upload_file_to_aws(
     input_file_path: Path,
     prefix: str,

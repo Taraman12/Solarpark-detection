@@ -19,7 +19,6 @@ from constants import (
     MASK_OUTPUT_DIR,
     URL_ML,
 )
-
 from logging_config import get_logger
 from save_to_disk import preprocess_and_save_data
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION

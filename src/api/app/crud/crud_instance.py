@@ -7,10 +7,10 @@ from fastapi import BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
+from app.cloud.aws import EC2_KWARGS, ec2_client
+from app.crud.base import CRUDBase
 from app.models.instance import Instance
 from app.schemas.instance import InstanceCreate, InstanceUpdate
-from app.crud.base import CRUDBase
-from app.cloud.aws import ec2_client, EC2_KWARGS
 
 
 class CRUDInstance(CRUDBase[Instance, InstanceCreate, InstanceUpdate]):

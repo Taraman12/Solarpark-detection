@@ -9,12 +9,11 @@ from typing import Optional, Tuple
 # third-party
 from botocore.errorfactory import ClientError
 from cloud_clients import BUCKET_NAME, s3_client
+from constants import DATA_OUTPUT_PREFIX_AWS, IDENTIFIER_REGEX, REQUIRED_BANDS
 
 # local-modules
 from logging_config import get_logger
-from constants import IDENTIFIER_REGEX, REQUIRED_BANDS, DATA_OUTPUT_PREFIX_AWS
 from settings import PRODUCTION
-
 
 # set up logger
 logger = get_logger("BaseConfig")

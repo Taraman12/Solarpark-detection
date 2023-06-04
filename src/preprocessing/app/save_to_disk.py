@@ -3,9 +3,9 @@ import json
 import logging
 import os
 import re
-from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, List
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # third-party
 import geopandas as gpd
@@ -13,34 +13,35 @@ import numpy as np
 import rasterio
 import rasterio.features
 import requests
-from rasterio.io import MemoryFile
-from rasterio.warp import transform_geom
-
-# from pyproj import Transformer
-
 
 # local modules
 from aws_functions import delete_folder_on_aws, download_from_aws, upload_file_to_aws
 from cloud_clients import aws_available
 from constants import (
+    HEADERS,
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
     IMAGE_OUTPUT_DIR,
+    IMAGES_WITH_SOLARPARK,
     KERNEL_SIZE,
     MASK_OUTPUT_DIR,
-    REQUIRED_BANDS,
-    URL_ML,
-    URL_API,
     MODEL_NAME,
-    HEADERS,
-    IMAGES_WITH_SOLARPARK,
+    REQUIRED_BANDS,
+    URL_API,
+    URL_ML,
 )
 from geopandas import GeoDataFrame
 from logging_config import get_logger
 from rasterio import DatasetReader
 from rasterio.features import geometry_mask
+from rasterio.io import MemoryFile
+from rasterio.warp import transform_geom
 from settings import MAKE_TRAININGS_DATA, PRODUCTION
 from shapely.geometry import Polygon
+
+# from pyproj import Transformer
+
+
 
 
 # set up logging
@@ -124,7 +125,7 @@ def preprocess_and_save_data(  # noqa: C901
         for col in range(num_cols):
             # FIXME global metadata shouldn't be changed
             metadata["crs"] = start_crs
-            
+
             # Define the window coordinates for the snippet
             window = rasterio.windows.Window(
                 col * KERNEL_SIZE, row * KERNEL_SIZE, KERNEL_SIZE, KERNEL_SIZE

@@ -1,6 +1,6 @@
 # build-in
-import os
 import logging
+import os
 
 # third-party
 import boto3

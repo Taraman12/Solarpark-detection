@@ -17,4 +17,4 @@ logging.config.fileConfig(log_file_path)
 
 
 def get_logger(name):
-    return logging.getLogger('BaseConfig')
+    return logging.getLogger("BaseConfig")

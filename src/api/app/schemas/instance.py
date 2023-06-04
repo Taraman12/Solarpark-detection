@@ -1,6 +1,7 @@
-from pydantic import BaseModel
-from typing import Literal
 from enum import Enum
+from typing import Literal
+
+from pydantic import BaseModel
 
 
 class Status(str, Enum):

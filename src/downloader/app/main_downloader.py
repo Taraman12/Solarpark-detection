@@ -1,14 +1,14 @@
 # build-in
+import atexit
 import time
 from datetime import date
 from distutils.util import strtobool
 from pathlib import Path
 from typing import Union
-import requests
-import atexit
 
 # third-party
 import geopandas as gpd
+import requests
 
 # local modules
 from api_call_handler import download_sentinel2_data
@@ -20,9 +20,6 @@ from sentinel_api import connect_to_sentinel_api
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import ServerError, UnauthorizedError
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
-
-
-
 
 # set up logger
 logger = get_logger("BaseConfig")
@@ -41,7 +38,7 @@ def main():
     api = get_api()
     tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
     exit()
-    #send_ending_response()
+    # send_ending_response()
 
     if MAKE_TRAININGS_DATA:
         dates_dict = SEASONS_DICT
@@ -62,7 +59,8 @@ def main():
 
 def send_ending_response():
     requests.post(
-        "http://localhost:8000/api/v1/management/ending_response", json={"status": "finished"}
+        "http://localhost:8000/api/v1/management/ending_response",
+        json={"status": "finished"},
     )
 
 

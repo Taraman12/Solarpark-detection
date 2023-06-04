@@ -13,6 +13,7 @@ from app.api_core import deps
 router = APIRouter()
 # The Docstring are shown in the Swagger UI as the description of the endpoint.
 
+
 @router.get("/", response_model=List[schemas.SolarPark])
 def read_solarpark(
     db: Session = Depends(deps.get_db),

@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 
 # local modules
-from .endpoints import root, solarpark, instance
+from .endpoints import instance, root, solarpark
 
 api_router = APIRouter()
 

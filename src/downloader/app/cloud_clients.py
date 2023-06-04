@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from logging_config import get_logger
 
 # set up logger
-logger = get_logger('BaseConfig')
+logger = get_logger("BaseConfig")
 
 
 load_dotenv()
