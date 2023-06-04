@@ -42,8 +42,6 @@ from shapely.geometry import Polygon
 # from pyproj import Transformer
 
 
-
-
 # set up logging
 logging.getLogger("rasterio").setLevel(logging.WARNING)
 logging.getLogger("fiona").setLevel(logging.WARNING)
