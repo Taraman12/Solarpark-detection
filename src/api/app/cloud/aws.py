@@ -4,6 +4,7 @@ import os
 
 # third-party
 import boto3
+import docker
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 
@@ -47,7 +48,6 @@ def verify_aws_credentials() -> bool:
 
 aws_available = verify_aws_credentials()
 
-import docker
 
 client = docker.from_env()
 logging.info(client.containers.list())

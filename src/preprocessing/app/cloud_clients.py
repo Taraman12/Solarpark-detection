@@ -4,7 +4,8 @@ import os
 # third-party
 import boto3
 from botocore.errorfactory import ClientError
-from dotenv import load_dotenv
+
+# from dotenv import load_dotenv
 
 # load_dotenv()
 # login to aws

@@ -34,7 +34,6 @@ from geopandas import GeoDataFrame
 from logging_config import get_logger
 from rasterio import DatasetReader
 from rasterio.features import geometry_mask
-from rasterio.io import MemoryFile
 from rasterio.warp import transform_geom
 from settings import MAKE_TRAININGS_DATA, PRODUCTION
 from shapely.geometry import Polygon

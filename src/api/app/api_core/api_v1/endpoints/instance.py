@@ -1,10 +1,8 @@
 # build-in
-import logging
 from typing import Any, List
 
 # third-party
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 # local modules
@@ -128,7 +126,7 @@ def terminate_instance_by_service(
     instance = crud.instance.get_by_service(db=db, service=service)
     if not instance:
         raise HTTPException(status_code=404, detail="instance not found")
-    response = crud.instance.terminate_instance_by_ec2_instance_id(
+    crud.instance.terminate_instance_by_ec2_instance_id(
         db=db, ec2_instance_id=instance.ec2_instance_id
     )
     return instance
