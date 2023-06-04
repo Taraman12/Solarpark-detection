@@ -1,4 +1,5 @@
 # build-in
+import atexit
 import time
 from datetime import date
 from distutils.util import strtobool
@@ -7,6 +8,7 @@ from typing import Union
 
 # third-party
 import geopandas as gpd
+import requests
 
 # local modules
 from api_call_handler import download_sentinel2_data
@@ -20,7 +22,7 @@ from sentinelsat.exceptions import ServerError, UnauthorizedError
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 
 # set up logger
-logger = get_logger(__name__)
+logger = get_logger("BaseConfig")
 """
 ToDo: Check logger settings
 ToDo: logger in submodules
@@ -30,9 +32,13 @@ ToDo: Needs better documentation
 
 
 def main():
+    # this function is called when the program is terminated
+    atexit.register(send_ending_response)
     check_requirements()
     api = get_api()
     tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
+    exit()
+    # send_ending_response()
 
     if MAKE_TRAININGS_DATA:
         dates_dict = SEASONS_DICT
@@ -49,6 +55,13 @@ def main():
                 f"{len(set(tiles_gdf.centroid_of_tile))} finished"
             )
     logger.info("Program finished successfully")
+
+
+def send_ending_response():
+    requests.post(
+        "http://localhost:8000/api/v1/management/ending_response",
+        json={"status": "finished"},
+    )
 
 
 def download_data(

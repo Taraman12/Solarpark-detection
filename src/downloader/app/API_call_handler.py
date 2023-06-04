@@ -7,21 +7,26 @@ import tempfile
 import time
 from datetime import date
 from pathlib import Path
+from typing import Union
 from zipfile import ZipFile
 
 # third-party
 import geopandas as gpd
-
-# local-modules
 from constants import IMAGE_REGEX, REQUIRED_BANDS
 from geopandas import GeoSeries
+
+# local-modules
+from logging_config import get_logger
 from sentinel_on_aws import download_from_aws_handler, upload_to_aws
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import LTATriggered
-from settings import DOCKERIZED
+from settings import DOCKERIZED, PRODUCTION
 
 # ToDo: change os.path to pathlib
 # ToDo: use sentinelsat get_stream() for streaming data to AWS S3
+
+# set up logger
+logger = get_logger("BaseConfig")
 
 
 class HTTPError(Exception):
@@ -32,8 +37,8 @@ class HTTPError(Exception):
 def download_sentinel2_data(
     api: SentinelAPI,
     footprint: str,
-    start_date: date,
-    end_date: date,
+    start_date: Union[date, str],
+    end_date: Union[date, str],
     download_root: Path = Path("."),
 ) -> bool:
     """Download Sentinel-2 data for a given footprint and extract the RGB
@@ -71,9 +76,14 @@ def download_sentinel2_data(
     # check if product is online
     is_online = api.is_online(product.uuid)
 
+    if PRODUCTION:
+        logger.info("Production=True, COPY from AWS S3.")
+        if download_from_aws_handler(product.identifier, target_folder):
+            return True
+
     if is_online:
         try:
-            print("Product is online. Starting download.")
+            logger.info("Product is online. Starting download.")
             # Download the product using the UUID
             api.download(product.uuid, directory_path=download_root)
         except HTTPError:
@@ -95,13 +105,13 @@ def download_sentinel2_data(
         (download_root / (product.identifier + ".zip")).unlink()
         return True
 
-    print("Product is not online. Download from AWS S3.")
+    logger.info("Product is not online. Download from AWS S3.")
     if download_from_aws_handler(product.identifier, target_folder):
         return True
 
     # trigger LTA
     api.trigger_offline_retrieval(product.uuid)
-    print("Product is not online. Triggering LTA.")
+    logger.info("Product is not online. Triggering LTA.")
     # download from LTA waiting for 10 minutes before trying again
     # result = asyncio.run(download_from_lta(api, product.uuid, download_root))
     return False
@@ -222,10 +232,10 @@ async def download_from_lta(
     while time.monotonic() - start_time < timeout:
         try:
             api.download(product_uuid, directory_path=download_root)
-            print(f"Product {product_uuid} downloaded successfully.")
+            logger.info(f"Product {product_uuid} downloaded successfully.")
             return True
         except LTATriggered:
             # Wait for 10 minutes before trying again
             await asyncio.sleep(600)
-    print(f"Download timed out after {timeout_hours} hours.")
+    logger.warning(f"Download timed out after {timeout_hours} hours.")
     return False

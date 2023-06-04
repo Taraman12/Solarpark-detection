@@ -110,7 +110,8 @@ async function handleRowClick(id) {
     map.value = new google.maps.Map(mapDiv.value, {
         // center: currPos.value,
         center: { lat: data.value.lat[0], lng: data.value.lon[0] },
-        zoom: 7,
+        zoom: 16,
+        mapTypeId: 'satellite'
     })
     // removes the last added polygon
     polygons.value.pop(-1);
@@ -151,6 +152,7 @@ onMounted(async () => { //create map
         // center: currPos.value,
         center: { lat: 40, lng: -80 },
         zoom: 7,
+        // mapTypeId: 'satellite'
     });
     await addPolygons();
 

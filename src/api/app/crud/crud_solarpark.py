@@ -28,7 +28,7 @@ from .base import CRUDBase
 ModelType = TypeVar("ModelType", bound=Base)
 
 
-# GeoJSON-Datei als Stream senden
+# send geojson-file as stream
 def generate(feature_collection: FeatureCollection):
     yield '{"type": "FeatureCollection", "features": ['
     for i, feature in enumerate(feature_collection["features"]):
@@ -39,8 +39,13 @@ def generate(feature_collection: FeatureCollection):
 
 
 class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
-    # pass
-    def get_geojson(
+    # super().__init__(model=SolarPark)
+    # def create(self, db):
+    #     # check if SolarPark already exists
+    #     # if not, create new SolarPark
+    #     query = get_multi()
+
+    def get_as_geojson(
         self,
         db: Session,
     ) -> Any:

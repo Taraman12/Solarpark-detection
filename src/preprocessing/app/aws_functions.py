@@ -12,10 +12,10 @@ from cloud_clients import bucket_name, s3_client
 from constants import IDENTIFIER_REGEX, IMAGE_INPUT_DIR
 
 
-def download_from_aws(identifier: Path) -> bool:
+def download_from_aws(output_path: str) -> bool:
     prefix = IMAGE_INPUT_DIR
-
-    regex_match = re.search(IDENTIFIER_REGEX, identifier)
+    identifier = output_path.split("/")[-1]
+    regex_match = re.search(IDENTIFIER_REGEX, output_path)
 
     if not regex_match:
         return False
@@ -70,10 +70,9 @@ def aws_list_files(prefix: str) -> list:
     return file_list
 
 
-# Not used due to a lot of requests to aws
-# images are send directly to ml-serve
 def upload_file_to_aws(
     input_file_path: Path,
+    prefix: str,
     output_path: Optional[str] = None,
 ) -> bool:
     """Uploads a Sentinel-2 image to AWS S3.

@@ -17,7 +17,7 @@ from constants import (
     IMAGE_OUTPUT_DIR,
     MASK_INPUT_DIR,
     MASK_OUTPUT_DIR,
-    URL,
+    URL_ML,
 )
 from logging_config import get_logger
 from save_to_disk import preprocess_and_save_data
@@ -82,7 +82,7 @@ def check_ml_serve_online() -> bool:
     retries = 5
     while retries > 0:
         try:
-            response = requests.get(f"{URL}/ping")
+            response = requests.get(f"{URL_ML}/ping")
             if response.status_code == 200:
                 logger.info("TorchServe is running")
                 return True
@@ -90,7 +90,7 @@ def check_ml_serve_online() -> bool:
                 logger.info("TorchServe is not running. retry in 5 seconds.")
                 time.sleep(5)
         except requests.exceptions.ConnectionError:
-            logger.info("TorchServe is not running. retry in 5 seconds.")
+            logger.info("TorchServe is not running. Retry in 5 seconds.")
             time.sleep(5)
         retries -= 1
     return False
@@ -138,7 +138,6 @@ if __name__ == "__main__":
     if not aws_available:
         logger.warning("AWS credentials not valid")
 
-    PRODUCTION = False
     if PRODUCTION:
         if not check_ml_serve_online():
             logger.error("ml-serve not online. Exiting.")
@@ -155,14 +154,13 @@ if __name__ == "__main__":
         IMAGE_INPUT_DIR = Path()
 
     saved_total = 0
-    logger.info(f"Number of files to process: {len(folder_list)}")
 
-    for i, tile_folder in enumerate(folder_list):
+    for i, tile_folder_path in enumerate(folder_list):
         logger.info(f"Processing file {i+1} of {len(folder_list)}")
         # print(f"Processing file {i+1} of {len(folder_list)}")
         try:
             saved_patches = preprocess_and_save_data(
-                identifier=tile_folder, masks_gdf=masks_gdf
+                tile_folder_path=tile_folder_path, masks_gdf=masks_gdf
             )
 
         except Exception as e:

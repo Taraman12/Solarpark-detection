@@ -5,6 +5,8 @@ from pathlib import Path
 # where will the images be stored/ name of the folder in s3 bucket
 IMAGE_INPUT_DIR = Path(r"data_raw")
 
+IMAGES_WITH_SOLARPARK = Path(r"images_with_solarpark")
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 MASK_INPUT_DIR = SCRIPT_DIR / "data" / "trn_polygons_germany_tile_names.geojson"
 
@@ -16,7 +18,10 @@ MASK_OUTPUT_DIR = Path(r".\data_local\test_mask_patches")
 
 KERNEL_SIZE = 256
 
-URL = "http://ml-serve:8080"
+URL_ML = "http://ml-serve:8080"  # ml-serve
+URL_API = "http://api:8000/api/v1"  # api
+MODEL_NAME = "solar-park-detection"
+HEADERS = {"Content-Type": "application/json"}
 
 IDENTIFIER_REGEX = re.compile(
     r"""(?P<mission>S2[A-B])_MSI

@@ -17,17 +17,18 @@ class SolarParkBase(BaseModel):
     first_detection: date
     last_detection: date
     avg_confidence: float
+    name_in_aws: str
     is_valid: str = "None"
     lat: List[float]
     lon: List[float]
 
-
-class SolarPark(SolarParkBase):
-    id: int
-
     class Config:
         orm_mode = True
         # use_enum_values = True
+
+
+class SolarPark(SolarParkBase):
+    id: int
 
 
 class SolarParkCreate(SolarParkBase):
