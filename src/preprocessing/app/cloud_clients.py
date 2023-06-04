@@ -6,7 +6,7 @@ import boto3
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 # login to aws
 session = boto3.Session(
     aws_access_key_id=os.getenv("aws_access_key_id"),
