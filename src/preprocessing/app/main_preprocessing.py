@@ -91,7 +91,7 @@ def check_ml_serve_online() -> bool:
                 logger.info("TorchServe is not running. retry in 5 seconds.")
                 time.sleep(5)
         except requests.exceptions.ConnectionError:
-            logger.info("TorchServe is not running. retry in 5 seconds.")
+            logger.info("TorchServe is not running. Retry in 5 seconds.")
             time.sleep(5)
         retries -= 1
     return False
@@ -155,7 +155,6 @@ if __name__ == "__main__":
         IMAGE_INPUT_DIR = Path()
 
     saved_total = 0
-    logger.info(f"Number of files to process: {len(folder_list)}")
 
     for i, tile_folder_path in enumerate(folder_list):
         logger.info(f"Processing file {i+1} of {len(folder_list)}")

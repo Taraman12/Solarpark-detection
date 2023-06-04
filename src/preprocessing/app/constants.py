@@ -18,11 +18,10 @@ MASK_OUTPUT_DIR = Path(r".\data_local\test_mask_patches")
 
 KERNEL_SIZE = 256
 
-URL_ML = "http://localhost:8080"  # ml-serve
-URL_API = "http://localhost:8000/api/v1"  # api
+URL_ML = "http://ml-serve:8080"  # ml-serve
+URL_API = "http://api:8000/api/v1"  # api
 MODEL_NAME = "solar-park-detection"
 HEADERS = {"Content-Type": "application/json"}
-
 
 IDENTIFIER_REGEX = re.compile(
     r"""(?P<mission>S2[A-B])_MSI
