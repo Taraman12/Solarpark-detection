@@ -33,10 +33,10 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
-      - aws_access_key_id = ${aws_access_key_id}
-      - aws_secret_access_key = ${aws_secret_access_key}
-      - aws_s3_bucket = ${aws_s3_bucket}
-      - region_name = ${region_name}
+      - aws_access_key_id=${aws_access_key_id}
+      - aws_secret_access_key=${aws_secret_access_key}
+      - aws_s3_bucket=${aws_s3_bucket}
+      - region_name=${region_name}
     expose:
       - "8000"
 

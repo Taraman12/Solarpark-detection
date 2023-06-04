@@ -8,7 +8,7 @@ add SSH port 22 in security group
 do not select default security group (Create a new one instead, and add SSH port 22)
 
 #### NOTE: eb cli will use the main branch for deployment
-even if you are on a different branch
+even if you are on a different branch locally
 
 CMD eb init
 choose location
@@ -33,4 +33,4 @@ CMD eb status eb-env
 
 CMD eb health eb-env
 
- eb logs --zip
+ eb logs --all "name of the environment"
