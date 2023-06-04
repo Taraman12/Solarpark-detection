@@ -91,3 +91,9 @@ services:
 
 volumes:
   data:
+
+
+# networks:
+#   default:
+#     external:
+#       name: my-net
