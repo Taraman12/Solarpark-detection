@@ -71,7 +71,7 @@ EC2_KWARGS = {
             },
         },
     ],
-    "UserData": f"""#!/bin/bash
+    "UserData": """#!/bin/bash
                 sudo yum update -y
                 sudo yum install docker -y
                 sudo service docker start
@@ -86,7 +86,7 @@ EC2_KWARGS = {
         {
             "ResourceType": "instance",
             "Tags": [
-                {"Key": "Name", "Value": f"solar-park-detection-ml-serve"},
+                {"Key": "Name", "Value": "solar-park-detection-ml-serve"},
             ],
         },
     ],
