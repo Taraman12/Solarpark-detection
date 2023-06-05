@@ -7,6 +7,9 @@ add SSH port 22 in security group
 
 do not select default security group (Create a new one instead, and add SSH port 22)
 
+Make sure your ec2 instance are in the same VPC and subnet!
+Also activate the inbound rules for the security group of the ec2 instance (so all instances with the same security group can communicate with each other)
+
 #### NOTE: eb cli will use the main branch for deployment
 even if you are on a different branch locally
 
