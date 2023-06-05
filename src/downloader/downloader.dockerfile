@@ -6,7 +6,7 @@ COPY ./requirements.txt /requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 
-COPY ./app .
+COPY . .
 
 # only difference is the last main file
 CMD ["python", "-m", "main_downloader"]
