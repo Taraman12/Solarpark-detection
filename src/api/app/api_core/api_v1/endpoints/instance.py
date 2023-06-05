@@ -126,7 +126,5 @@ def terminate_instance_by_service(
     instance = crud.instance.get_by_service(db=db, service=service)
     if not instance:
         raise HTTPException(status_code=404, detail="instance not found")
-    crud.instance.terminate_instance_by_ec2_instance_id(
-        db=db, ec2_instance_id=instance.ec2_instance_id
-    )
+    crud.instance.terminate_instance(db=db, instance=instance)
     return instance
