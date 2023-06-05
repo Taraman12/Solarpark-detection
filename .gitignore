@@ -6,6 +6,9 @@ Create_figures_thesis/*.pdf
 
 Notebooks/ML_Modell/data/
 
+### SSH Private key ###
+*.pem
+
 ### VisualStudioCode ###
 .vscode/*      # Maybe .vscode/**/* instead - see comments
 !.vscode/settings.json
