@@ -6,6 +6,7 @@ from builtins import NotImplementedError
 from typing import Any
 
 # from fastapi import BackgroundTasks
+import paramiko
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -55,18 +56,35 @@ class CRUDInstance(CRUDBase[Instance, InstanceCreate, InstanceUpdate]):
 
     def start_instance(
         self, db: Session, *, service: str, instance_type: str = "t3.micro"
-    ) -> str:
+    ) -> dict:
+        EC2_KWARGS["InstanceType"] = instance_type
         # EC2_KWARGS = self.replace_instance_str(service, instance_type)
         print(EC2_KWARGS)
         response = ec2_client.run_instances(**EC2_KWARGS)
-        if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-            obj_in = {
-                "status": "started",
-                "service": service,
-                "ec2_instance_id": response["Instances"][0]["InstanceId"],
-            }
-            db_obj = self.create(db, obj_in=obj_in)
-            return db_obj
+        if not response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+            raise NotImplementedError("Instance could not be started")
+
+        obj_in = {
+            "status": "started",
+            "service": service,
+            "ec2_instance_id": response["Instances"][0]["InstanceId"],
+        }
+        db_obj = self.create(db, obj_in=obj_in)
+        self.copy_and_start_docker_compose(response)
+        return db_obj
+
+    def copy_and_start_docker_compose(self, response: dict) -> None:
+        private_ip = response["Instances"][0]["PrivateIpAddress"]
+        time.sleep(5)
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(private_ip, username="ec2-user", key_filename="Ec2-boto3.pem")
+        sftp = ssh.open_sftp()
+        sftp.put(".env", "/home/ec2-user/.env")
+        sftp.put("docker-compose.yml", "/home/ec2-user/docker-compose.yml")
+        sftp.close()
+        stdin, stdout, stderr = ssh.exec_command("sudo docker-compose up")
+        ssh.close()
 
     def replace_instance_str(self, service: str, instance_type: str):
         EC2_KWARGS["InstanceType"] = instance_type
@@ -78,10 +96,10 @@ class CRUDInstance(CRUDBase[Instance, InstanceCreate, InstanceUpdate]):
         ][0]["Tags"][0]["Value"].replace("SERVICE_PLACEHOLDER", service)
         return EC2_KWARGS
 
-    def terminate_instance_by_ec2_instance_id(
-        self, db: Session, *, ec2_instance_id: str
-    ) -> Any:
-        response = ec2_client.terminate_instances(InstanceIds=[ec2_instance_id])
+    def terminate_instance(self, db: Session, *, instance: dict) -> Any:
+        response = ec2_client.terminate_instances(
+            InstanceIds=[instance.ec2_instance_id]
+        )
         if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
             response = self.remove(db=db, id=instance.id)
         else:

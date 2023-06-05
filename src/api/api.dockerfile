@@ -22,6 +22,8 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./app /code/app
 COPY ./alembic /code/alembic
 COPY ./alembic.ini /code/alembic.ini
+COPY ./app/cloud/.env /code/app/.env
+COPY ./app/cloud/docker-compose.yml /code/app/docker-compose.yml
 
 #CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 CMD ["/bin/bash", "-c","alembic upgrade head; uvicorn app.main:app --host 0.0.0.0 --port 8000"]
