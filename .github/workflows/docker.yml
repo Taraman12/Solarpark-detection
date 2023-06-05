@@ -24,7 +24,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./src/downloader
+          context: ./src/downloader/app
           file: ./src/downloader/downloader.dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest
