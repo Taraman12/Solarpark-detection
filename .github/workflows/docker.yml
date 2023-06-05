@@ -1,39 +1,46 @@
-name: Docker Build and Push
+name: ci
 
 on:
   push:
     branches:
       - main
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
-        # run: docker build -t my-dockerhub-username/my-repo:latest .
-        run: docker build -t taraman12/solar-park-detection-downloader:latest -f src/downloader/downloader.dockerfile ./
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Tag Docker image number version
-        # run: docker tag my-dockerhub-username/my-repo:latest my-dockerhub-username/my-repo:1.0.0
-        run: docker tag taraman12/solar-park-detection-downloader:latest taraman12/solar-park-detection-downloader:1.0.0
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./src/downloader/downloader.dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest
 
-      - name: Tag Docker image latest
-        # run: docker tag my-dockerhub-username/my-repo:latest my-dockerhub-username/my-repo:1.0.0
-        run: docker tag taraman12/solar-park-detection-downloader:latest taraman12/solar-park-detection-downloader:latest
+      # - name: Build Docker image
+      #   # run: docker build -t my-dockerhub-username/my-repo:latest .
+      #   run: docker build -t ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest -f src/downloader/downloader.dockerfile ./
 
-      - name: Push Docker image
-        # run: docker push my-dockerhub-username/my-repo:latest && docker push my-dockerhub-username/my-repo:1.0.0
-        run: docker push taraman12/solar-park-detection-downloader:latest && docker push taraman12/solar-park-detection-downloader:1.0.0
+      # - name: Tag Docker image number version
+      #   # run: docker tag my-dockerhub-username/my-repo:latest my-dockerhub-username/my-repo:1.0.0
+      #   run: docker tag ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:1.0.0
+
+      # - name: Tag Docker image latest
+      #   # run: docker tag my-dockerhub-username/my-repo:latest my-dockerhub-username/my-repo:1.0.0
+      #   run: docker tag ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest
+
+      # - name: Push Docker image
+      #   # run: docker push my-dockerhub-username/my-repo:latest && docker push my-dockerhub-username/my-repo:1.0.0
+      #   run: docker push ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest && docker push ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:1.0.0
