@@ -9,7 +9,7 @@ from botocore.errorfactory import ClientError
 
 # local-modules
 from cloud_clients import s3_client
-from constants import IDENTIFIER_REGEX, IMAGE_INPUT_DIR, BUCKET_NAME
+from constants import BUCKET_NAME, IDENTIFIER_REGEX, IMAGE_INPUT_DIR
 
 
 def download_from_aws(output_path: str) -> bool:

@@ -1,13 +1,12 @@
 # build-in
 import os
-import logging
 
 # third-party
 import boto3
+from botocore.credentials import InstanceMetadataFetcher, InstanceMetadataProvider
 from botocore.errorfactory import ClientError
-from botocore.credentials import InstanceMetadataProvider, InstanceMetadataFetcher
-
 from dotenv import load_dotenv
+from logging_config import get_logger
 
 logger = get_logger("BaseConfig")
 
