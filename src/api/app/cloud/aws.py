@@ -74,7 +74,7 @@ def verify_aws_credentials() -> bool:
         s3_client.list_buckets()
         return True
     except ClientError:
-        logging.warning("Credentials are NOT valid.")
+        logger.warning("Credentials are NOT valid.")
         return False
 
 
