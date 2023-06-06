@@ -79,11 +79,30 @@ def create_output_directories(output_dirs: List[Path]) -> None:
 
 
 def check_ml_serve_online() -> bool:
-    retries = 5
+    retries = 3
     while retries > 0:
         try:
             logger.info(f"Checking if TorchServe is running on {URL_ML}")
             response = requests.get(f"{URL_ML}/ping")
+            if response.status_code == 200:
+                logger.info("TorchServe is running")
+                return True
+            else:
+                logger.info("TorchServe is not running. retry in 5 seconds.")
+                time.sleep(5)
+        except requests.exceptions.ConnectionError:
+            logger.info("TorchServe is not running. Retry in 5 seconds.")
+            time.sleep(5)
+        retries -= 1
+    return False
+
+
+def check_ml_serve_online_localhost() -> bool:
+    retries = 3
+    while retries > 0:
+        try:
+            logger.info(f"Checking if TorchServe is running on {URL_ML}")
+            response = requests.get("http://localhost:8080/ping")
             if response.status_code == 200:
                 logger.info("TorchServe is running")
                 return True
@@ -143,6 +162,8 @@ if __name__ == "__main__":
     if PRODUCTION:
         if not check_ml_serve_online():
             logger.error("ml-serve not online. Exiting.")
+        if not check_ml_serve_online_localhost():
+            logger.error("localhost not online. Exiting.")
             exit()
 
     masks_gdf = gpd.read_file(MASK_INPUT_DIR)
