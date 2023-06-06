@@ -81,7 +81,7 @@ def verify_aws_credentials() -> bool:
 aws_available = verify_aws_credentials()
 
 
-client = docker.from_env()
+# client = docker.from_env()
 
 
 EC2_KWARGS = {
