@@ -5,11 +5,8 @@ import logging
 # third-party
 import boto3
 from botocore.errorfactory import ClientError
+from botocore.credentials import InstanceMetadataProvider, InstanceMetadataFetcher
 
-# from dotenv import load_dotenv
-
-# import os
-import boto3
 from dotenv import load_dotenv
 
 # local file
@@ -27,9 +24,12 @@ if os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get("AWS_SECRET_ACCESS_KEY
 # if deployed on aws ec2 instance, the credentials are provided by the IAM role of the ec2 instance
 else:
     logging.info("Using IAM role credentials")
-    session = boto3.Session(region_name="eu-central-1")
-    credentials = session.get_credentials()
-    credentials = credentials.get_frozen_credentials()
+    provider = InstanceMetadataProvider(
+        iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
+    )
+    if not provider is None:
+        raise ValueError("No IAM role found")
+    credentials = provider.load().get_frozen_credentials()
     session = boto3.Session(
         aws_access_key_id=credentials.access_key,
         aws_secret_access_key=credentials.secret_key,
