@@ -21,21 +21,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build and push downloader image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./src/downloader/app
-          file: ./src/downloader/downloader.dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest
+      # - name: Build and push downloader image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: ./src/downloader/app
+      #     file: ./src/downloader/downloader.dockerfile
+      #     push: true
+      #     tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-downloader:latest
 
-      - name: Build and push ml-serve image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./src/ml-serve
-          file: ./src/ml-serve/ml-serve.dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-ml-serve:latest
+      # - name: Build and push ml-serve image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: ./src/ml-serve
+      #     file: ./src/ml-serve/ml-serve.dockerfile
+      #     push: true
+      #     tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-ml-serve:latest
 
       # - name: Build and push frontend
       #   uses: docker/build-push-action@v4
