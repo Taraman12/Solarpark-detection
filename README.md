@@ -1,4 +1,5 @@
 [![Linting](https://github.com/Taraman12/Solarpark-detection/actions/workflows/lint.yml/badge.svg)](https://github.com/Taraman12/Solarpark-detection/actions/workflows/lint.yml)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)(https://github.com/Taraman12/Solarpark-detection/actions/workflows/docker.yml)
 # Solarpark-detection
  Continuous solar park detection from satellite imagery with Deep Learning
 
