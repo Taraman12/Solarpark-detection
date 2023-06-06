@@ -4,10 +4,8 @@ import os
 # third-party
 import boto3
 import docker
-from botocore.errorfactory import ClientError
-
 from botocore.credentials import InstanceMetadataFetcher, InstanceMetadataProvider
-
+from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 from logging_config import get_logger
 
