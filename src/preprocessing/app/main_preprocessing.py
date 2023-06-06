@@ -24,7 +24,7 @@ from save_to_disk import preprocess_and_save_data
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 
 # set up logging
-logger = get_logger(__name__)
+logger = get_logger("BaseConfig")
 debugpy.listen(("0.0.0.0", 5678))
 """
 ToDo: Add counter for loop
