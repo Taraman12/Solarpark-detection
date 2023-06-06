@@ -479,9 +479,11 @@ def preprocess_bands(bands: Dict[str, np.ndarray]) -> np.ndarray:
     """
     # ToDo: add padding
     stacked_bands = stack_bands(bands)
+    logger.info(f"Stacked bands shape: {stacked_bands.shape}")
     stacked_bands = color_correction(stacked_bands)
+    logger.info(f"Color corrected bands shape: {stacked_bands.shape}")
     stacked_bands = robust_normalize(stacked_bands)
-
+    logger.info(f"Normalized bands shape: {stacked_bands.shape}")
     return stacked_bands
 
 

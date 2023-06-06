@@ -162,8 +162,6 @@ if __name__ == "__main__":
     if PRODUCTION:
         if not check_ml_serve_online():
             logger.error("ml-serve not online. Exiting.")
-        if not check_ml_serve_online_localhost():
-            logger.error("localhost not online. Exiting.")
             exit()
 
     masks_gdf = gpd.read_file(MASK_INPUT_DIR)
