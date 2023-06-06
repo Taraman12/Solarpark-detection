@@ -42,9 +42,9 @@ from shapely.geometry import Polygon
 
 
 # set up logging
-logging.getLogger("rasterio").setLevel(logging.WARNING)
-logging.getLogger("fiona").setLevel(logging.WARNING)
-logger = get_logger(__name__)
+# logging.getLogger("rasterio").setLevel(logging.WARNING)
+# logging.getLogger("fiona").setLevel(logging.WARNING)
+logger = get_logger("BaseConfig")
 # log_file_path = path.join(path.dirname(path.abspath(__file__)), "logging.conf")
 # logging.config.fileConfig(log_file_path)
 # logger = logging.getLogger(__name__)
@@ -83,12 +83,12 @@ def preprocess_and_save_data(  # noqa: C901
 
     # find paths to all REQUIRED_BANDS
     band_paths = find_band_paths(image_dir=IMAGE_INPUT_DIR / identifier)
-
+    logger.info(f"Found {len(band_paths)} bands for {identifier}")
     # open all REQUIRED_BANDS
     bands = open_dataset_readers(band_paths=band_paths)
-
+    logger.info(f"Opened {len(bands)} bands for {identifier}")
     stacked_bands = preprocess_bands(bands)
-
+    logger.info(f"Preprocessed {len(bands)} bands for {identifier}")
     # ! MASK #
     # masks_gdf = gpd.read_file(mask_input_dir)
     first_band = list(bands.keys())[0]

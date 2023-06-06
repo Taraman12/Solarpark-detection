@@ -29,7 +29,7 @@ debugpy.listen(("0.0.0.0", 5678))
 """
 ToDo: Add counter for loop
 ToDo: Add check if image and mask have the same length
-ToDo: Log/Print the number of total files saved
+ToDo: Log/logger.info the number of total files saved
 
 ToDo: Needs better documentation
 ToDo: Needs better variable names
@@ -82,6 +82,7 @@ def check_ml_serve_online() -> bool:
     retries = 5
     while retries > 0:
         try:
+            logger.info(f"Checking if TorchServe is running on {URL_ML}")
             response = requests.get(f"{URL_ML}/ping")
             if response.status_code == 200:
                 logger.info("TorchServe is running")
@@ -130,6 +131,7 @@ if __name__ == "__main__":
 
     # mandatory if trainings data should be created
     if MAKE_TRAININGS_DATA and not validate_input_paths(input_dirs):
+        logger.error("Input paths not valid. Exiting.")
         exit()
 
     create_output_directories(output_dirs)
@@ -157,7 +159,6 @@ if __name__ == "__main__":
 
     for i, tile_folder_path in enumerate(folder_list):
         logger.info(f"Processing file {i+1} of {len(folder_list)}")
-        # print(f"Processing file {i+1} of {len(folder_list)}")
         try:
             saved_patches = preprocess_and_save_data(
                 tile_folder_path=tile_folder_path, masks_gdf=masks_gdf
@@ -168,5 +169,5 @@ if __name__ == "__main__":
             continue
 
         saved_total += saved_patches
-        print(f"Number of files saved: {saved_patches}")
-    print(f"program finished. Total images saved: {saved_total}")
+        logger.info(f"Number of files saved: {saved_patches}")
+    logger.info(f"program finished. Total images saved: {saved_total}")

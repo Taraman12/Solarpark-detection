@@ -10,6 +10,9 @@ from botocore.errorfactory import ClientError
 # local-modules
 from cloud_clients import s3_client
 from constants import BUCKET_NAME, IDENTIFIER_REGEX, IMAGE_INPUT_DIR
+from logging_config import get_logger
+
+logger = get_logger("BaseConfig")
 
 
 def download_from_aws(output_path: str) -> bool:
@@ -36,7 +39,7 @@ def download_from_aws(output_path: str) -> bool:
         except s3_client.exceptions.NoSuchKey:
             # ToDo: Need better error handling
             # should trigger LTA
-            print("No such key in bucket")
+            logger.error("No such key in bucket")
             return False
 
         response_content = response["Body"].read()
@@ -94,7 +97,7 @@ def upload_file_to_aws(
         s3_client.upload_file(input_file_path, BUCKET_NAME, f"{prefix}/{output_path}")
         return True
     except ClientError as e:
-        print(e)
+        logger.error(e)
         return False
 
 
@@ -112,7 +115,7 @@ def delete_folder_on_aws(folder_path: str) -> None:
         # Delete the folder itself
         bucket.objects.filter(Prefix=folder_path + "/").delete()
     except ClientError as e:
-        print(e)
+        logger.error(e)
 
 
 # Not used due to a lot of requests to aws
@@ -142,6 +145,6 @@ def upload_folder_to_aws(
             try:
                 s3_client.upload_file(local_file, BUCKET_NAME, f"{output_path}/{file}")
             except ClientError as e:
-                print(e)
+                logger.error(e)
                 return False
     return True
