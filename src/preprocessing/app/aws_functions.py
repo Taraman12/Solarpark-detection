@@ -8,8 +8,8 @@ from typing import List, Optional
 from botocore.errorfactory import ClientError
 
 # local-modules
-from cloud_clients import bucket_name, s3_client
-from constants import IDENTIFIER_REGEX, IMAGE_INPUT_DIR
+from cloud_clients import s3_client
+from constants import IDENTIFIER_REGEX, IMAGE_INPUT_DIR, BUCKET_NAME
 
 
 def download_from_aws(output_path: str) -> bool:
@@ -30,7 +30,7 @@ def download_from_aws(output_path: str) -> bool:
         # https://stackoverflow.com/questions/63323425/download-sentinel-file-from-s3-using-python-boto3
         try:
             response = s3_client.get_object(
-                Bucket=bucket_name,
+                Bucket=BUCKET_NAME,
                 Key=band_file,  # f"{prefix}/{identifier}/{band_file}"
             )
         except s3_client.exceptions.NoSuchKey:
@@ -51,7 +51,7 @@ def download_from_aws(output_path: str) -> bool:
 def aws_list_folders(prefix: str) -> list:
     """List folders in specific S3 URL."""
     s3_folders = s3_client.list_objects_v2(
-        Bucket=bucket_name, Prefix=f"{prefix}/", Delimiter="/"
+        Bucket=BUCKET_NAME, Prefix=f"{prefix}/", Delimiter="/"
     )
     folder_list: List[str] = []
     if s3_folders["KeyCount"] == 0:
@@ -61,7 +61,7 @@ def aws_list_folders(prefix: str) -> list:
 
 def aws_list_files(prefix: str) -> list:
     """List files in specific S3 URL."""
-    s3_files = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    s3_files = s3_client.list_objects_v2(Bucket=BUCKET_NAME, Prefix=prefix)
     file_list: List[str] = []
     if s3_files["KeyCount"] == 0:
         return file_list
@@ -91,7 +91,7 @@ def upload_file_to_aws(
     prefix = "data_preprocessed"
     # Upload the file
     try:
-        s3_client.upload_file(input_file_path, bucket_name, f"{prefix}/{output_path}")
+        s3_client.upload_file(input_file_path, BUCKET_NAME, f"{prefix}/{output_path}")
         return True
     except ClientError as e:
         print(e)
@@ -102,10 +102,10 @@ def delete_folder_on_aws(folder_path: str) -> None:
     """Deletes a folder and all its contents from an S3 bucket.
 
     Args:
-        bucket_name (str): The name of the S3 bucket.
+        BUCKET_NAME (str): The name of the S3 bucket.
         folder_path (str): The path of the folder to delete.
     """
-    bucket = s3_client.Bucket(bucket_name)
+    bucket = s3_client.Bucket(BUCKET_NAME)
     try:
         # Delete all objects in the folder
         bucket.objects.filter(Prefix=folder_path).delete()
@@ -140,7 +140,7 @@ def upload_folder_to_aws(
 
             # Upload the file
             try:
-                s3_client.upload_file(local_file, bucket_name, f"{output_path}/{file}")
+                s3_client.upload_file(local_file, BUCKET_NAME, f"{output_path}/{file}")
             except ClientError as e:
                 print(e)
                 return False

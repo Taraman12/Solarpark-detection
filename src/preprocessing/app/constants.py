@@ -23,6 +23,8 @@ URL_API = "http://api:8000/api/v1"  # api
 MODEL_NAME = "solar-park-detection"
 HEADERS = {"Content-Type": "application/json"}
 
+BUCKET_NAME = "solar-detection-697553-eu-central-1"
+
 IDENTIFIER_REGEX = re.compile(
     r"""(?P<mission>S2[A-B])_MSI
         (?P<product_level>L[1-2][A-C])_
