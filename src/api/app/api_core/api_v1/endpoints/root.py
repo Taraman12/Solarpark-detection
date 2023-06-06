@@ -12,6 +12,6 @@ def root():
 
 @router.get("/ml-server")
 def ml_server():
-    response = requests.get("http://ml-serve:8081/models")
+    response = requests.get("http://localhost:8081/models")
     # return json response
     return response.json()["models"][0]
