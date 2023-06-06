@@ -52,7 +52,7 @@ def get_url():
     if os.environ.get("DOCKERIZED") == "true":
         USER = os.getenv("POSTGRES_USER", "postgres")
         PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
-        SERVER = os.getenv("POSTGRES_SERVER", "db")
+        SERVER = os.getenv("POSTGRES_SERVER", "localhost")
         DB = os.getenv("POSTGRES_DB", "app")
     else:
         src_path = get_src_path()
