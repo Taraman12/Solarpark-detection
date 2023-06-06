@@ -1,5 +1,6 @@
 # build-in
 import os
+import logging
 
 # third-party
 import boto3
@@ -25,7 +26,15 @@ if os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get("AWS_SECRET_ACCESS_KEY
 
 # if deployed on aws ec2 instance, the credentials are provided by the IAM role of the ec2 instance
 else:
-    session = boto3.Session()
+    logging.info("Using IAM role credentials")
+    session = boto3.Session(region_name="eu-central-1")
+    credentials = session.get_credentials()
+    credentials = credentials.get_frozen_credentials()
+    session = boto3.Session(
+        aws_access_key_id=credentials.access_key,
+        aws_secret_access_key=credentials.secret_key,
+        region_name="eu-central-1",
+    )
 
 
 # create s3 client
