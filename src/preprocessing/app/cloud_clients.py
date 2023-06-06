@@ -27,7 +27,7 @@ else:
     provider = InstanceMetadataProvider(
         iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
     )
-    if not provider is None:
+    if provider is None:
         raise ValueError("No IAM role found")
     credentials = provider.load().get_frozen_credentials()
     session = boto3.Session(
