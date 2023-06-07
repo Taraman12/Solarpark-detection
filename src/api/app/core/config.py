@@ -33,6 +33,8 @@ class Settings(BaseSettings):
         "http://localhost:5000",
         "http://localhost:5678",
         "http://preprocessing:5678",
+        "http://ml-serve:8081",
+        "http://localhost:8081",
     ]
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
