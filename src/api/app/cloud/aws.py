@@ -3,10 +3,12 @@ import os
 
 # third-party
 import boto3
-import docker
+
+# import docker
 from botocore.credentials import InstanceMetadataFetcher, InstanceMetadataProvider
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
+
 from .logging_config import get_logger
 
 # local-modules
@@ -52,16 +54,15 @@ else:
     provider = InstanceMetadataProvider(
         iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
     )
-    if provider is None:
-        raise ValueError("No IAM role found")
-    credentials = provider.load().get_frozen_credentials()
-    logger.info(f"Credentials:{credentials.access_key}")
-    session = boto3.Session(
-        aws_access_key_id=credentials.access_key,
-        aws_secret_access_key=credentials.secret_key,
-        aws_session_token=credentials.token,
-        region_name="eu-central-1",
-    )
+    if provider.load() is not None:
+        credentials = provider.load().get_frozen_credentials()
+        logger.info(f"Credentials:{credentials.access_key}")
+        session = boto3.Session(
+            aws_access_key_id=credentials.access_key,
+            aws_secret_access_key=credentials.secret_key,
+            aws_session_token=credentials.token,
+            region_name="eu-central-1",
+        )
 
 
 # create s3 client
@@ -72,6 +73,7 @@ ec2_client = session.client("ec2", region_name="eu-central-1")
 def verify_aws_credentials() -> bool:
     try:
         s3_client.list_buckets()
+        logger.info("Credentials are valid.")
         return True
     except ClientError:
         logger.warning("Credentials are NOT valid.")
