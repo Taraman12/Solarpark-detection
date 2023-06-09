@@ -24,7 +24,7 @@ The downloader downloads the Sentinel-2 tiles from Germany and stores them in a 
 
 The preprocessing merges the different bands (Red, Green, Blue, NIR) into one image and uses a robust normalisation as well as color corecction. At the end the larger image (10980x10980 pixels) will be chopped into smaller images (256x256 pixels) so it can be proceessed by the neural network. In Production mode the image will be send directly to the ml-model for interferiece and the predictions than will be send through the api to the database. If you want to make trainings data. The preprocessing converts the polygons from the trainings polygons to masks on the small images and stores them with the images on the disk instead sending them to the model. 
 
-The API 
+The API is used as a connection between the the services among them selves (mainly the DB) and as a start hub 
 
 # ToDos:
 - [ ] Add a description of the project
