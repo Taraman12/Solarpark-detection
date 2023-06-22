@@ -14,8 +14,7 @@ import './assets/main.css'
 /* Init Pinia */
 const pinia = createPinia();
 
-/* Create Vue app */
-createApp(App).use(router).use(pinia).mount("#app");
+
 
 const styleStore = useStyleStore(pinia);
 
@@ -45,3 +44,6 @@ if (
 ) {
     styleStore.setDarkMode(true);
 }
+
+/* Create Vue app */
+createApp(App).use(router).use(pinia).mount("#app");
