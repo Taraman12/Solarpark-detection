@@ -160,8 +160,8 @@ onMounted(async () => { //create map
 </script>
 
 <template>
-    <div class="flex h-screen justify-between">
-        <div class="w-2/5 h-full">
+    <div class="flex h-screen justify-between gap-6 pt-2">
+        <div class="sticky top-14 w-2/5 h-full">
             <div style="overflow-y: hidden">
                 <div ref="mapDiv" style="width: 100%; height: 50vh"></div>
             </div>
@@ -171,10 +171,11 @@ onMounted(async () => { //create map
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>size_in_sq_m</th>
-                        <th>peak_power</th>
+                        <th>Size in m&sup2;</th>
+                        <th>Peak Power (MW)</th>
                         <th>first_detection</th>
                         <th>last_detection</th>
+                        <th>avg_confidence</th>
                         <th>Valid</th>
                     </tr>
                 </thead>
@@ -182,9 +183,10 @@ onMounted(async () => { //create map
                     <tr v-for="item in dataTable" :key="item.id" @click="handleRowClick(item.id)">
                         <td>{{ item.id }}</td>
                         <td>{{ item.size_in_sq_m }}</td>
-                        <td>{{ item.peak_power }}</td>
+                        <td>{{ item.peak_power.toFixed(2) }}</td>
                         <td>{{ item.first_detection }}</td>
                         <td>{{ item.last_detection }}</td>
+                        <td>{{ item.avg_confidence.toFixed(2) }}</td>
                         <td v-if="item.is_valid === 'None'">
                             <input type="checkbox" v-model="item.selected" @click="handleCheckboxClick(item)">
                         </td>
