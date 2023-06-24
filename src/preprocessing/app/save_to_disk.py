@@ -37,23 +37,14 @@ from rasterio.warp import transform_geom
 from settings import MAKE_TRAININGS_DATA, PRODUCTION
 from shapely.geometry import Polygon
 
-# from pyproj import Transformer
-
-
-# set up logging
-# logging.getLogger("rasterio").setLevel(logging.WARNING)
-# logging.getLogger("fiona").setLevel(logging.WARNING)
 logger = get_logger("BaseConfig")
-# log_file_path = path.join(path.dirname(path.abspath(__file__)), "logging.conf")
-# logging.config.fileConfig(log_file_path)
-# logger = logging.getLogger(__name__)
+
 """
 ToDo: Add padding to the image/mask
 ToDo: Needs better documentation
 ToDo: handle memory consumption (but not so important)
 """
 
-# Defining constants
 
 # extracts tile, date, band and resolution from filename
 # ! Adjust to TCI band
@@ -68,6 +59,7 @@ def preprocess_and_save_data(  # noqa: C901
     tile_folder_path: str,
     masks_gdf: GeoDataFrame,
 ) -> int:
+    
     tile_folder_path = tile_folder_path.strip("/")
     tile, tile_date = get_tile_and_date(tile_folder_path)
     identifier = tile_folder_path.split("/")[-1]
@@ -82,12 +74,12 @@ def preprocess_and_save_data(  # noqa: C901
 
     # find paths to all REQUIRED_BANDS
     band_paths = find_band_paths(image_dir=IMAGE_INPUT_DIR / identifier)
-    logger.info(f"Found {len(band_paths)} bands for {identifier}")
+    logger.debug(f"Found {len(band_paths)} bands for {identifier}")
     # open all REQUIRED_BANDS
     bands = open_dataset_readers(band_paths=band_paths)
-    logger.info(f"Opened {len(bands)} bands for {identifier}")
+    logger.debug(f"Opened {len(bands)} bands for {identifier}")
     stacked_bands = preprocess_bands(bands)
-    logger.info(f"Preprocessed {len(bands)} bands for {identifier}")
+    logger.debug(f"Preprocessed {len(bands)} bands for {identifier}")
     # ! MASK #
     # masks_gdf = gpd.read_file(mask_input_dir)
     first_band = list(bands.keys())[0]
@@ -219,7 +211,7 @@ def prediction_handler(
 
     polygons, areas = masks_to_polygons(prediction, metadata)
     # got changed in masks_to_polygons
-    metadata["crs"] = "EPSG:4326"
+    # metadata["crs"] = "EPSG:4326"
     logger.info(f"Found {len(polygons)} polygons")
 
     for polygon, area in zip(polygons, areas):
@@ -233,14 +225,18 @@ def prediction_handler(
 
 
 def upload_geotiff_handler(data: np.ndarray, metadata: dict, filename: str) -> bool:
+    # FIXME: upload to aws doesn't find the path in windows
+    metadata["driver"] = "GTiff"
     metadata["dtype"] = rasterio.uint8
     metadata["count"] = 3
+    data = np.round(data * 255).astype(np.uint8)
     with rasterio.open(fp=filename, mode="w", **metadata) as dst:
-        dst.write(data.astype(rasterio.uint8))
-        if upload_file_to_aws(
-            filename, prefix=IMAGES_WITH_SOLARPARK, output_path=filename
-        ):
-            logger.info("Image uploaded to AWS")
+        dst.write(data)
+
+    if upload_file_to_aws(filename, prefix=IMAGES_WITH_SOLARPARK, output_path=filename):
+        logger.info("Image uploaded to AWS")
+    # delete the file from local storage
+    os.remove(filename)
 
 
 def get_tile_and_date(identifier: str) -> Tuple[Optional[str], Optional[str]]:
@@ -363,6 +359,8 @@ def to_datetime_str(date_string: str) -> str:
 
 
 def calc_peak_power(area_in_sq_m: float) -> float:
+    # https://www.bundesnetzagentur.de/SharedDocs/Downloads/DE/Sachgebiete/Energie/Unternehmen_Institutionen/ErneuerbareEnergien/PV-Freiflaechenanlagen/Bericht_Flaecheninanspruchnahme_2016.pdf?__blob=publicationFile&v=2#:~:text=Die%20bereits%20im%20Rahmen%20der,Ackerland%20in%20benachteiligten%20Gebieten%20errichtet. # noqa
+    # page 8 on the pdf (german)
     # 1,6 Hektar = 1 MWp
     # area in sq m / 10000 = area in ha * 1.6 = peak power in MWp
     return area_in_sq_m / 10000 * 1.6
@@ -388,12 +386,12 @@ def extract_polygon_coordinates(polygon: Polygon) -> Tuple[List[float], List[flo
     return latitudes, longitudes
 
 
-def save_patch(output_path: Path, metadata: dict, data_array: np.ndarray) -> bool:
+def save_patch(output_path: Path, metadata: dict, data: np.ndarray) -> bool:
     # ! add folder for masks and images
     output_path.parent.mkdir(parents=True, exist_ok=True)
     # looks like the metadata is not correct or dytpe is not correct
     with rasterio.open(fp=output_path, mode="w", **metadata) as dst:
-        dst.write(data_array.astype(rasterio.float32))
+        dst.write(data.astype(rasterio.float32))
 
     # Optional: Upload to AWS
     # NOTE: Each upload is a request to AWS and only 2000 requests per month are free
@@ -499,7 +497,7 @@ def stack_bands(bands: Dict[str, rasterio.DatasetReader]) -> np.ndarray:
         np.ndarray: The stacked bands array, where each band is stacked along the third dimension.
     """
     return np.dstack(
-        [np.float32(bands[b].read(1)) for b in ["B08", "B04", "B03", "B02"]]
+        [bands[b].read(1).astype(int) for b in ["B08", "B04", "B03", "B02"]]
     )
 
 
@@ -559,6 +557,7 @@ def filter_mask_on_tile(masks: gpd.GeoDataFrame, tile: str) -> gpd.GeoDataFrame:
     return masks[masks.tile_name == tile].geometry.reset_index(drop=True)
 
 
+### OLD CODE BELOW ###
 def padding_size(image_size: int, KERNEL_SIZE: int) -> int:
     """Computes the padding size, which is needed so that the kernel fits the
     image."""
