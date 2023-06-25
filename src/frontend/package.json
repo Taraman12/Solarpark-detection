@@ -16,10 +16,12 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.15.2",
+    "@mdi/js": "^7.2.96",
     "autoprefixer": "^10.4.14",
     "axios": "^1.4.0",
-    "material-components-web": "^14.0.0",
+    "ol": "^7.4.0",
     "pinia": "^2.0.32",
+    "proj4": "^2.9.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6"
   },
