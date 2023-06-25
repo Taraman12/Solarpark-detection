@@ -1,33 +1,64 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { useStyleStore } from "@/stores/style.js";
+import { mdiGithub, mdiThemeLightDark } from '@mdi/js'
+import Icon from '@/components/IconCanvas.vue'
+import NavBar from '@/components/NavBar.vue'
+import NavBarItem from '@/components/NavBarItem.vue'
+import NavBarItemLabel from '@/components/NavBarItemLabel.vue'
+import LayoutBase from '@/layouts/LayoutBase.vue'
+const styleStore = useStyleStore();
+// import HelloWorld from './components/HelloWorld.vue'
+
+// const ripple = new MDCRipple(document.querySelector('.foo-button'));
+
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-        <RouterLink to="/testview">Test Seite</RouterLink>
-        <RouterLink to="/table">Table View</RouterLink>
-        <RouterLink to="/map">Map View</RouterLink>
-        <RouterLink to="/mapWithPoly">mapWithPolyView</RouterLink>
-        <RouterLink to="/selectPolyFromTableView">SelectPolyFromTableView</RouterLink>
-        <RouterLink to="/modelsView">Models</RouterLink>
-        <RouterLink to="/showImageAwsView">ShowImageAwsView</RouterLink>
-        <RouterLink to="/sideBarView">sideBarView</RouterLink>
-      </nav>
-    </div>
-  </header>
-  <RouterView />
+  <LayoutBase>
+    <NavBar>
+      <!-- <header>
+      <img alt="Vue logo" class="logo" src="@/assets/satellit.ico" width="125" height="125" />
+      <nav> -->
+      <div class="flex justify-center">
+        <div class="flex items-center space-x-5 text-neutral-500 dark:text-gray-300">
+          <RouterLink to="/" class="hover:text-black dark:hover:text-gray-100">Home</RouterLink>
+          <RouterLink to="/about" class="hover:text-black dark:hover:text-gray-100">About</RouterLink>
+          <RouterLink to="/testview" class="hover:text-black dark:hover:text-gray-100">Test Seite</RouterLink>
+          <RouterLink to="/table" class="hover:text-black dark:hover:text-gray-100">Table View</RouterLink>
+          <RouterLink to="/map" class="hover:text-black dark:hover:text-gray-100">Map View</RouterLink>
+          <RouterLink to="/mapWithPoly" class="hover:text-black dark:hover:text-gray-100">mapWithPolyView</RouterLink>
+          <RouterLink to="/selectPolyFromTableView" class="hover:text-black dark:hover:text-gray-100">
+            SelectPolyFromTableView</RouterLink>
+          <RouterLink to="/modelsView" class="hover:text-black dark:hover:text-gray-100">Models</RouterLink>
+          <RouterLink to="/showImageAwsView" class="hover:text-black dark:hover:text-gray-100">ShowImageAwsView
+          </RouterLink>
+          <RouterLink to="/sideBarView" class="hover:text-black dark:hover:text-gray-100">sideBarView</RouterLink>
+        </div>
+      </div>
+      <div
+        class="max-h-screen-menu overflow-y-auto lg:overflow-visible lg:flex lg:items-stretch lg:justify-end lg:ml-auto">
+        <div class="flex items-center space-x-4">
+          <div class="">
+            <a href="https://github.com/Taraman12/Solarpark-detection" target="_blank" rel="noopener noreferrer">
+              <Icon :path="mdiGithub" />
+            </a>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input @click="styleStore.setDarkMode()" type="checkbox" value="" class="sr-only peer">
+            <div
+              class="w-11 h-6 bg-gray-100 peer-focus:outline-none  rounded-full peer dark:bg-gray-200 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-gray-600">
+            </div>
+            <Icon :path="mdiThemeLightDark" />
+          </label>
+        </div>
+      </div>
+    </NavBar>
+    <RouterView />
+  </LayoutBase>
 </template>
 
-<style scoped>
+<!-- <style scoped>
 header {
   line-height: 1.5;
   max-height: 100vh;
@@ -89,4 +120,4 @@ nav a:first-of-type {
     margin-top: 1rem;
   }
 }
-</style>
+</style> -->
