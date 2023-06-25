@@ -1,4 +1,4 @@
-@layer base {
+/* @layer base {
     table {
         @apply w-full border-collapse table-auto;
     }
@@ -19,4 +19,72 @@
     tr:nth-child(even) td {
         @apply bg-gray-100 dark:bg-gray-800;
     }
+} */
+
+table {
+  @apply w-full;
+}
+/* sticky top-0 z-30 */
+thead {
+  @apply bg-gray-400 hidden lg:table-header-group dark:bg-neutral-500;
+}
+
+tr {
+  @apply max-w-full block relative border-b-4 border-gray-100
+    lg:table-row lg:border-b-0 dark:border-gray-600;
+}
+
+tr:last-child {
+  @apply border-b-0;
+}
+
+th {
+  @apply lg:text-center lg:py-2 lg:px-3;
+}
+
+td {
+  @apply flex justify-between text-center py-3 px-4 align-top border-b border-gray-100
+    lg:table-cell lg:text-center lg:py-2 lg:px-3 lg:align-middle lg:border-b-0 dark:border-neutral-400;
+}
+
+tr:nth-child(2n) td {
+  @apply lg:bg-gray-200 lg:dark:bg-neutral-700;
+}
+
+td:last-child {
+  @apply border-b-0;
+}
+
+tbody tr:hover td {
+  @apply lg:bg-gray-300 lg:dark:bg-neutral-600;
+}
+
+td:before {
+  content: attr(data-label);
+  @apply font-semibold pr-3 text-left lg:hidden;
+}
+
+td.checkbox-cell, th.checkbox-cell {
+  @apply lg:w-5;
+}
+
+td.progress-cell progress {
+  @apply flex w-2/5 self-center
+    lg:w-full;
+}
+
+td.image-cell {
+  @apply border-b-0 lg:w-6;
+}
+
+td.image-cell:before, td.actions-cell:before {
+  @apply hidden;
+}
+
+td.image-cell .image {
+  @apply w-24 h-24 mx-auto lg:w-6 lg:h-6;
+}
+
+.table-pagination {
+  @apply px-6 py-3 border-t border-gray-100 dark:border-gray-700;
 }
