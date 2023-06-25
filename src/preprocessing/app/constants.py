@@ -1,6 +1,7 @@
 # build-in
 import re
 from pathlib import Path
+from settings import DOCKERIZED
 
 # where will the images be stored/ name of the folder in s3 bucket
 IMAGE_INPUT_DIR = Path(r"data_raw")
@@ -20,8 +21,14 @@ KERNEL_SIZE = 256
 PADDING = 25
 UNDERSAMPLING_RATE = 0.05
 
-URL_ML = "http://localhost:8080"  # ml-serve
-URL_API = "http://localhost:8000/api/v1"  # api
+if DOCKERIZED:
+    URL_ML = "http://ml-serve:8080"  # ml-serve
+    URL_API = "http://api:8000/api/v1"  # api
+else:
+    URL_ML = "http://localhost:8080"
+    URL_API = "http://localhost:8000/api/v1"
+
+
 MODEL_NAME = "solar-park-detection"
 HEADERS = {"Content-Type": "application/json"}
 
