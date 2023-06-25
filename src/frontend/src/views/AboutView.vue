@@ -31,6 +31,12 @@ async function startInstance() {
   </div>
   <div class="about">
     <h1>This is an about page</h1>
+    <p>
+      See the following source for the 1,6 MW peak per 1 acres:
+      <a
+        href="https://www.bundesnetzagentur.de/SharedDocs/Downloads/DE/Sachgebiete/Energie/Unternehmen_Institutionen/ErneuerbareEnergien/PV-Freiflaechenanlagen/Bericht_Flaecheninanspruchnahme_2016.pdf?__blob=publicationFile&v=2#:~:text=Die%20bereits%20im%20Rahmen%20der,Ackerland%20in%20benachteiligten%20Gebieten%20errichtet.">Bundesnetzagentur
+        Report Dec. 2016</a>
+    </p>
   </div>
 </template>
 
