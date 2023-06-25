@@ -110,6 +110,8 @@ def preprocess_and_save_data(  # noqa: C901
             stacked_bands = preprocess_bands(bands, window)
             if stacked_bands.max() == 0:
                 continue
+            stacked_bands = pad_array(stacked_bands)
+
             logger.debug(f"Preprocessed {len(bands)} bands for {identifier}")
             # ! MASK #
             # masks_gdf = gpd.read_file(mask_input_dir)
@@ -573,6 +575,21 @@ def robust_normalize(
     return (band - percentile_lower_bound) / (
         percentile_upper_bound - percentile_lower_bound
     )
+
+
+def pad_array(array: np.ndarray) -> np.ndarray:
+    # Define the desired size of the array
+    desired_size = (KERNEL_SIZE, KERNEL_SIZE)
+    # Get the current size of the array
+    current_size = array.shape[:2]
+    # Calculate the amount of padding needed
+    padding = (
+        (0, desired_size[0] - current_size[0]),
+        (0, desired_size[1] - current_size[1]),
+        (0, 0),
+    )
+    # Pad the array with zeros
+    return np.pad(array, padding, mode="constant")
 
 
 def rasterize_mask(masks: gpd.GeoDataFrame, metadata: dict) -> np.ndarray:
