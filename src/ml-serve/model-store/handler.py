@@ -1,7 +1,7 @@
 import logging
 import os
 from typing import Any
-
+import boto3
 import numpy as np
 import segmentation_models_pytorch as smp
 import torch
@@ -55,7 +55,14 @@ class ModelHandler(BaseHandler):
             raise RuntimeError("Missing the model.pt file")
 
         # model_config_path = r"/app/model-store/model-config.yaml"
-
+        if PRODUCTION:
+            s3 = boto3.client("s3")
+            s3.download_file(
+                "sagemaker-us-east-1-123456789012",
+                "model-config.yaml",
+                "model-config.yaml",
+            )
+            
         with open("model-config.yaml", "r") as f:
             model_config = yaml.safe_load(f)
 
