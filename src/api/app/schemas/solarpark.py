@@ -7,6 +7,13 @@ from typing import List
 
 # third-party
 from pydantic import BaseModel
+from enum import Enum
+
+class Status(str, Enum):
+    none = "None"
+    valid = "valid"
+    non_valid = "non-valid"
+    unsure = "unsure"
 
 
 class SolarParkBase(BaseModel):
@@ -18,7 +25,7 @@ class SolarParkBase(BaseModel):
     last_detection: date
     avg_confidence: float
     name_in_aws: str
-    is_valid: str = "None"
+    is_valid: Status = Status.none
     lat: List[float]
     lon: List[float]
 
