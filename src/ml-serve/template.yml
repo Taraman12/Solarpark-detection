@@ -1,0 +1,9 @@
+Resources:
+  TorchServeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      MemorySize: 2024
+      Timeout: 30
