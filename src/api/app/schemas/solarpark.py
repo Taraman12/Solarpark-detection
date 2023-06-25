@@ -1,5 +1,6 @@
 # build-in
 from datetime import date
+from enum import Enum
 
 # from geoalchemy2.types import Geometry
 # from geoalchemy2 import WKTElement
@@ -7,7 +8,7 @@ from typing import List
 
 # third-party
 from pydantic import BaseModel
-from enum import Enum
+
 
 class Status(str, Enum):
     none = "None"

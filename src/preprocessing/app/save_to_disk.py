@@ -23,15 +23,14 @@ from constants import (
     IMAGE_OUTPUT_DIR,
     IMAGES_WITH_SOLARPARK,
     KERNEL_SIZE,
-    PADDING,
-    UNDERSAMPLING_RATE,
     MASK_OUTPUT_DIR,
     MODEL_NAME,
+    PADDING,
     REQUIRED_BANDS,
+    UNDERSAMPLING_RATE,
     URL_API,
     URL_ML,
 )
-
 from geopandas import GeoDataFrame
 from logging_config import get_logger
 from rasterio import DatasetReader

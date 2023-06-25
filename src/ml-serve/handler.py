@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Any
+
 import boto3
 import numpy as np
 import segmentation_models_pytorch as smp
@@ -62,7 +63,7 @@ class ModelHandler(BaseHandler):
                 "model-config.yaml",
                 "model-config.yaml",
             )
-            
+
         with open("model-config.yaml", "r") as f:
             model_config = yaml.safe_load(f)
 

@@ -43,7 +43,6 @@ else:
         logger.error(e)
 
 
-
 # create s3 client
 s3_client = session.client("s3")
 
