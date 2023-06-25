@@ -13,7 +13,7 @@ from .logging_config import get_logger
 
 # local-modules
 
-load_dotenv()
+# load_dotenv()
 # login to aws
 aws_access_key_id = os.getenv("aws_access_key_id")
 aws_secret_access_key = os.getenv("aws_secret_access_key")
@@ -37,8 +37,10 @@ session = boto3.Session(
 
 logger = get_logger("BaseConfig")
 # local file
-if os.environ.get("LOCAL"):
+# local file
+if not os.environ.get("DOCKERIZED"):
     load_dotenv()
+
 
 # In local docker environment, the AWS credentials are stored in the .env file
 if os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get("AWS_SECRET_ACCESS_KEY"):
@@ -54,7 +56,7 @@ else:
     provider = InstanceMetadataProvider(
         iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
     )
-    if provider.load() is not None:
+    try:
         credentials = provider.load().get_frozen_credentials()
         logger.info(f"Credentials:{credentials.access_key}")
         session = boto3.Session(
@@ -63,6 +65,8 @@ else:
             aws_session_token=credentials.token,
             region_name="eu-central-1",
         )
+    except Exception as e:
+        logger.error(f"Error: {e}")
 
 
 # create s3 client

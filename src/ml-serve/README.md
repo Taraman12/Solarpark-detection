@@ -42,3 +42,7 @@ curl "http://localhost:8081/models"
 #### make .mar file
 ##### run this in (git) bash shell (from ml-serve folder)
 ./make-archive.sh
+
+#### Build Lambda Docker container
+login through aws cli (needs to be in us-east-1 region):
+aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws

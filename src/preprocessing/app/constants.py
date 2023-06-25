@@ -17,6 +17,8 @@ IMAGE_OUTPUT_DIR = Path(r".\data_local\test_images_geotiff")
 MASK_OUTPUT_DIR = Path(r".\data_local\test_mask_patches")
 
 KERNEL_SIZE = 256
+PADDING = 25
+UNDERSAMPLING_RATE = 0.05
 
 URL_ML = "http://localhost:8080"  # ml-serve
 URL_API = "http://localhost:8000/api/v1"  # api

@@ -45,13 +45,13 @@ jobs:
       #     push: true
       #     tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-frontend:latest
 
-      - name: Build and push preprocessing
-        uses: docker/build-push-action@v4
-        with:
-          context: ./src/preprocessing
-          file: ./src/preprocessing/preprocessing.dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-preprocessing:latest
+      # - name: Build and push preprocessing
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: ./src/preprocessing
+      #     file: ./src/preprocessing/preprocessing.dockerfile
+      #     push: true
+      #     tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-preprocessing:latest
 
       - name: Build and push api
         uses: docker/build-push-action@v4
@@ -60,6 +60,14 @@ jobs:
           file: ./src/api/api.dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-api:latest
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/frontend
+          file: ./src/frontend/frontend.dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-frontend:latest
 
       # - name: Build Docker image
       #   # run: docker build -t my-dockerhub-username/my-repo:latest .

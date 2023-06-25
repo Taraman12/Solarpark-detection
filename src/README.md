@@ -10,6 +10,9 @@ do not select default security group (Create a new one instead, and add SSH port
 Make sure your ec2 instance are in the same VPC and subnet!
 Also activate the inbound rules for the security group of the ec2 instance (so all instances with the same security group can communicate with each other)
 
+### secrurity group for ec2 instance
+https://aws.plainenglish.io/using-aws-to-create-a-docker-swarm-b48731c850c
+
 #### NOTE: eb cli will use the main branch for deployment
 even if you are on a different branch locally
 

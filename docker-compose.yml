@@ -39,7 +39,7 @@ services:
       - region_name=${region_name}
     expose:
       - "8000"
-
+    # network: host
     volumes:
       - data:/var/lib/postgis/data
       - /var/run/docker.sock:/var/run/docker.sock
@@ -71,10 +71,12 @@ services:
   #   build:
   #     context: ./src/preprocessing
   #     dockerfile: preprocessing.dockerfile
-  #   depends_on:
-  #     - ml-serve
+  #   # depends_on:
+  #   #   - ml-serve
   #   environment:
   #     - DOCKERIZED=true
+  #     - MAKE_TRAININGS_DATA=False
+  #     - PRODUCTION=true
   #   ports:
   #     - "5678:5678"
   #   expose:
@@ -92,8 +94,7 @@ services:
 volumes:
   data:
 
-
-# networks:
-#   default:
-#     external:
-#       name: my-net
+    # networks:
+    #   default:
+    #     external:
+    #       name: my-net

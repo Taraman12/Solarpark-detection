@@ -18,7 +18,7 @@ fetch("http://localhost:8000/api/v1/solarpark/")
   .then(data => console.log(data))
   .catch((err) => (error.value = err))
 
-  function downloadGeoJSON() {
+function downloadGeoJSON() {
   fetch('http://localhost:8000/api/v1/solarpark/download/as-geojson')
     .then(response => {
       // Dateinamen aus dem Content-Disposition-Header extrahieren oder Standardnamen verwenden
@@ -40,9 +40,14 @@ fetch("http://localhost:8000/api/v1/solarpark/")
 
 <template>
   <div class="about">
-    <div>
-      <button @click="downloadGeoJSON">GeoJSON herunterladen</button>
-    </div>
+    <button @click="downloadGeoJSON"
+      class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+      <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+        <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
+      </svg>
+      <span>GeoJSON</span>
+    </button>
+
     <h1>This is my first test page</h1>
     <div v-if="error">Oops! Error encountered: {{ error.message }}</div>
     <div v-else-if="data">

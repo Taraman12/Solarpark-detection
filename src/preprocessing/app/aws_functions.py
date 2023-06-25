@@ -91,7 +91,7 @@ def upload_file_to_aws(
     if output_path is None:
         output_path = os.path.basename(input_file_path)
 
-    prefix = "data_preprocessed"
+    prefix = "predicted-solar-parks"
     # Upload the file
     try:
         s3_client.upload_file(input_file_path, BUCKET_NAME, f"{prefix}/{output_path}")
