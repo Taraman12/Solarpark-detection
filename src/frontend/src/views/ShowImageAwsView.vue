@@ -11,6 +11,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import Polygon from 'ol/geom/Polygon'
+import { Style, Fill, Stroke } from 'ol/style';
 import OSM from 'ol/source/OSM.js';
 import WebGLTile from 'ol/layer/WebGLTile.js';
 import { register } from 'ol/proj/proj4';
@@ -21,22 +22,11 @@ import { useApiFetch } from '@/plugins/fetch'
 
 register(proj4);
 const OSMmap = ref(null); // map object
+const OSMmapDiv = ref(null); // define divref to populate the map
 
 const layer = new TileLayer({
     source: new OSM(),
 });
-
-async function loadSource() {
-    const source = new GeoTIFF({
-        sources: [
-            {
-                url: 'https://solar-detection-697553-eu-central-1.s3.eu-central-1.amazonaws.com/predicted-solar-parks/test.tif?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEID%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDGV1LWNlbnRyYWwtMSJIMEYCIQC3BBVwZUagb5y8X%2BR0WsQjNvAQH6Fzkt9xauwORpXxaQIhALXaw%2BibBvqomlTvzXL0gS0NKAWSkRB1zcRRE5UZ7p9ZKvECCNn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQARoMMTAzOTc2MjI4NDM1IgyJ4xmQDvX5MvZmBc0qxQI4jPBcb0Npo43%2FloLIYyivYN9qV%2BqUYfY6evYYznh3N0fPWynVt16P3dGTTlInTv9tCshSt9fOTZEhM0BVS24fEqH2gZ4HVLsotn5%2FRpyR61QhaD4QYV6%2Bp6vw%2BEnc%2FGwXDXy%2Bb5nsbeoOEepK0b%2FiEs1ueQHCXsHwyK0oDumHLpe%2FNXV1suCML0zwYUDqqh1FxMyS%2F73EqA4RuP8%2BgI2Ft3Xe%2BShlf5c1k539CLy%2BajX8zMr1OI4v0zodnOgHIXmmwWADA6MRUaly8LcaGJY%2FeCdltW355zrhRnxkZxOYJd9YjHMaeb4yg3xfFPx%2BISW79O13peWwy0vdCAGAT6%2FQGY7BxCfNlGDrI2%2BQ44nSBbq8DT0d3dW%2F7%2B6EYW5wmGVNh6xTn50JcLNbCZ6H7QH3xm10%2F1JdgOHmgtvRuPHkYNwQ3gRkMPHe0aQGOrIC059%2B44EmkDnjAEGUG18irZ4LKpFDX7NvznVcGMnJ3gff9Eio99Na%2BRY7jKWqvvIao6xCgQ3Jsk8wau90uvSgL%2BcNrar%2F9MPYGG69GjIFnSc1fzfPRLwxyW%2BEy6QjqTgB6X%2FNJEgjYg5PhbriCFzOhMQ6usCav5X49IYEnOrVuAmp1AutiGX8HVRAAzh6B6k%2BIz8FhcQIIlXUf19RH7IH8OGQm44GLUXxkn0wByqPuhK7RyDY9jSD%2BRZjeIFOilLkbG%2BZIepFpP5FJoxukbqbv7MtoO9sAuz0MRUX9JBT7dgaiKvwISKbHTSt%2BSfei7diTpLe%2BPb%2FQiybOsQvFLD8dmftbEO8JRN5y3QpTjJidWi9n%2Br5vglkEtjozBq%2FVWAXyw4Cpub65LZ49mArRaJiTOVI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20230622T201307Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=ASIARQNLXKZJUIMTPMWG%2F20230622%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Signature=bcb0cf1cd456b968061047b66435e98e40c287c6dc2c83833de494dc6329e6b8',
-                // url: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/32/U/NA/2022/9/S2B_32UNA_20220923_0_L2A/TCI.tif',
-            },
-        ],
-    });
-    return source;
-}
 
 // https://stackoverflow.com/questions/76076055/how-to-delete-google-maps-markers-in-vue-3-composition-api-js-gmaps-api
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -104,13 +94,86 @@ async function addPolygons() {
     }
 }
 
-async function handleRowClick(id) {
-    // Do something with the selected row ID
-    data.value = await fetchData(id);
+async function addOSMPolygon(data) {
+    const lonCoords = data.value.lon;
+    const latCoords = data.value.lat;
+    const polygonCoords = latCoords.map((lat, index) => [lonCoords[index], lat]);
 
+    const epsgCode = OSMmap.value.getView().getProjection().getCode();
+    await fromEPSGCode(epsgCode);
+
+    const openLayersCoords = polygonCoords.map(coord => fromLonLat(coord, epsgCode));
+
+    const polygonGeometry = new Polygon([openLayersCoords]);
+
+    const polygonFeature = new Feature({
+        type: "Polygon",
+        geometry: polygonGeometry,
+    });
+
+    const vectorSource = new VectorSource({
+        features: [polygonFeature],
+    });
+
+    const vectorLayer = new VectorLayer({
+        source: vectorSource,
+        style: new Style({
+            stroke: new Stroke({
+                color: 'red',
+                width: 2,
+            }),
+        }),
+    });
+    // console.log(vectorLayer);
+    // testView = await vectorSource.getView()
+    // console.log(testView);
+    console.log(OSMmap.value.getView().getProjection().getCode());
+    OSMmap.value.addLayer(vectorLayer);
+    OSMmap.value.getView().fit(vectorSource.getExtent(), {
+        padding: [50, 50, 50, 50],
+        maxZoom: 15,
+    });
+}
+async function loadSource(name_in_aws) {
+    const url = `https://solar-detection-697553-eu-central-1.s3.eu-central-1.amazonaws.com/predicted-solar-parks/${name_in_aws}`
+    const source = new GeoTIFF({
+        sources: [
+            {
+                url: url,
+            },
+        ],
+    });
+    return source;
+}
+
+async function addImage(name_in_aws) {
+
+    const source = await loadSource(name_in_aws);
+    const sourceView = await source.getView()
+    const projection = sourceView.projection
+    const epsgCode = projection.code_
+    console.log(sourceView);
+
+    await fromEPSGCode(epsgCode);
+
+    // const newView = source.getView()
+
+    const imageLayer = new WebGLTile({
+        source: source,
+    });
+    OSMmap.value.addLayer(imageLayer)
+    // OSMmap.value.setView(newView)
+    OSMmap.value.getView()
+}
+
+async function handleRowClick(item) {
+    // Do something with the selected row ID
+    data.value = await fetchData(item.id);
+    // const source = await loadSource();
     console.log("here: " + data.value.lat[0]);
     map.value = new google.maps.Map(mapDiv.value, {
         // center: currPos.value,
+        // ToDo: center map on solar park
         center: { lat: data.value.lat[0], lng: data.value.lon[0] },
         zoom: 16,
         mapTypeId: 'satellite'
@@ -118,16 +181,8 @@ async function handleRowClick(id) {
     // removes the last added polygon
     polygons.value.pop(-1);
     await addPolygons()
-    // get(`/solarpark/${id}`).then(park => {
-    //     console.log("park " + park);
-    //     if (polygon.value) {
-    //         polygon.value.setMap(null);
-    //     }
-    //     addPolygon(park);
-    // });
-    // Create a new polygon geometry from the coordinates
-    const polygonCoords = latCoords.map((lat, index) => [lonCoords[index], lat]);
-    const polygonGeometry = new Polygon(polygonCoords);
+    await addImage(item.name_in_aws)
+    await addOSMPolygon(data);
 }
 
 async function handleCheckboxClick(item) {
@@ -150,46 +205,46 @@ async function handleCheckboxClick(item) {
 
 onMounted(async () => {
     dataTable.value = await fetchData("");
-    const source = await loadSource();
-    const sourceView = await source.getView()
-    const newView = source.getView()
-    const projection = sourceView.projection
-    const epsgCode = projection.code_
-    await fromEPSGCode(epsgCode);
-    const imageLayer = new WebGLTile({
-        source: source,
-    });
+    // const source = await loadSource();
+    // const sourceView = await source.getView()
+    // const newView = source.getView()
+    // const projection = sourceView.projection
+    // const epsgCode = projection.code_
+    // await fromEPSGCode(epsgCode);
+    // const imageLayer = new WebGLTile({
+    //     source: source,
+    // });
 
     OSMmap.value = new Map({
         target: "OSMmap",
         layers: [layer],
         view: new View({
-            center: fromLonLat([10, 51]),
+            center: fromLonLat([9.93, 49.783]),
             zoom: 8,
         }),
     });
-    OSMmap.value.addLayer(imageLayer);
-    OSMmap.value.setView(newView);
+    // OSMmap.value.addLayer(imageLayer);
+    // OSMmap.value.setView(newView);
 
     // ! Hardcoded for now
-    data.value = await fetchData(4)
+    // data.value = await fetchData(4)
     await loader.load();
     map.value = new google.maps.Map(mapDiv.value, {
         // center: currPos.value,
-        center: { lat: 40, lng: -80 },
-        zoom: 7,
+        center: { lat: 49.783, lng: 9.93 },
+        zoom: 8,
         // mapTypeId: 'satellite'
     });
-    await addPolygons();
+    // await addPolygons();
 });
 </script>
 <template>
-    <div class="grid grid-cols-3 gap-4">
-        <div class="grid gap-2  overflow-hidden">
+    <div class="grid grid-cols-3 grid-rows-2 gap-4">
+        <div class="grid gap-2 row-span-full mt-4">
             <div id="OSMmap" class="h-full"></div>
             <div ref="mapDiv" class="h-full"></div>
         </div>
-        <div class="h-full overflow-y-auto col-span-2">
+        <div class="h-full overflow-y-auto col-span-2 mt-4">
             <table class="table">
                 <thead>
                     <tr>
@@ -203,7 +258,7 @@ onMounted(async () => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="item in dataTable" :key="item.id" @click="handleRowClick(item.id)">
+                    <tr v-for="item in dataTable" :key="item.id" @click="handleRowClick(item)">
                         <td>{{ item.id }}</td>
                         <td>{{ item.size_in_sq_m }}</td>
                         <td>{{ item.peak_power.toFixed(2) }}</td>
