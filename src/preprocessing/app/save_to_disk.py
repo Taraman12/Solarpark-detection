@@ -33,7 +33,8 @@ from constants import (
 )
 from geopandas import GeoDataFrame
 from logging_config import get_logger
-from rasterio import DatasetReader
+
+# from rasterio import DatasetReader
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_geom
 from rasterio.windows import Window
@@ -62,8 +63,6 @@ def preprocess_and_save_data(  # noqa: C901
     tile_folder_path: str,
     masks_gdf: GeoDataFrame,
 ) -> int:
-    PRODUCTION = False
-    MAKE_TRAININGS_DATA = True
     # remove trailing slash
     tile_folder_path = tile_folder_path.strip("/")
 
@@ -123,7 +122,7 @@ def preprocess_and_save_data(  # noqa: C901
                     "transform": bands[first_band].window_transform(window),
                 }
             )
-            start_crs = metadata["crs"]
+            # start_crs = metadata["crs"]
             # filter all masks to selected tile
             if MAKE_TRAININGS_DATA:
                 masks = filter_mask_on_tile(masks_gdf, tile)
@@ -596,7 +595,7 @@ def filter_mask_on_tile(masks: gpd.GeoDataFrame, tile: str) -> gpd.GeoDataFrame:
     return masks[masks.tile_name == tile].geometry.reset_index(drop=True)
 
 
-### OLD CODE BELOW ###
+# ------------ OLD CODE BELOW ------------
 def padding_size(image_size: int, KERNEL_SIZE: int) -> int:
     """Computes the padding size, which is needed so that the kernel fits the
     image."""

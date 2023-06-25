@@ -1,7 +1,7 @@
 """Inital
 
 Revision ID: 9131270a9141
-Revises: 
+Revises:
 Create Date: 2023-06-24 14:50:37.902013
 
 """
