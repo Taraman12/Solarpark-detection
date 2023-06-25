@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 
 function createFetch(baseURL) {
-    return function useFetch(url) {
+    return function useFetch() {
         const data = ref(null)
         const error = ref(null)
 
@@ -11,11 +11,10 @@ function createFetch(baseURL) {
             })
                 .then((res) => res.json())
                 .then((json) => (data.value = json))
-                .then(data => console.log(data))
                 .catch((err) => (error.value = err))
         }
 
-        function post(body, headers = {}) {
+        function post(url, body, headers = {}) {
             return fetch(`${baseURL}${url}`, {
                 method: 'POST',
                 headers: {
@@ -29,7 +28,7 @@ function createFetch(baseURL) {
                 .catch((err) => (error.value = err))
         }
 
-        function put(body, headers = {}) {
+        function put(url, body, headers = {}) {
             return fetch(`${baseURL}${url}`, {
                 method: 'PUT',
                 headers: {
@@ -43,7 +42,7 @@ function createFetch(baseURL) {
                 .catch((err) => (error.value = err))
         }
 
-        function del(headers = {}) {
+        function del(url, headers = {}) {
             return fetch(`${baseURL}${url}`, {
                 method: 'DELETE',
                 headers
