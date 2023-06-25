@@ -11,7 +11,7 @@ from logging_config import get_logger
 logger = get_logger("BaseConfig")
 
 # local file
-if os.environ.get("LOCAL"):
+if not os.environ.get("DOCKERIZED"):
     load_dotenv()
 
 # In local docker environment, the AWS credentials are stored in the .env file
@@ -30,14 +30,18 @@ else:
     )
     if provider is None:
         raise ValueError("No IAM role found")
-    credentials = provider.load().get_frozen_credentials()
-    logger.info(f"Credentials:{credentials.access_key}")
-    session = boto3.Session(
-        aws_access_key_id=credentials.access_key,
-        aws_secret_access_key=credentials.secret_key,
-        aws_session_token=credentials.token,
-        region_name="eu-central-1",
-    )
+    try:
+        credentials = provider.load().get_frozen_credentials()
+        logger.info(f"Credentials:{credentials.access_key}")
+        session = boto3.Session(
+            aws_access_key_id=credentials.access_key,
+            aws_secret_access_key=credentials.secret_key,
+            aws_session_token=credentials.token,
+            region_name="eu-central-1",
+        )
+    except AttributeError as e:
+        logger.error(e)
+
 
 
 # create s3 client
