@@ -11,7 +11,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import Polygon from 'ol/geom/Polygon'
-import { Style, Fill, Stroke } from 'ol/style';
+import { Style, Stroke } from 'ol/style';
 import OSM from 'ol/source/OSM.js';
 import WebGLTile from 'ol/layer/WebGLTile.js';
 import { register } from 'ol/proj/proj4';
@@ -20,7 +20,20 @@ import proj4 from 'proj4';
 import { Loader } from '@googlemaps/js-api-loader'
 import { useApiFetch } from '@/plugins/fetch'
 
+// import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+// https://stackoverflow.com/questions/76076055/how-to-delete-google-maps-markers-in-vue-3-composition-api-js-gmaps-api
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const AWS_ACCESS_KEY_ID = import.meta.env.VITE_AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
+const DOCKERIZED = import.meta.env.VITE_DOCKERIZED;
+
+console.log(DOCKERIZED);
+// needed to get the epsg code definitions
 register(proj4);
+
 const OSMmap = ref(null); // map object
 const OSMmapDiv = ref(null); // define divref to populate the map
 
@@ -28,8 +41,8 @@ const layer = new TileLayer({
     source: new OSM(),
 });
 
-// https://stackoverflow.com/questions/76076055/how-to-delete-google-maps-markers-in-vue-3-composition-api-js-gmaps-api
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+
 const { dataSinglePoly, errorSinglePoly, get, put } = useApiFetch()
 //* Google Map instances
 const loader = new Loader({
@@ -37,6 +50,7 @@ const loader = new Loader({
     version: 'weekly',
     libraries: ['places']
 })
+
 const mapDiv = ref(null); // define divref to populate the map
 let map = ref(null); // map object
 
@@ -57,12 +71,40 @@ const polygonOptions = {
 
 async function fetchData(id) {
     try {
-        const response = await fetch(`http://localhost:8000/api/v1/solarpark/${id}`);
+        const response = await get(`/solarpark/${id}`);
         const data = await response.json();
         return data;
     } catch (error) {
         console.error(error);
     }
+}
+
+async function generateUrls(filename) {
+    // https://stackoverflow.com/questions/65960693/aws-sdk-v3-s3client-in-web-worker-throws-referenceerror-window-is-not-defined
+    const s3config = {
+        region: 'eu-central-1',
+        credentials: {
+            accessKeyId: AWS_ACCESS_KEY_ID,
+            secretAccessKey: AWS_SECRET_ACCESS_KEY
+        }
+    };
+
+    let getParams = {
+        Bucket: 'solar-detection-697553-eu-central-1',
+        Key: `predicted-solar-parks/${filename}`
+    };
+    let url;
+
+    const clientS3 = new S3Client(s3config);
+
+    const getCmd = new GetObjectCommand(getParams);
+    try {
+        url = await getSignedUrl(clientS3, getCmd);
+    } catch (err) {
+        console.log('Error getting signed URL ', err);
+    }
+    console.log(url);
+    return url;
 }
 
 async function addPolygons() {
@@ -134,8 +176,8 @@ async function addOSMPolygon(data) {
         maxZoom: 15,
     });
 }
-async function loadSource(name_in_aws) {
-    const url = `https://solar-detection-697553-eu-central-1.s3.eu-central-1.amazonaws.com/predicted-solar-parks/${name_in_aws}`
+async function loadSource(url) {
+    // const url = url
     const source = new GeoTIFF({
         sources: [
             {
@@ -180,28 +222,12 @@ async function handleRowClick(item) {
     })
     // removes the last added polygon
     polygons.value.pop(-1);
+    const url = await generateUrls(item.name_in_aws)
     await addPolygons()
-    await addImage(item.name_in_aws)
+    await addImage(url)
     await addOSMPolygon(data);
 }
 
-async function handleCheckboxClick(item) {
-    try {
-        // copy item object and update is_valid property
-        const updatedItem = { ...item, is_valid: "True" };
-
-        const response = await fetch(`http://localhost:8000/api/v1/solarpark/${item.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedItem)
-        });
-        console.log(response);
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 onMounted(async () => {
     dataTable.value = await fetchData("");
@@ -239,7 +265,8 @@ onMounted(async () => {
 });
 </script>
 <template>
-    <div class="grid grid-cols-3 grid-rows-2 gap-4">
+    <button @click="generateUrls">URL</button>
+    <div class="grid grid-cols-3 grid-rows-6 gap-4">
         <div class="grid gap-2 row-span-full mt-4">
             <div id="OSMmap" class="h-full"></div>
             <div ref="mapDiv" class="h-full"></div>
@@ -266,7 +293,7 @@ onMounted(async () => {
                         <td>{{ item.last_detection }}</td>
                         <td>{{ item.avg_confidence.toFixed(2) }}</td>
                         <td v-if="item.is_valid === 'None'">
-                            <input type="checkbox" v-model="item.selected" @click="handleCheckboxClick(item)">
+                            <span>Unclassified</span>
                         </td>
                         <td v-else-if="item.is_valid === 'True'">
                             <span class="text-green-500">Valid</span>
