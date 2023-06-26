@@ -27,6 +27,7 @@ class SolarParkBase(BaseModel):
     avg_confidence: float
     name_in_aws: str
     is_valid: Status = Status.none
+    comment: str = "None"
     lat: List[float]
     lon: List[float]
 
