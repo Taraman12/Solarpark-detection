@@ -18,9 +18,9 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue')
     },
     {
-      path: '/testview',
-      name: 'testview',
-      component: () => import('../views/TestView.vue')
+      path: '/getData',
+      name: 'getData',
+      component: () => import('../views/GetDataView.vue')
     },
     {
       path: '/table',
@@ -33,9 +33,9 @@ const router = createRouter({
       component: () => import('../views/MapView.vue')
     },
     {
-      path: '/mapWithPoly',
-      name: 'mapWithPoly',
-      component: () => import('../views/MapWithPolyView.vue')
+      path: '/classifyData',
+      name: 'classifyData',
+      component: () => import('../views/classifyDataView.vue')
     },
     {
       path: '/selectPolyFromTableView',
@@ -48,9 +48,9 @@ const router = createRouter({
       component: () => import('../views/ModelsView.vue')
     },
     {
-      path: '/showImageAwsView',
-      name: 'showImageAwsView',
-      component: () => import('../views/ShowImageAwsView.vue')
+      path: '/overview',
+      name: 'overview',
+      component: () => import('../views/OverViewView.vue')
     },
     {
       path: '/sideBarView',
