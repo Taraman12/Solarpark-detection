@@ -265,50 +265,52 @@ onMounted(async () => {
 });
 </script>
 <template>
-    <button @click="generateUrls">URL</button>
-    <div class="grid grid-cols-3 grid-rows-6 gap-4">
-        <div class="grid gap-2 row-span-full mt-4">
-            <div id="OSMmap" class="h-full"></div>
-            <div ref="mapDiv" class="h-full"></div>
+    <div class="flex">
+        <div class="w-2/5 place-self-start sticky top-20 m-4">
+            <div id="OSMmap" class="h-96"></div>
+            <div ref="mapDiv" class="h-96 mt-4"></div>
         </div>
-        <div class="h-full overflow-y-auto col-span-2 mt-4">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Size in m&sup2;</th>
-                        <th>Peak Power (MW)</th>
-                        <th>first_detection</th>
-                        <th>last_detection</th>
-                        <th>avg_confidence</th>
-                        <th>Valid</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item in dataTable" :key="item.id" @click="handleRowClick(item)">
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.size_in_sq_m }}</td>
-                        <td>{{ item.peak_power.toFixed(2) }}</td>
-                        <td>{{ item.first_detection }}</td>
-                        <td>{{ item.last_detection }}</td>
-                        <td>{{ item.avg_confidence.toFixed(2) }}</td>
-                        <td v-if="item.is_valid === 'None'">
-                            <span>Unclassified</span>
-                        </td>
-                        <td v-else-if="item.is_valid === 'True'">
-                            <span class="text-green-500">Valid</span>
-                        </td>
-                        <td v-else-if="item.is_valid === 'False'">
-                            <span class="text-red-500">Invalid</span>
-                        </td>
-                        <td v-else-if="item.is_valid === 'Unsure'">
-                            <span class="text-yellow-500">Unsure</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div v-if="error">{{ error }}</div>
-            <div v-else>Loading...</div>
+        <div class="w-3/5 place-self-end">
+            <div class="h-full col-span-2">
+                <div v-if="error">{{ error }}</div>
+                <div v-else>
+                    <table class="table">
+                        <thead class="sticky top-14 z-50">
+                            <tr>
+                                <th>ID</th>
+                                <th>Size in m&sup2;</th>
+                                <th>Peak Power (MW)</th>
+                                <th>first_detection</th>
+                                <th>last_detection</th>
+                                <th>avg_confidence</th>
+                                <th>Valid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in dataTable" :key="item.id" @click="handleRowClick(item)">
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.size_in_sq_m }}</td>
+                                <td>{{ item.peak_power.toFixed(2) }}</td>
+                                <td>{{ item.first_detection }}</td>
+                                <td>{{ item.last_detection }}</td>
+                                <td>{{ item.avg_confidence.toFixed(2) }}</td>
+                                <td v-if="item.is_valid === 'None'">
+                                    <span>Unclassified</span>
+                                </td>
+                                <td v-else-if="item.is_valid === 'True'">
+                                    <span class="text-green-500">Valid</span>
+                                </td>
+                                <td v-else-if="item.is_valid === 'False'">
+                                    <span class="text-red-500">Invalid</span>
+                                </td>
+                                <td v-else-if="item.is_valid === 'Unsure'">
+                                    <span class="text-yellow-500">Unsure</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </template>
