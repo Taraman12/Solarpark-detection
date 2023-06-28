@@ -14,13 +14,6 @@ def root():
     return {"message": "Hello World!"}
 
 
-@router.get("/ml-server")
-def ml_server():
-    response = requests.get("http://ml-serve:8081/models")
-    # return json response
-    return response.json()["models"][0]
-
-
 # @router.get("/start-preprocess")
 # async def start_preprocess():
 #     # await os.system("type nul > filename.txt")
