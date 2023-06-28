@@ -30,7 +30,7 @@ def get_model() -> Any:
 
 
 @router.get("/{model}")
-def get_model(model: str) -> Any:
+def get_model(model: str) -> Any:  # noqa: F811
     """Get model by name from ml server"""
     response = requests.get(f"http://localhost:8081/models/{model}/all")
 
@@ -58,7 +58,7 @@ async def register_model(model: str = "solar-park-detection") -> Any:
 
 
 @router.post("/as-url/{url}")
-def register_model(url: str) -> Any:
+def register_model(url: str) -> Any:  # noqa: F811
     """register model by url from ml server"""
     response = requests.post(f"http://localhost:8081/models?url={url}")
 
