@@ -1,52 +1,50 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useApiFetch } from '@/plugins/fetch';
 
 
 const models = ref(null);
 const error = ref(null);
 const isLoading = ref(true);
+const modelsDetail = ref(null);
 
-// const headers = {
-//     'Content-Type': 'application/json'
-// };
-
-const options = {
-    headers: {
-        'Content-Type': 'application/json'
-    }
-};
-// fetch('http://localhost:8081/models', options)
-//     .then(response => {
-//         if (response.headers.get('Content-Type').includes('application/json')) {
-//             return response.json();
-//         } else {
-//             throw new TypeError('Response was not JSON');
-//         }
-//     })
-//     .then(data => console.log(data.models[0].modelName))
-//     .catch(error => console.error(error));
-
-// fetch('http://localhost:8000/api/v1/ml-server', options)
-//     .then(response => {
-//         console.log(response.headers);
-//         return response.json()})
-//     .then(data => console.log(data.models[0].modelName))
-//     .catch(error => console.error(error));
-
-async function fetchModel() {
+const { get, post } = useApiFetch()
+async function fetchData(model) {
     try {
-        const response = await fetch(`http://ml-serve:8000/api/v1/ml-server`, options);
-        const data = response.json();
-        console.log("data " + data);
+        const response = await get(`/models/${model}`);
+        const data = await response.json();
         return data;
     } catch (error) {
         console.error(error);
-    } finally {
-        isLoading.value = false;
     }
 }
+
+
+async function registerModel(model) {
+    try {
+        console.log(model);
+        const response = await post(`/models/${model}`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function registerTestModel() {
+    try {
+        const response = await post(`/models/`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+}
+const modelInput = ref("");
+
 onMounted(async () => { //create map
-    models.value = await fetchModel();
+    models.value = await fetchData("");
+    modelsDetail.value = await fetchData("solar-park-detection");
     console.log("models " + models.value);
 });
 
@@ -54,38 +52,75 @@ onMounted(async () => { //create map
 
 
 <template>
-    <div>{{ models }}</div>
-    <!-- <table class="table">
-      <thead>
-        <tr>
-          <th>Model Name</th>
-          <th>Model URL</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="model in models" :key="model.modelName">
-          <td>{{ model.modelName }}</td>
-          <td>{{ model.modelUrl }}</td>
-        </tr>
-      </tbody>
-    </table> -->
-    <!-- <div>
-        <li v-for="model in models" :key="model.modelName">
-            <a>{{ model.modelName }}</a>
-        </li>
-    </div> -->
-    <!-- <div>
-        <div v-if="isLoading">Loading...</div>
-        <div v-else-if="error">Error: {{ error }}</div>
-        <div v-else>
-            <h2>Models:</h2>
-            <table class="table">
-                <ul>
-                    <li v-for="model in models" :key="model.modelName">
-                        <a :href="model.modelUrl">{{ model.modelName }}</a>
-                    </li>
-                </ul>
-            </table>
+    <div class="grid gap-4 justify-center mt-4">
+        <button @click="registerTestModel()"
+            class="bg-green-500 hover:bg-green-600 text-gray-800 dark:bg-green-700 dark:hover:bg-green-800 text-center font-bold py-2 px-4 rounded">
+            register test model
+        </button>
+        <input v-model="modelInput" placeholder="Name or URL" class="dark:bg-neutral-300 text-black border" />
+        <button @click="registerModel(modelInput)"
+            class="bg-green-500 hover:bg-green-600 text-gray-800 dark:bg-green-700 dark:hover:bg-green-800 text-center font-bold py-2 px-4 rounded">
+            register model model by Name
+        </button>
+        <button @click="registerModel(`as-url/${modelInput}`)"
+            class="bg-green-500 hover:bg-green-600 text-gray-800 dark:bg-green-700 dark:hover:bg-green-800 text-center font-bold py-2 px-4 rounded">
+            register model model by url
+        </button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Model URL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="model in models" :key="model.modelName">
+                    <td>{{ model.modelName }}</td>
+                    <td>{{ model.modelUrl }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            <div v-for="models in modelsDetail" :key="models.modelName">
+                <table>
+                    <tr>
+                        <td>Model Name</td>
+                        <td>{{ models.modelName }}</td>
+                    </tr>
+                    <tr>
+                        <td>Model Version</td>
+                        <td>{{ models.modelVersion }}</td>
+                    </tr>
+                    <tr>
+                        <td>Model URL</td>
+                        <td>{{ models.modelUrl }}</td>
+                    </tr>
+                    <tr>
+                        <td>Runtime</td>
+                        <td>{{ models.runtime }}</td>
+                    </tr>
+                    <tr>
+                        <td>Min Workers</td>
+                        <td>{{ models.minWorkers }}</td>
+                    </tr>
+                    <tr>
+                        <td>Max Workers</td>
+                        <td>{{ models.maxWorkers }}</td>
+                    </tr>
+                    <tr>
+                        <td>Batch Size</td>
+                        <td>{{ models.batchSize }}</td>
+                    </tr>
+                    <tr>
+                        <td>Max Batch Delay</td>
+                        <td>{{ models.maxBatchDelay }}</td>
+                    </tr>
+                    <tr>
+                        <td>Loaded At Startup</td>
+                        <td>{{ models.loadedAtStartup }}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
-    </div> -->
+    </div>
 </template>

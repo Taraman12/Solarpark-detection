@@ -1,29 +1,27 @@
 # build-in
+import json
 from typing import Any, TypeVar
 
-# import geojson
-from fastapi.encoders import jsonable_encoder
-
 # third-party
-# from pydantic import BaseModel
+from fastapi import File, UploadFile
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
-
-# import shapely.wkt
-# from geoalchemy2.elements import WKTElement
 from geojson import Feature, FeatureCollection, Polygon
-
-# from shapely.geometry import Polygon
+from shapely.geometry import shape
 from sqlalchemy.orm import Session
 
+# local modules
 from app.db.base_class import Base
 from app.models.solarpark import SolarPark
 from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 
-# local modules
 from .base import CRUDBase
 
+# import geojson
 # from geoalchemy2.shape import to_shape
-
+# import shapely.wkt
+# from geoalchemy2.elements import WKTElement
+# from pydantic import BaseModel
 
 ModelType = TypeVar("ModelType", bound=Base)
 
@@ -66,6 +64,9 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
                 "first_detection": row["first_detection"],  # .strftime('%Y-%m-%d'),
                 "last_detection": row["last_detection"],  # .strftime('%Y-%m-%d'),
                 "avg_confidence": row["avg_confidence"],
+                "name_in_aws": row["name_in_aws"],
+                "is_valid": row["is_valid"],
+                "comment": row["comment"],
             }
             feature = Feature(geometry=polygon, properties=properties)
             features.append(feature)
@@ -85,8 +86,44 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         return StreamingResponse(
             content=generate(),
             media_type="application/json",
-            headers={"Content-Disposition": "attachment; filename=geodata.geojson"},
+            headers={"Content-Disposition": "attachment; filename=solar-parks.geojson"},
         )
+
+    async def create_upload_file(
+        self,
+        db: Session,
+        file: UploadFile = File(...),
+    ) -> Any:
+        contents = await file.read()
+
+        data = json.loads(contents)
+        # print(data)
+        for feature in data["features"]:
+            polygon = shape(feature["geometry"])
+            # print(polygon)
+            coords = polygon.exterior.coords
+            # Extract the latitude and longitude coordinates into separate lists
+            latitudes = [coord[1] for coord in coords]
+            longitudes = [coord[0] for coord in coords]
+            properties = feature["properties"]
+            obj_in_data = SolarPark(
+                name_of_model=properties["name_of_model"],
+                size_in_sq_m=properties["size_in_sq_m"],
+                peak_power=properties["peak_power"],
+                date_of_data=properties["date_of_data"],
+                first_detection=properties["first_detection"],
+                last_detection=properties["last_detection"],
+                avg_confidence=properties["avg_confidence"],
+                name_in_aws=properties["name_in_aws"],
+                is_valid=properties["is_valid"],
+                comment=properties["comment"],
+                lat=latitudes,
+                lon=longitudes,
+            )
+            db.add(obj_in_data)
+
+        db.commit()
+        return {"filename": file.filename}
 
     # def get(self, db: Session, id: Any, *, polygon: bool = False) -> SolarPark:
     #     if polygon:

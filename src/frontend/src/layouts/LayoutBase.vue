@@ -4,7 +4,7 @@ import { useStyleStore } from "@/stores/style.js";
 
 const styleStore = useStyleStore();
 
-const layoutAsidePadding = "xl:pl-60";
+// const layoutAsidePadding = "xl:pl-60";
 
 
 </script>

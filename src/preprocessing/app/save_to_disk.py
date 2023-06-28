@@ -113,10 +113,7 @@ def preprocess_and_save_data(  # noqa: C901
             stacked_bands = pad_array(stacked_bands)
 
             logger.debug(f"Preprocessed {len(bands)} bands for {identifier}")
-            # ! MASK #
-            # masks_gdf = gpd.read_file(mask_input_dir)
 
-            # metadata = bands[first_band].meta
             metadata.update(
                 {
                     "width": window.width,
@@ -124,8 +121,7 @@ def preprocess_and_save_data(  # noqa: C901
                     "transform": bands[first_band].window_transform(window),
                 }
             )
-            # start_crs = metadata["crs"]
-            # filter all masks to selected tile
+
             if MAKE_TRAININGS_DATA:
                 masks = filter_mask_on_tile(masks_gdf, tile)
 
@@ -148,42 +144,6 @@ def preprocess_and_save_data(  # noqa: C901
                     window,
                 )
                 file_counter += data_saved
-
-            # num_rows = metadata["height"] // KERNEL_SIZE
-            # num_cols = metadata["width"] // KERNEL_SIZE
-
-            # unused, but start for more
-            # arr = transform_to_patched_array(stacked_bands, num_rows, num_cols)
-
-            # metadata["width"] = KERNEL_SIZE
-            # metadata["height"] = KERNEL_SIZE
-
-            # Iterate over the rows and columns to split the image into small images
-            # for row in range(num_rows):
-            #     for col in range(num_cols):
-            # FIXME global metadata shouldn't be changed
-            # metadata["crs"] = start_crs
-
-            # Define the window coordinates for the snippet
-            # window = rasterio.windows.Window(
-            #     col * KERNEL_SIZE, row * KERNEL_SIZE, KERNEL_SIZE, KERNEL_SIZE
-            # )
-
-            # Cut out the snippet from the merged image
-            # small_image = stacked_bands[
-            #     window.row_off : window.row_off + window.height,
-            #     window.col_off : window.col_off + window.width,
-            # ]
-
-            # check if the image patch is not empty (all black)
-            # https://gis.stackexchange.com/questions/380038/reasons-for-partial-tiles-in-sentinel
-            # if small_image.max() == 0:
-            #     continue
-
-            # # update metadata for small image patch
-            # metadata["transform"] = rasterio.windows.transform(
-            #     window, bands[list(bands.keys())[0]].transform
-            # )
 
             if PRODUCTION:
                 prediction_handler(
@@ -365,7 +325,7 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
         "lon": lon,
     }
     url = f"{URL_API}/solarpark/"
-    logger.info(f"Writing to DB: {data}")
+    logger.debug(f"Writing to DB: {data}")
     try:
         response = requests.post(url, headers=HEADERS, json=data)
         response.raise_for_status()

@@ -1,3 +1,10 @@
+###
+
+setup npm install
+
+for the aws-sdk you need to run
+npm install @aws-sdk/client-s3
+
 # frontend
 
 This template should help get you started developing with Vue 3 in Vite.

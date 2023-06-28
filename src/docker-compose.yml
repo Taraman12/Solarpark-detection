@@ -1,4 +1,5 @@
 version: "3.9"
+# can be renamed to docker-compose.cloud.yml
 services:
   # db-postgis:
   #   image: postgis/postgis:15-3.3 # alt: postgres:15.3
@@ -62,43 +63,48 @@ services:
   #   environment:
   #     - DOCKERIZED=true
 
-  # ml-serve:
-  #   build:
-  #     context: ./ml-serve
-  #     dockerfile: ml-serve.dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #     - "8081:8081"
-  #     - "8082:8082"
-  #   expose:
-  #     - "8080"
-  #     - "8081"
-  #     - "8082"
-  #   # limits the number of cpus the container can use
-  #   # else on each thread (core) a model will be loaded
-  #   cpus: 1.0
+  ml-serve:
+    image: taraman12/solar-park-detection-ml-serve:latest
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+    expose:
+      - "8080"
+      - "8081"
+      - "8082"
+    # limits the number of cpus the container can use
+    # else on each thread (core) a model will be loaded
+    cpus: 1.0
 
-  # preprocessing:
-  #   build:
-  #     context: ./preprocessing
-  #     dockerfile: preprocessing.dockerfile
-  #   depends_on:
-  #     - ml-serve
-  #   environment:
-  #     - DOCKERIZED=true
-  #   ports:
-  #     - "5678:5678"
-  #   expose:
-  #     - "5678"
+  preprocessing:
+    image: taraman12/solar-park-detection-preprocessing:latest
+    depends_on:
+      - ml-serve
+    environment:
+      - DOCKERIZED=true
+      - MAKE_TRAININGS_DATA=False
+      - PRODUCTION=true
+    ports:
+      - "5678:5678"
+    expose:
+      - "5678"
+    # prevents the container from being started automatically
+    # when running `docker-compose up`
+    profiles: [ "cli-only" ]
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: frontend.dockerfile
-  #   ports:
-  #     - "80:5000"
-  #   expose:
-  #     - "80"
+  frontend:
+    image: taraman12/solar-park-detection-frontend:latest
+    environment:
+      - VITE_DOCKERIZED=true
+      - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - VITE_AWS_ACCESS_KEY_ID=${aws_access_key_id}
+      - VITE_AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+      - VITE_BASE_IP=${VITE_BASE_IP}
+    ports:
+      - "80:5000"
+    expose:
+      - "80"
 
 volumes:
   data:

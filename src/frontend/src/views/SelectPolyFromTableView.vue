@@ -50,7 +50,7 @@ const polygonOptions = {
 
 async function fetchData(id) {
     try {
-        const response = await fetch(`http://localhost:8000/api/v1/solarpark/${id}`);
+        const response = await get(`/solarpark/${id}`);
         const data = await response.json();
         return data;
     } catch (error) {

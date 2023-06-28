@@ -2,7 +2,7 @@
 from typing import Any, List
 
 # third-party
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -89,3 +89,17 @@ async def get_as_geojson(
     # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
     # print(response)
     return crud.solarpark.get_as_geojson(db)  # response #crud.solarpark.get_geojson(db)
+
+
+@router.post("/upload/as-geojson")
+async def upload_as_geojson(
+    *,
+    db: Session = Depends(deps.get_db),
+    file: UploadFile = File(...),
+) -> Any:
+    print("upload_as_geojson")
+    print(file)
+    """Upload geojson file."""
+    # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
+    message = await crud.solarpark.create_upload_file(db, file)
+    return message
