@@ -18,9 +18,9 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue')
     },
     {
-      path: '/getData',
-      name: 'getData',
-      component: () => import('../views/GetDataView.vue')
+      path: '/download',
+      name: 'download',
+      component: () => import('../views/DownloadView.vue')
     },
     {
       path: '/table',
@@ -33,9 +33,9 @@ const router = createRouter({
       component: () => import('../views/MapView.vue')
     },
     {
-      path: '/classifyData',
-      name: 'classifyData',
-      component: () => import('../views/classifyDataView.vue')
+      path: '/classifying',
+      name: 'classifying',
+      component: () => import('../views/ClassifyingView.vue')
     },
     {
       path: '/selectPolyFromTableView',
@@ -43,8 +43,8 @@ const router = createRouter({
       component: () => import('../views/SelectPolyFromTableView.vue')
     },
     {
-      path: '/modelsView',
-      name: 'modelsView',
+      path: '/models',
+      name: 'models',
       component: () => import('../views/ModelsView.vue')
     },
     {
