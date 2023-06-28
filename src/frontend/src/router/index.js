@@ -50,7 +50,7 @@ const router = createRouter({
     {
       path: '/overview',
       name: 'overview',
-      component: () => import('../views/OverViewView.vue')
+      component: () => import('../views/OverviewView.vue')
     },
     {
       path: '/sideBarView',
