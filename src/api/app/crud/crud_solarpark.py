@@ -6,15 +6,15 @@ from typing import Any, TypeVar
 from fastapi import File, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
 from geojson import Feature, FeatureCollection, Polygon
 from shapely.geometry import shape
-
+from sqlalchemy.orm import Session
 
 # local modules
 from app.db.base_class import Base
 from app.models.solarpark import SolarPark
 from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
+
 from .base import CRUDBase
 
 # import geojson
@@ -99,7 +99,6 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         data = json.loads(contents)
         # print(data)
         for feature in data["features"]:
-
             polygon = shape(feature["geometry"])
             # print(polygon)
             coords = polygon.exterior.coords
