@@ -20,24 +20,23 @@ const styleStore = useStyleStore();
       <!-- <header>
       <img alt="Vue logo" class="logo" src="@/assets/satellit.ico" width="125" height="125" />
       <nav> -->
-      <div class="flex justify-center">
+      <div class="flex justify-center w-screen">
         <div class="flex items-center space-x-5 text-neutral-500 dark:text-gray-300">
           <RouterLink to="/" class="hover:text-black dark:hover:text-gray-100">Home</RouterLink>
           <RouterLink to="/overview" class="hover:text-black dark:hover:text-gray-100">Overview
           </RouterLink>
           <RouterLink to="/classifyData" class="hover:text-black dark:hover:text-gray-100">Classify Data</RouterLink>
           <RouterLink to="/getData" class="hover:text-black dark:hover:text-gray-100">Get Data</RouterLink>
+          <RouterLink to="/modelsView" class="hover:text-black dark:hover:text-gray-100">Models</RouterLink>
           <RouterLink to="/about" class="hover:text-black dark:hover:text-gray-100">About</RouterLink>
           <!-- <RouterLink to="/table" class="hover:text-black dark:hover:text-gray-100">Table View</RouterLink>
           <RouterLink to="/map" class="hover:text-black dark:hover:text-gray-100">Map View</RouterLink>
           <RouterLink to="/selectPolyFromTableView" class="hover:text-black dark:hover:text-gray-100">
-            SelectPolyFromTableView</RouterLink>
-          <RouterLink to="/modelsView" class="hover:text-black dark:hover:text-gray-100">Models</RouterLink>
-          <RouterLink to="/sideBarView" class="hover:text-black dark:hover:text-gray-100">sideBarView</RouterLink> -->
+            SelectPolyFromTableView</RouterLink> -->
+          <!-- <RouterLink to="/sideBarView" class="hover:text-black dark:hover:text-gray-100">sideBarView</RouterLink> -->
         </div>
       </div>
-      <div
-        class="max-h-screen-menu overflow-y-auto lg:overflow-visible lg:flex lg:items-stretch lg:justify-end lg:ml-auto">
+      <div class="flex max-h-screen-menu items-stretch lg:ml-auto">
         <div class="flex items-center space-x-4">
           <div class="">
             <a href="https://github.com/Taraman12/Solarpark-detection" target="_blank" rel="noopener noreferrer">
