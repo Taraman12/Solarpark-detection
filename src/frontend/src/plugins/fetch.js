@@ -9,7 +9,7 @@ function createFetch(baseURL) {
         const data = ref(null)
         const error = ref(null)
         const headers = {
-            // 'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
             "Access-Control-Allow-Private-Network": "true",
         };
