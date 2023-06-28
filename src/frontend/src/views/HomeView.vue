@@ -3,7 +3,7 @@ import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
 <template>
-  <main class="mx-auto max-w-screen-xl">
+  <main class="mx-auto max-w-2xl">
     <h1 class="text-2xl">
       Continues Solar Park Detection
     </h1>
