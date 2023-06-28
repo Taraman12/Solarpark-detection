@@ -36,9 +36,9 @@ const styleStore = useStyleStore();
           <!-- <RouterLink to="/sideBarView" class="hover:text-black dark:hover:text-gray-100">sideBarView</RouterLink> -->
         </div>
       </div>
-      <div class="flex max-h-screen-menu items-stretch lg:ml-auto">
+      <div class="flex mr-4 max-h-screen-menu items-stretch lg:ml-auto">
         <div class="flex items-center space-x-4">
-          <div class="">
+          <div>
             <a href="https://github.com/Taraman12/Solarpark-detection" target="_blank" rel="noopener noreferrer">
               <Icon :path="mdiGithub" />
             </a>
@@ -52,6 +52,7 @@ const styleStore = useStyleStore();
           </label>
         </div>
       </div>
+
     </NavBar>
     <RouterView />
   </LayoutBase>
