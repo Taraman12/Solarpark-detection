@@ -1,6 +1,6 @@
 <script setup>
 /* eslint-disable no-undef */
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import "ol/ol.css";
 import Map from "ol/Map";
 import View from "ol/View";
@@ -28,14 +28,14 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const AWS_ACCESS_KEY_ID = import.meta.env.VITE_AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
-const DOCKERIZED = import.meta.env.VITE_DOCKERIZED;
+// const DOCKERIZED = import.meta.env.VITE_DOCKERIZED;
 
-console.log(DOCKERIZED);
+// console.log(DOCKERIZED);
 // needed to get the epsg code definitions
 register(proj4);
 
 const OSMmap = ref(null); // map object
-const OSMmapDiv = ref(null); // define divref to populate the map
+// const OSMmapDiv = ref(null);
 
 const layer = new TileLayer({
     source: new OSM(),
@@ -43,7 +43,8 @@ const layer = new TileLayer({
 
 
 
-const { dataSinglePoly, errorSinglePoly, get, put } = useApiFetch()
+// const { dataSinglePoly, errorSinglePoly, get, put } = useApiFetch()
+const { get } = useApiFetch()
 //* Google Map instances
 const loader = new Loader({
     apiKey: GOOGLE_MAPS_API_KEY,
@@ -51,15 +52,18 @@ const loader = new Loader({
     libraries: ['places']
 })
 
-const mapDiv = ref(null); // define divref to populate the map
+const mapDiv = ref(null);
 let map = ref(null); // map object
 
 const dataTable = ref(null)
 const data = ref(null)
 const error = ref(null)
+const FilterIsValid = ref("");
+const FilterModelName = ref("solar-park-detection");
+const filteredData = ref(null);
 
 let polygons = ref([]);
-let polygon = ref(null);
+// let polygon = ref(null);
 
 const polygonOptions = {
     strokeColor: "#FF0000",
@@ -231,16 +235,7 @@ async function handleRowClick(item) {
 
 onMounted(async () => {
     dataTable.value = await fetchData("");
-    // const source = await loadSource();
-    // const sourceView = await source.getView()
-    // const newView = source.getView()
-    // const projection = sourceView.projection
-    // const epsgCode = projection.code_
-    // await fromEPSGCode(epsgCode);
-    // const imageLayer = new WebGLTile({
-    //     source: source,
-    // });
-
+    filteredData.value = dataTable.value
     OSMmap.value = new Map({
         target: "OSMmap",
         layers: [layer],
@@ -249,11 +244,6 @@ onMounted(async () => {
             zoom: 8,
         }),
     });
-    // OSMmap.value.addLayer(imageLayer);
-    // OSMmap.value.setView(newView);
-
-    // ! Hardcoded for now
-    // data.value = await fetchData(4)
     await loader.load();
     map.value = new google.maps.Map(mapDiv.value, {
         // center: currPos.value,
@@ -261,8 +251,28 @@ onMounted(async () => {
         zoom: 8,
         // mapTypeId: 'satellite'
     });
-    // await addPolygons();
 });
+
+watch(FilterIsValid, () => {
+    if (FilterIsValid.value === "") {
+        filteredData.value = dataTable.value;
+    } else {
+        filteredData.value = dataTable.value.filter((item) => {
+            return item.is_valid === FilterIsValid.value;
+        });
+    }
+});
+
+watch(FilterModelName, () => {
+    if (FilterModelName.value === "solar-park-detection") {
+        filteredData.value = dataTable.value;
+    } else {
+        filteredData.value = dataTable.value.filter((item) => {
+            return item.name_of_model === FilterModelName.value;
+        });
+    }
+});
+
 </script>
 <template>
     <div class="flex">
@@ -270,7 +280,27 @@ onMounted(async () => {
             <div id="OSMmap" class="h-96"></div>
             <div ref="mapDiv" class="h-96 mt-4"></div>
         </div>
-        <div class="w-3/5 place-self-end">
+        <div class="w-3/5">
+            <div class="flex justify-center">
+                <div class="m-4">
+                    <!-- <label for="filter" class="mr-4 p-1">Filter:</label> -->
+                    <select id="filter" v-model="FilterIsValid" class="text-black border dark:bg-neutral-300 p-1 rounded">
+                        <option value="">All</option>
+                        <option value="None">Unclassified</option>
+                        <option value="valid">Valid</option>
+                        <option value="non-valid">Invalid</option>
+                        <option value="unsure">Unsure</option>
+                    </select>
+                </div>
+                <div class="m-4">
+                    <select id="filter" v-model="FilterModelName" class="text-black border dark:bg-neutral-300 p-1 rounded">
+                        <option value="solar-park-detection">solar-park-detection</option>
+                        <option value="training">training</option>
+                        <option value="validation">validation</option>
+                        <option value="test">test</option>
+                    </select>
+                </div>
+            </div>
             <div class="h-full col-span-2">
                 <div v-if="error">{{ error }}</div>
                 <div v-else>
@@ -280,30 +310,30 @@ onMounted(async () => {
                                 <th>ID</th>
                                 <th>Size in m&sup2;</th>
                                 <th>Peak Power (MW)</th>
-                                <th>first_detection</th>
-                                <th>last_detection</th>
-                                <th>avg_confidence</th>
-                                <th>Valid</th>
+                                <th>First detection</th>
+                                <th>Last detection</th>
+                                <th>Name of Model</th>
+                                <th>Classification</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item in dataTable" :key="item.id" @click="handleRowClick(item)">
+                            <tr v-for="item in filteredData" :key="item.id" @click="handleRowClick(item)">
                                 <td>{{ item.id }}</td>
                                 <td>{{ item.size_in_sq_m }}</td>
                                 <td>{{ item.peak_power.toFixed(2) }}</td>
                                 <td>{{ item.first_detection }}</td>
                                 <td>{{ item.last_detection }}</td>
-                                <td>{{ item.avg_confidence.toFixed(2) }}</td>
+                                <td>{{ item.name_of_model }}</td>
                                 <td v-if="item.is_valid === 'None'">
                                     <span>Unclassified</span>
                                 </td>
-                                <td v-else-if="item.is_valid === 'True'">
+                                <td v-else-if="item.is_valid === 'valid'">
                                     <span class="text-green-500">Valid</span>
                                 </td>
-                                <td v-else-if="item.is_valid === 'False'">
+                                <td v-else-if="item.is_valid === 'non-valid'">
                                     <span class="text-red-500">Invalid</span>
                                 </td>
-                                <td v-else-if="item.is_valid === 'Unsure'">
+                                <td v-else-if="item.is_valid === 'unsure'">
                                     <span class="text-yellow-500">Unsure</span>
                                 </td>
                             </tr>
