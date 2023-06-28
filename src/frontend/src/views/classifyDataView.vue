@@ -27,29 +27,31 @@ const AWS_ACCESS_KEY_ID = import.meta.env.VITE_AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
 const DOCKERIZED = import.meta.env.VITE_DOCKERIZED;
 
-register(proj4);
+// lost and found
+const data = ref(null)
 
+// all
 const { get, put } = useApiFetch()
 const dataTable = ref(null)
-const data = ref(null)
-const error = ref(null)
 const noneItem = ref(null)
 const noneItemCount = ref(null)
-const mapDiv = ref(null); // define divref to populate the map
+const toggleValue = ref(false)
+const FilterModelName = ref("solar-park-detection");
+const filteredData = ref([]);
+
+async function fetchData(id) {
+  try {
+    const response = await get(`/solarpark/${id}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// google maps
 let map = ref(null); // map object
-
-const OSMmap = ref(null); // map object
-const OSMmapDiv = ref(null); // define divref to populate the map
-
-const layer = new TileLayer({
-  source: new OSM(),
-});
-const loader = new Loader({
-  apiKey: GOOGLE_MAPS_API_KEY,
-  version: 'weekly',
-  libraries: ['places']
-})
-
+const mapDiv = ref(null); // populate the map
 let polygons = ref([]);
 
 const polygonOptions = {
@@ -60,33 +62,11 @@ const polygonOptions = {
   fillOpacity: 0.00,
 };
 
-async function generateUrls(filename) {
-  // https://stackoverflow.com/questions/65960693/aws-sdk-v3-s3client-in-web-worker-throws-referenceerror-window-is-not-defined
-  const s3config = {
-    region: 'eu-central-1',
-    credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID,
-      secretAccessKey: AWS_SECRET_ACCESS_KEY
-    }
-  };
-
-  let getParams = {
-    Bucket: 'solar-detection-697553-eu-central-1',
-    Key: `predicted-solar-parks/${filename}`
-  };
-  let url;
-
-  const clientS3 = new S3Client(s3config);
-
-  const getCmd = new GetObjectCommand(getParams);
-  try {
-    url = await getSignedUrl(clientS3, getCmd);
-  } catch (err) {
-    console.log('Error getting signed URL ', err);
-  }
-  console.log(url);
-  return url;
-}
+const loader = new Loader({
+  apiKey: GOOGLE_MAPS_API_KEY,
+  version: 'weekly',
+  libraries: ['places']
+})
 
 async function addPolygons() {
   if (Array.isArray(data.value)) {
@@ -116,6 +96,55 @@ async function addPolygons() {
     polygons.value.push(polygon);
   }
 }
+
+// OpenLayers
+register(proj4);
+const OSMmap = ref(null); // map object
+
+const layer = new TileLayer({
+  source: new OSM(),
+});
+
+async function generateUrls(filename) {
+  // https://stackoverflow.com/questions/65960693/aws-sdk-v3-s3client-in-web-worker-throws-referenceerror-window-is-not-defined
+  const s3config = {
+    region: 'eu-central-1',
+    credentials: {
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY
+    }
+  };
+
+  let getParams = {
+    Bucket: 'solar-detection-697553-eu-central-1',
+    Key: `predicted-solar-parks/${filename}`
+  };
+  let url;
+
+  const clientS3 = new S3Client(s3config);
+
+  const getCmd = new GetObjectCommand(getParams);
+  try {
+    url = await getSignedUrl(clientS3, getCmd);
+  } catch (err) {
+    console.log('Error getting signed URL ', err);
+  }
+  console.log(url);
+  return url;
+}
+
+async function loadSource(url) {
+  // const url = url
+  const source = new GeoTIFF({
+    sources: [
+      {
+        url: url,
+      },
+    ],
+  });
+  return source;
+}
+
 
 async function addOSMPolygon(data) {
   const lonCoords = data.value.lon;
@@ -147,9 +176,6 @@ async function addOSMPolygon(data) {
       }),
     }),
   });
-  // console.log(vectorLayer);
-  // testView = await vectorSource.getView()
-  // console.log(testView);
   console.log(OSMmap.value.getView().getProjection().getCode());
   OSMmap.value.addLayer(vectorLayer);
   OSMmap.value.getView().fit(vectorSource.getExtent(), {
@@ -158,20 +184,8 @@ async function addOSMPolygon(data) {
   });
 }
 
-async function loadSource(url) {
-  // const url = url
-  const source = new GeoTIFF({
-    sources: [
-      {
-        url: url,
-      },
-    ],
-  });
-  return source;
-}
 
 async function addImage(name_in_aws) {
-
   const source = await loadSource(name_in_aws);
   const sourceView = await source.getView()
   const projection = sourceView.projection
@@ -190,51 +204,50 @@ async function addImage(name_in_aws) {
   OSMmap.value.getView()
 }
 
-async function fetchData(id) {
-  try {
-    const response = await get(`/solarpark/${id}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(error);
-  }
-}
 
-// async function handleCheckboxClick(item) {
-//     try {
-//         // copy item object and update is_valid property
-//         const updatedItem = { ...item, is_valid: "valid" };
 
-//         const response = await fetch(`http://localhost:8000/api/v1/solarpark/${item.id}`, {
-//             method: 'PUT',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(updatedItem)
-//         });
-//         console.log(response);
-//     } catch (error) {
-//         console.error(error);
-//     }
-// }
+
 async function updateItem(id, value) {
   try {
     const item = await get(`/solarpark/${id}`);
-    const updatedItem = { ...item, is_valid: value };
+    const object = await item.json();
+    const updatedItem = { ...object, is_valid: value };
     await put(`/solarpark/${id}`, updatedItem);
     console.log(`Item ${id} updated to ${value}`);
-    dataTable.value = await fetchData("");
-    noneItem.value = dataTable.value.find(item => item.is_valid === "None");
-    noneItemCount.value = dataTable.value.filter(item => item.is_valid === "None").length;
+    filteredData.value = await fetchData("");
+    noneItem.value = filteredData.value.find(item => item.is_valid === "None");
+    noneItemCount.value = filteredData.value.filter(item => item.is_valid === "None").length;
   } catch (error) {
     console.error(error);
   }
 }
 
-onMounted(async () => {
-  dataTable.value = await fetchData("");
-  noneItem.value = dataTable.value.find(item => item.is_valid === "None");
-  noneItemCount.value = dataTable.value.filter(item => item.is_valid === "None").length;
+async function handleItemUpdate(item) {
+  data.value = await fetchData(item.id);
+  map.value = new google.maps.Map(mapDiv.value, {
+    // center: currPos.value,
+    // ToDo: center map on solar park
+    center: { lat: data.value.lat[0], lng: data.value.lon[0] },
+    zoom: 16,
+    mapTypeId: 'satellite'
+  })
+  polygons.value.pop(-1);
+  const url = await generateUrls(item.name_in_aws)
+  await addPolygons()
+  await addImage(url)
+  await addOSMPolygon(data);
+}
+async function loadGoogleMaps(item) {
+  await loader.load();
+  map.value = new google.maps.Map(mapDiv.value, {
+    // center: currPos.value,
+    // ToDo: center map on solar park
+    center: { lat: item.lat[0], lng: item.lon[0] },
+    zoom: 16,
+    mapTypeId: 'satellite'
+  })
+}
+async function loadOSMMap(item) {
   OSMmap.value = new Map({
     target: "OSMmap",
     layers: [layer],
@@ -243,17 +256,52 @@ onMounted(async () => {
       zoom: 8,
     }),
   });
-  await loader.load();
-  map.value = new google.maps.Map(mapDiv.value, {
-    // center: currPos.value,
-    center: { lat: 49.783, lng: 9.93 },
-    zoom: 8,
-    // mapTypeId: 'satellite'
-  });
+  const url = await generateUrls(item.name_in_aws)
+  await addImage(url)
+  await addOSMPolygon(data);
+}
+onMounted(async () => {
+  dataTable.value = await fetchData("");
+  noneItem.value = dataTable.value.find(item => item.is_valid === "None");
+  noneItemCount.value = dataTable.value.filter(item => item.is_valid === "None").length;
+  loadGoogleMaps(noneItem.value)
+  loadOSMMap(noneItem.value)
 });
 
-watch(dataTable, (newVal) => {
+
+watch(filteredData, (newVal) => {
   noneItem.value = newVal.find(item => item.is_valid === "None");
+  noneItemCount.value = filteredData.value.filter(item => item.is_valid === "None").length;
+  handleItemUpdate(noneItem.value)
+});
+
+
+watch(toggleValue, (newVal) => {
+  console.log(newVal);
+  if (newVal) {
+    noneItem.value = filteredData.value.find(item => {
+      return item.is_valid === "None" || item.is_valid === "unsure";
+    });
+    noneItemCount.value = filteredData.value.filter(item => {
+      return item.is_valid === "None" || item.is_valid === "unsure";
+    }).length;
+  } else {
+    noneItem.value = filteredData.value.find(item => item.is_valid === "None");
+    noneItemCount.value = filteredData.value.filter(item => item.is_valid === "None").length;
+  }
+});
+
+
+watch(FilterModelName, (newVal) => {
+  console.log(newVal);
+  console.log("dataTable", dataTable.value);
+  if (FilterModelName.value === "") {
+    filteredData.value = dataTable.value;
+  } else {
+    filteredData.value = dataTable.value.filter((item) => {
+      return item.name_of_model === FilterModelName.value;
+    });
+  }
 });
 </script>
 
@@ -265,6 +313,14 @@ watch(dataTable, (newVal) => {
     </div>
     <div class="grid w-1/5 gap-4 ml-8 items-center">
       <div>
+        <div class="mb-3">
+          <select id="filter" v-model="FilterModelName" class="text-black border dark:bg-neutral-300 p-1 rounded">
+            <option value="solar-park-detection">solar-park-detection</option>
+            <option value="training">training</option>
+            <option value="validation">validation</option>
+            <option value="test">test</option>
+          </select>
+        </div>
         <div class="border-2 border-neutral-500 rounded mb-2">
           <table>
             <tr>
@@ -317,51 +373,27 @@ watch(dataTable, (newVal) => {
                 Unsure/Next
               </button>
             </div>
+            <!-- <label>
+              Include Unsure
+              <input type="checkbox" v-model="toggleValue" />
+            </label> -->
+
           </div>
         </div>
+        <div>
+          <label class="relative inline-flex items-center cursor-pointer mt-3">
+            <input type="checkbox" class="sr-only peer" v-model="toggleValue" />
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+            </div>
+            <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Include Unsure</span>
+          </label>
+        </div>
       </div>
+
     </div>
+
   </div>
-  <!-- ! Dont delete! -->
-  <!-- <div class="h-full overflow-y-auto col-span-2">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Size in m&sup2;</th>
-          <th>Peak Power (MW)</th>
-          <th>first_detection</th>
-          <th>last_detection</th>
-          <th>avg_confidence</th>
-          <th>Valid</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in dataTable" :key="item.id" @click="handleRowClick(item.id)">
-          <td>{{ item.id }}</td>
-          <td>{{ item.size_in_sq_m }}</td>
-          <td>{{ item.peak_power.toFixed(2) }}</td>
-          <td>{{ item.first_detection }}</td>
-          <td>{{ item.last_detection }}</td>
-          <td>{{ item.avg_confidence.toFixed(2) }}</td>
-          <td v-if="item.is_valid === 'None'">
-            <input type="checkbox" v-model="item.selected" @click="handleCheckboxClick(item)">
-          </td>
-          <td v-else-if="item.is_valid === 'valid'">
-            <span class="text-green-500">Valid</span>
-          </td>
-          <td v-else-if="item.is_valid === 'non-valid'">
-            <span class="text-red-500">Invalid</span>
-          </td>
-          <td v-else-if="item.is_valid === 'unsure'">
-            <span class="text-yellow-500">Unsure</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div v-if="error">{{ error }}</div>
-    <div v-else>Loading...</div>
-  </div> -->
 </template>
 
 <style>
