@@ -24,7 +24,7 @@ This only handles / forwards requests to the torchserve management API, and does
 @router.get("/")
 def get_model() -> Any:
     """Returns registered models from ml server"""
-    response = requests.get("http://localhost:8081/models")
+    response = requests.get("http://ml-serve:8081/models")
 
     return response.json()["models"]
 
@@ -32,7 +32,7 @@ def get_model() -> Any:
 @router.get("/{model}")
 def get_model(model: str) -> Any:  # noqa: F811
     """Get model by name from ml server"""
-    response = requests.get(f"http://localhost:8081/models/{model}/all")
+    response = requests.get(f"http://ml-serve:8081/models/{model}/all")
 
     return response.json()
 
@@ -41,7 +41,7 @@ def get_model(model: str) -> Any:  # noqa: F811
 def register_example_model() -> Any:
     """Register squeezenet1_1 model as example"""
     response = requests.post(
-        "http://localhost:8081/models?url=https://torchserve.pytorch.org/mar_files/squeezenet1_1.mar"
+        "http://ml-serve:8081/models?url=https://torchserve.pytorch.org/mar_files/squeezenet1_1.mar"
     )
 
     return response.json()
@@ -51,7 +51,7 @@ def register_example_model() -> Any:
 async def register_model(model: str = "solar-park-detection") -> Any:
     """register model by name from ml server"""
     response = requests.post(
-        f"http://localhost:8081/models?url=https://solar-detection-697553-eu-central-1.s3.eu-central-1.amazonaws.com/model-store/{model}.mar"
+        f"http://ml-serve:8081/models?url=https://solar-detection-697553-eu-central-1.s3.eu-central-1.amazonaws.com/model-store/{model}.mar"
     )
 
     return response.json()
@@ -60,7 +60,7 @@ async def register_model(model: str = "solar-park-detection") -> Any:
 @router.post("/as-url/{url}")
 def register_model(url: str) -> Any:  # noqa: F811
     """register model by url from ml server"""
-    response = requests.post(f"http://localhost:8081/models?url={url}")
+    response = requests.post(f"http://ml-serve:8081/models?url={url}")
 
     return response.json()
 
@@ -71,6 +71,6 @@ def delete_model(
     version: int = 1,
 ) -> Any:
     """Delete model by name from ml server"""
-    response = requests.delete(f"http://localhost:8081/models/{model}/{version}.0")
+    response = requests.delete(f"http://ml-serve:8081/models/{model}/{version}.0")
 
     return response.json()
