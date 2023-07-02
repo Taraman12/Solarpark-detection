@@ -2,32 +2,33 @@
 import re
 from pathlib import Path
 
-from settings import DOCKERIZED
+from settings import DOCKERIZED, API_HOST, ML_HOST
 
 # where will the images be stored/ name of the folder in s3 bucket
 IMAGE_INPUT_DIR = Path(r"data_raw")
+#IMAGE_INPUT_DIR = Path(r".\data_local\training_data_raw")
 
+# prefix of the images in the s3 bucket
+# FIXME: used, but doesn't have an impact
 IMAGES_WITH_SOLARPARK = Path(r"images_with_solarpark")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 MASK_INPUT_DIR = SCRIPT_DIR / "data" / "trn_polygons_germany_tile_names.geojson"
 
 # NOTE will be created if not existent
-IMAGE_OUTPUT_DIR = Path(r".\data_local\test_images_geotiff")
+IMAGE_OUTPUT_DIR = Path(r".\data_local\images_undersampling")
 
 # NOTE will be created if not existent
-MASK_OUTPUT_DIR = Path(r".\data_local\test_mask_patches")
+MASK_OUTPUT_DIR = Path(r".\data_local\mask_undersampling")
 
 KERNEL_SIZE = 256
 PADDING = 25
 UNDERSAMPLING_RATE = 0.05
 
-if DOCKERIZED:
-    URL_ML = "http://ml-serve:8080"  # ml-serve
-    URL_API = "http://api:8000/api/v1"  # api
-else:
-    URL_ML = "http://localhost:8080"
-    URL_API = "http://localhost:8000/api/v1"
+
+URL_ML = f"http://{ML_HOST}:8080"  # ml-serve
+URL_API = f"http://{API_HOST}:8000/api/v1"  # api
+
 
 
 MODEL_NAME = "solar-park-detection"
