@@ -57,6 +57,11 @@ const router = createRouter({
       name: 'sideBarView',
       component: () => import('../views/SideBarView.vue')
     },
+    {
+      path: '/explore',
+      name: 'explore',
+      component: () => import('../views/ExploreView.vue')
+    },
   ]
 })
 
