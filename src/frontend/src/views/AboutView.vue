@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useApiFetch } from '@/plugins/fetch'
+import Icon from '@/components/IconCanvas.vue'
 
+const { get, post, filePost } = useApiFetch()
 const models = ref(null);
 const error = ref(null);
 const isLoading = ref(true);
@@ -10,9 +13,10 @@ const options = {
     'Content-Type': 'application/json'
   }
 };
+
 async function startInstance() {
   try {
-    const response = await fetch(`http://localhost:8000/api/v1/instance/start/ml-serve?instance_type=t3.medium`, options);
+    const response = await get(`/instance/start/ml-serve?instance_type=t3.medium`, options);
     const data = response.json();
     console.log("data " + data);
     return data;
