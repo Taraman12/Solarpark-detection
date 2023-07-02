@@ -19,6 +19,7 @@
     "@aws-sdk/credential-providers": "^3.359.0",
     "@aws-sdk/s3-request-presigner": "^3.359.0",
     "@googlemaps/js-api-loader": "^1.15.2",
+    "@googlemaps/markerclusterer": "^2.3.1",
     "@mdi/js": "^7.2.96",
     "autoprefixer": "^10.4.14",
     "aws-sdk": "^2.1404.0",
