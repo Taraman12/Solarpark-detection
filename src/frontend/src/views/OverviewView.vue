@@ -276,11 +276,15 @@ watch(FilterModelName, () => {
 </script>
 <template>
     <div class="flex">
-        <div class="w-2/5 place-self-start sticky top-20 m-4">
-            <div id="OSMmap" class="h-96"></div>
-            <div ref="mapDiv" class="h-96 mt-4"></div>
+        <div class="w-2/5 place-self-start justify-center sticky top-20 m-4">
+            <div class="h-96">
+                <div id="OSMmap" class="h-full" />
+            </div>
+            <div class="h-96 mt-4">
+                <div ref="mapDiv" class="h-full" />
+            </div>
         </div>
-        <div class="w-3/5">
+        <div class="w-3/5 ">
             <div class="flex justify-center">
                 <div class="m-4">
                     <!-- <label for="filter" class="mr-4 p-1">Filter:</label> -->
