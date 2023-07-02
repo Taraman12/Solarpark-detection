@@ -189,7 +189,7 @@ def trainings_data_handler(
     metadata["dtype"] = rasterio.float32
     output_path = IMAGE_OUTPUT_DIR / filename
     save_patch(output_path, metadata, small_image)
-    save_for_upload(output_path,metadata, small_image)
+    save_for_upload(output_path, metadata, small_image)
     return 1
 
 
@@ -224,13 +224,14 @@ def save_for_upload(output_path: Path, metadata: dict, data: np.ndarray) -> bool
     metadata["driver"] = "GTiff"
     metadata["dtype"] = rasterio.uint8
     metadata["count"] = 3
-    output_upload_path = output_path.parent.joinpath('upload', output_path.name)
+    output_upload_path = output_path.parent.joinpath("upload", output_path.name)
     output_upload_path.parent.mkdir(parents=True, exist_ok=True)
 
     with rasterio.open(fp=output_upload_path, mode="w", **metadata) as dst:
         dst.write(data[1:4])
 
     return True
+
 
 def upload_geotiff_handler(data: np.ndarray, metadata: dict, filename: str) -> bool:
     # FIXME: upload to aws doesn't find the path in windows

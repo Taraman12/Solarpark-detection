@@ -2,11 +2,11 @@
 import re
 from pathlib import Path
 
-from settings import DOCKERIZED, API_HOST, ML_HOST
+from settings import API_HOST, DOCKERIZED, ML_HOST
 
 # where will the images be stored/ name of the folder in s3 bucket
 IMAGE_INPUT_DIR = Path(r"data_raw")
-#IMAGE_INPUT_DIR = Path(r".\data_local\training_data_raw")
+# IMAGE_INPUT_DIR = Path(r".\data_local\training_data_raw")
 
 # prefix of the images in the s3 bucket
 # FIXME: used, but doesn't have an impact
@@ -28,7 +28,6 @@ UNDERSAMPLING_RATE = 0.05
 
 URL_ML = f"http://{ML_HOST}:8080"  # ml-serve
 URL_API = f"http://{API_HOST}:8000/api/v1"  # api
-
 
 
 MODEL_NAME = "solar-park-detection"

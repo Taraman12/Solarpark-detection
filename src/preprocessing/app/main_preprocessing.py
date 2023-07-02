@@ -17,10 +17,9 @@ from constants import (
     IMAGE_OUTPUT_DIR,
     MASK_INPUT_DIR,
     MASK_OUTPUT_DIR,
-    URL_ML,
     URL_API,
+    URL_ML,
 )
-
 from logging_config import get_logger
 from save_to_disk import preprocess_and_save_data
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION

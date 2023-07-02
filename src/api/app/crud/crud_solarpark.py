@@ -10,13 +10,14 @@ from geojson import Feature, FeatureCollection, Polygon
 from shapely.geometry import shape
 from sqlalchemy.orm import Session
 
+from app.cloud.logging_config import get_logger
+
 # local modules
 from app.db.base_class import Base
 from app.models.solarpark import SolarPark
 from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 
 from .base import CRUDBase
-from app.cloud.logging_config import get_logger
 
 logger = get_logger("BaseConfig")
 # import geojson
