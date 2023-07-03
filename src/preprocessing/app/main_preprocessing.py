@@ -17,6 +17,7 @@ from constants import (
     IMAGE_OUTPUT_DIR,
     MASK_INPUT_DIR,
     MASK_OUTPUT_DIR,
+    URL_API,
     URL_ML,
 )
 from logging_config import get_logger
@@ -121,6 +122,8 @@ if __name__ == "__main__":
     logger.info(f"Dockerized = {DOCKERIZED}")
     logger.info(f"Make_trainings_data = {MAKE_TRAININGS_DATA}")
     logger.info(f"Production = {PRODUCTION}")
+    logger.info(f"URL_ML = {URL_ML}")
+    logger.info(f"URL_API = {URL_API}")
 
     ##########################################
     # data = {

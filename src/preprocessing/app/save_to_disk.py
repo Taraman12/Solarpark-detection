@@ -110,6 +110,7 @@ def preprocess_and_save_data(  # noqa: C901
             stacked_bands = preprocess_bands(bands, window)
             if stacked_bands.max() == 0:
                 continue
+            # ! probably not needed anymore
             stacked_bands = pad_array(stacked_bands)
 
             logger.debug(f"Preprocessed {len(bands)} bands for {identifier}")
@@ -188,6 +189,7 @@ def trainings_data_handler(
     metadata["dtype"] = rasterio.float32
     output_path = IMAGE_OUTPUT_DIR / filename
     save_patch(output_path, metadata, small_image)
+    save_for_upload(output_path, metadata, small_image)
     return 1
 
 
@@ -215,6 +217,20 @@ def prediction_handler(
             logger.info("Image uploaded to AWS")
 
     return None
+
+
+def save_for_upload(output_path: Path, metadata: dict, data: np.ndarray) -> bool:
+    data = np.round(data * 255).astype(np.uint8)
+    metadata["driver"] = "GTiff"
+    metadata["dtype"] = rasterio.uint8
+    metadata["count"] = 3
+    output_upload_path = output_path.parent.joinpath("upload", output_path.name)
+    output_upload_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with rasterio.open(fp=output_upload_path, mode="w", **metadata) as dst:
+        dst.write(data[1:4])
+
+    return True
 
 
 def upload_geotiff_handler(data: np.ndarray, metadata: dict, filename: str) -> bool:
@@ -321,6 +337,7 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
         "avg_confidence": 0,
         "name_in_aws": filename,
         "is_valid": "None",
+        "comment": "None",
         "lat": lat,
         "lon": lon,
     }
@@ -388,21 +405,6 @@ def save_patch(output_path: Path, metadata: dict, data: np.ndarray) -> bool:
     # looks like the metadata is not correct or dytpe is not correct
     with rasterio.open(fp=output_path, mode="w", **metadata) as dst:
         dst.write(data)  # .astype(rasterio.float32)
-
-    # Optional: Upload to AWS
-    # NOTE: Each upload is a request to AWS and only 2000 requests per month are free
-    # therefore, this is commented out by default
-    # As a solution, we could upload the files to AWS in a zip file
-    #
-    # if aws_available:
-    #
-    #     result = upload_file_to_aws(
-    #         input_file_path=output_path, output_path=output_path.name
-    #     )
-    #     if result:
-    #         return True
-    #     else:
-    #         raise Exception("Upload to AWS failed")
 
     return True
 
@@ -482,6 +484,7 @@ def preprocess_bands(bands: Dict[str, np.ndarray], window: Window) -> np.ndarray
     stacked_bands = color_correction(stacked_bands)
     logger.debug(f"Color corrected bands shape: {stacked_bands.shape}")
     stacked_bands = robust_normalize(stacked_bands)
+    # ToDo: check data type
     logger.debug(f"Normalized bands shape: {stacked_bands.shape}")
     return stacked_bands
 
@@ -498,6 +501,7 @@ def stack_bands(bands: Dict[str, rasterio.DatasetReader], window: Window) -> np.
         np.ndarray: The stacked bands array, where each band is stacked along the third dimension.
     """
     return np.dstack(
+        # ToDo: try np.int16 instead of int
         [
             bands[b].read(1, window=window).astype(int)
             for b in ["B08", "B04", "B03", "B02"]
@@ -514,6 +518,7 @@ def color_correction(stacked_bands: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: The color-corrected stacked bands array.
     """
+    # ToDo: try np.int16 instead of int
     return (stacked_bands / 8).astype(int)
 
 

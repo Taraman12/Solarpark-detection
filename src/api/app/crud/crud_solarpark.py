@@ -10,6 +10,8 @@ from geojson import Feature, FeatureCollection, Polygon
 from shapely.geometry import shape
 from sqlalchemy.orm import Session
 
+from app.cloud.logging_config import get_logger
+
 # local modules
 from app.db.base_class import Base
 from app.models.solarpark import SolarPark
@@ -17,6 +19,7 @@ from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 
 from .base import CRUDBase
 
+logger = get_logger("BaseConfig")
 # import geojson
 # from geoalchemy2.shape import to_shape
 # import shapely.wkt
@@ -121,8 +124,10 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
                 lon=longitudes,
             )
             db.add(obj_in_data)
+            logger.info(f"Added {obj_in_data.name_in_aws} to database")
+            db.commit()
 
-        db.commit()
+        # db.commit()
         return {"filename": file.filename}
 
     # def get(self, db: Session, id: Any, *, polygon: bool = False) -> SolarPark:

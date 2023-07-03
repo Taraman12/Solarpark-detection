@@ -28,6 +28,7 @@ const styleStore = useStyleStore();
           <RouterLink to="/classifying" class="hover:text-black dark:hover:text-gray-100">Classifying</RouterLink>
           <RouterLink to="/download" class="hover:text-black dark:hover:text-gray-100">Download</RouterLink>
           <RouterLink to="/models" class="hover:text-black dark:hover:text-gray-100">Models</RouterLink>
+          <RouterLink to="/explore" class="hover:text-black dark:hover:text-gray-100">Explore</RouterLink>
           <RouterLink to="/about" class="hover:text-black dark:hover:text-gray-100">About</RouterLink>
           <!-- <RouterLink to="/table" class="hover:text-black dark:hover:text-gray-100">Table View</RouterLink>
           <RouterLink to="/map" class="hover:text-black dark:hover:text-gray-100">Map View</RouterLink>

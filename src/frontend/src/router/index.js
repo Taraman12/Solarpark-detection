@@ -50,12 +50,17 @@ const router = createRouter({
     {
       path: '/overview',
       name: 'overview',
-      component: () => import('../views/OverViewView.vue')
+      component: () => import('../views/OverviewView.vue')
     },
     {
       path: '/sideBarView',
       name: 'sideBarView',
       component: () => import('../views/SideBarView.vue')
+    },
+    {
+      path: '/explore',
+      name: 'explore',
+      component: () => import('../views/ExploreView.vue')
     },
   ]
 })
