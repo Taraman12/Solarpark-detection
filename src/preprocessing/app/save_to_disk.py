@@ -407,7 +407,7 @@ def save_patch(output_path: Path, metadata: dict, data: np.ndarray) -> bool:
     metadata["driver"] = "GTiff"
     # ! add folder for masks and images
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    # looks like the metadata is not correct or dytpe is not correct
+    # ? looks like the metadata is not correct or dytpe is not correct
     with rasterio.open(fp=output_path, mode="w", **metadata) as dst:
         dst.write(data)  # .astype(rasterio.float32)
 
