@@ -345,17 +345,17 @@ watch(FilterModelName, (newVal) => {
                 <td>{{ noneItem.peak_power.toFixed(2) }}</td>
               </tr>
               <tr>
-                <td>first_detection</td>
+                <td>First Detection</td>
                 <td>{{ noneItem.first_detection }}</td>
               </tr>
               <tr>
-                <td>last_detection</td>
+                <td>Last Detection</td>
                 <td>{{ noneItem.last_detection }}</td>
               </tr>
-              <tr>
+              <!-- <tr>
                 <td>avg_confidence</td>
                 <td>{{ noneItem.avg_confidence.toFixed(2) }}</td>
-              </tr>
+              </tr> -->
             </table>
           </div>
           <div class="grid grid-cols-2 gap-3 mt-4">

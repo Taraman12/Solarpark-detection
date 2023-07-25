@@ -30,11 +30,10 @@ async function startInstance() {
 </script>
 
 <template>
-  <div>
+  <!-- <div>
     <button @click="startInstance">Start Instance</button>
-  </div>
+  </div> -->
   <div class="about">
-    <h1>This is an about page</h1>
     <p>
       See the following source for the 1,6 MW peak per 1 acres:
       <a
