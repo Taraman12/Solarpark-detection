@@ -1,7 +1,7 @@
-encoder_name: "timm-efficientnet-b0"
+encoder_name: "timm-resnest14d"
 encoder_weights: "imagenet"
-batch_size: 32
+batch_size: 16
 in_channels: 4
 classes: 1
 activation: "sigmoid"
-comment: "all_seasons, color_corr, cleaned, dropped with model eff_b0"
+comment: "all_seasons, color_corr, cleaned, verified, 11 Epochs, LR=0.005, Batchsize=16, transformation=None"

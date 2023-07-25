@@ -52,7 +52,7 @@ class ModelHandler(BaseHandler):
             if torch.backends.mps.is_available()
             else "cpu"
         )
-        if not os.path.isfile("eff_b0.pth"):
+        if not os.path.isfile("resnest14d_best_model.pt"):
             raise RuntimeError("Missing the model.pt file")
 
         # model_config_path = r"/app/model-store/model-config.yaml"
@@ -81,7 +81,7 @@ class ModelHandler(BaseHandler):
             activation=model_config["activation"],
         )
         # load pretrained model
-        self.model.load_state_dict(torch.load("eff_b0.pth", map_location=self.device))
+        self.model.load_state_dict(torch.load("resnest14d_best_model.pt", map_location=self.device))
         # set model to eval mode
         self.model.eval()
         logger.info("Model initialized!")

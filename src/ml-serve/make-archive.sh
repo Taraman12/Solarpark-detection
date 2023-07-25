@@ -4,7 +4,7 @@
 
 torch-model-archiver --model-name solar-park-detection \
                      --version 1.0 \
-                     --serialized-file model-store/eff_b0.pth \
+                     --serialized-file model-store/resnest14d_best_model.pt \
                      --handler model-store/handler.py \
                      --extra-files model-store/model-config.yaml \
                      --requirements-file requirements.txt \
