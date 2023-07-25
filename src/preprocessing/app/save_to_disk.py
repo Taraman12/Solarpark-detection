@@ -371,11 +371,16 @@ def to_datetime_str(date_string: str) -> str:
 
 
 def calc_peak_power(area_in_sq_m: float) -> float:
+    # Solar park in 2015
     # https://www.bundesnetzagentur.de/SharedDocs/Downloads/DE/Sachgebiete/Energie/Unternehmen_Institutionen/ErneuerbareEnergien/PV-Freiflaechenanlagen/Bericht_Flaecheninanspruchnahme_2016.pdf?__blob=publicationFile&v=2#:~:text=Die%20bereits%20im%20Rahmen%20der,Ackerland%20in%20benachteiligten%20Gebieten%20errichtet. # noqa
     # page 8 on the pdf (german)
     # 1,6 acre = 1 MWp
-    # area in sq m / 10000 = area in acr * 1.6 = peak power in MWp
-    return area_in_sq_m / 10000 * 1.6
+    # Solar park in 2022
+    # https://www.ise.fraunhofer.de/content/dam/ise/de/documents/publications/studies/aktuelle-fakten-zur-photovoltaik-in-deutschland.pdf
+    # page 40 on the pdf (german)
+    # 1 MWP/ha, 980 MWh/MWP
+    # => 1 acre = 10000 m² = 1 MWp
+    return area_in_sq_m / 10000
 
 
 def extract_polygon_coordinates(polygon: Polygon) -> Tuple[List[float], List[float]]:
@@ -402,7 +407,7 @@ def save_patch(output_path: Path, metadata: dict, data: np.ndarray) -> bool:
     metadata["driver"] = "GTiff"
     # ! add folder for masks and images
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    # looks like the metadata is not correct or dytpe is not correct
+    # ? looks like the metadata is not correct or dytpe is not correct
     with rasterio.open(fp=output_path, mode="w", **metadata) as dst:
         dst.write(data)  # .astype(rasterio.float32)
 
