@@ -1,0 +1,2 @@
+train_loss_epochs,val_loss_epochs,val_dice_epochs,validation_f1_epochs,validation_precision_epochs,validation_recall_epochs
+1.1354980172355318,1.2259729372673347,0.010971914189839048,0.010971915291967711,0.005554144547800877,0.7930137568809947
