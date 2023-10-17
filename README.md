@@ -13,7 +13,8 @@ This project was developed as part of a master thesis at the chair of Process- a
 - [Installation](#installation)
 - [ToDos:](#todos)
 - [Pipeline explanation](#pipeline-explanation)
-- [Create requirements.txt](#create-requirementstxt)
+- [Poetry Workflow](#poetry-workflow)
+  - [Create requirements.txt from poetry.lock](#create-requirementstxt-from-poetrylock)
 - [Known problems](#known-problems)
   - [psycopg2:](#psycopg2)
 
@@ -71,11 +72,69 @@ The preprocessing merges the different bands (Red, Green, Blue, NIR) into one im
 
 The API is used as a connection between the the services among them selves (mainly the DB) and as a start hub 
 
+## Poetry Workflow
+To install poetry follow the instructions on the [poetry website](https://python-poetry.org/docs/#installation)
 
- ## Create requirements.txt
- check if all groups are correct
- 
- poetry export -f requirements.txt --output requirements.txt --without-hashes --with main --with lint --with dev --with ml-model --with api
+Quick overview of the poetry workflow for beginners.
+
+Add dependencies:
+```bash
+poetry add requests
+```
+
+Add dependencies to groups:
+```bash
+poetry add black --group formatting
+```	
+
+Add development dependencies:
+```bash
+poetry add pytest --group dev
+```
+
+Update dependencies in pyproject.toml
+```bash
+poetry update pytest --group dev
+```
+
+Remove dependencies in pyproject.toml
+```bash
+poetry remove pytest --group dev
+```
+Update dependencies __from__ pyproject.toml (manuel change) to poetry.lock
+```bash
+poetry lock
+```
+
+Install dependencies from poetry.lock
+```bash
+poetry install
+```
+
+Show dependency tree
+```bash
+poetry show --tree
+```
+
+Run a command in the virtual environment
+```bash
+poetry run pytest
+```
+Start a shell within the virtual environment
+```bash
+poetry shell
+```
+
+### Create requirements.txt from poetry.lock
+Generally:
+```bash
+poetry export -f requirements.txt --output requirements.txt --without-hashes --with main --with lint --with dev --with ml-model --with api
+```
+
+In this project (with Makefile):
+```bash
+make requirements
+```
 
 ## Known problems
 
