@@ -56,8 +56,8 @@ pip install -r requirements-dev.txt
 6. TBD 
 
 ## ToDos:
-- [ ] Add a description of the project
 - [ ] Add pre-commit hooks
+- [ ] Add coverage to workflow and badge
 - [ ] Add docformatter again
 - [ ] Add mypy again
 - [ ] Add readTheDocs
