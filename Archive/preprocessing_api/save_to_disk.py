@@ -14,7 +14,11 @@ import rasterio.features
 import requests
 
 # local modules
-from app.preprocessing.aws_functions import delete_folder_on_aws, download_from_aws, upload_file_to_aws
+from app.preprocessing.aws_functions import (
+    delete_folder_on_aws,
+    download_from_aws,
+    upload_file_to_aws,
+)
 from app.preprocessing.cloud_clients import aws_available
 from app.preprocessing.constants import (
     HEADERS,

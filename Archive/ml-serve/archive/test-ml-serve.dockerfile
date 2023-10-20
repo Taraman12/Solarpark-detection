@@ -81,7 +81,7 @@ RUN TORCH_VER=$(curl --silent --location https://pypi.org/pypi/torch/json | pyth
 RUN python -m pip install --no-cache-dir captum torchtext torchserve torch-model-archiver pyyaml
 
 # Final image for production
-FROM ${BASE_IMAGE} AS runtime-image 
+FROM ${BASE_IMAGE} AS runtime-image
 # Re-state ARG PYTHON_VERSION to make it active in this build-stage (uses default define at the top)
 ARG PYTHON_VERSION
 ENV PYTHONUNBUFFERED TRUE
@@ -111,7 +111,7 @@ COPY --chown=model-server --from=compile-image /home/venv /home/venv
 
 ENV PATH="/home/venv/bin:$PATH"
 # ! path changed
-COPY dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh 
+COPY dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/dockerd-entrypoint.sh \
     && chown -R model-server /home/model-server

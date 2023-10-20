@@ -33,4 +33,3 @@ jobs:
       # run tests
       - name: Run tests
         run: poetry run pytest
-

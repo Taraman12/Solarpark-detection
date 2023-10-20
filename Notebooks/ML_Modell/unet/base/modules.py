@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Conv2dReLU(nn.Sequential):
     def __init__(
         self,
@@ -93,6 +94,7 @@ class Activation(nn.Module):
 
     def forward(self, x: Tensor):
         return self.activation(x)
+
 
 class Attention(nn.Module):
     def __init__(self, name, **params):
