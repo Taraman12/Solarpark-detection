@@ -48,7 +48,7 @@ api
 ├───app
 │   ├───api
 │   │   ├───endpoints
-│   │   │   
+│   │   │
 ```
 The models folder contains the tables for the database including the types of each column to build the database.
 the schemas folder contains the pydantic models for the api endpoints. These are used to validate the data sent to the server.
@@ -61,7 +61,7 @@ Go to the api directory and run the following commands:
 alembic revision --autogenerate -m "Your Comment"
 ```
 To generate a new migration file. Then run:
-```	
+```
 alembic upgrade head
 ```
 To apply the migration to the database.\
@@ -84,4 +84,3 @@ https://fastapi.tiangolo.com/tutorial/response-model/
 
 Json Encoder:
 https://fastapi.tiangolo.com/tutorial/encoder/
-

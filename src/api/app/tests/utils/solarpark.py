@@ -1,5 +1,5 @@
-from typing import Dict
 from datetime import date
+from typing import Dict
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session

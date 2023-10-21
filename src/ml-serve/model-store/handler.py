@@ -81,7 +81,9 @@ class ModelHandler(BaseHandler):
             activation=model_config["activation"],
         )
         # load pretrained model
-        self.model.load_state_dict(torch.load("resnest14d_best_model.pt", map_location=self.device))
+        self.model.load_state_dict(
+            torch.load("resnest14d_best_model.pt", map_location=self.device)
+        )
         # set model to eval mode
         self.model.eval()
         logger.info("Model initialized!")

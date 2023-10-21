@@ -5,17 +5,17 @@ delete torch, torchvision, torchaudio from the requirements.txt file
 ##### run this in (git) bash shell (from ml-serve folder)
 ```bash
 ./make-archive.sh
-```	
+```
 
 ### Notes on ml-serve
-https://github.com/pytorch/serve/blob/master/docs/getting_started.md  
-cli:  
+https://github.com/pytorch/serve/blob/master/docs/getting_started.md
+cli:
 https://github.com/pytorch/serve/blob/master/model-archiver/README.md
 
 install model-archiver first if torch-model-archiver is not in path variable:
 https://pypi.org/project/model-archiver/
 
-cli:  
+cli:
 ```bash
 torch-model-archiver --model-name test_model \
                      --version 1.0 \
@@ -25,8 +25,8 @@ torch-model-archiver --model-name test_model \
                      --extra-files requirements.txt \
 ```
 
-cli docs:  
-https://pytorch.org/serve/server.html#command-line-interface  
+cli docs:
+https://pytorch.org/serve/server.html#command-line-interface
 ```bash
 torchserve --start \
            --ncs \
@@ -35,15 +35,15 @@ torchserve --start \
            --models test_model.mar \
 ```
 
-File make-archive.sh from:  
+File make-archive.sh from:
 https://github.com/pytorch/serve/tree/master/docker
 
 ```bash
-docker run --rm 
+docker run --rm
         --name torchserve_docker \
            -p8080:8080 -p8081:8081 -p8082:8082 \
            ubuntu-torchserve:latest \
-           torchserve --model-store /home/model-server/model-store/ 
+           torchserve --model-store /home/model-server/model-store/
            --models foodnet=foodnet_resnet18.mar
 
 docker run --rm --name torchserve_docker \

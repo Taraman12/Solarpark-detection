@@ -1,6 +1,7 @@
-from sqlalchemy.orm import Session
-from fastapi.testclient import TestClient
 from datetime import date
+
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from app import crud
 from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
@@ -48,6 +49,7 @@ def test_create_solarpark(db: Session) -> None:
     assert solarpark.lat == lat
     assert solarpark.lon == lon
 
+
 def test_get_solarpark(db: Session) -> None:
     name_of_model = random_lower_string()
     size_in_sq_m = 100.0
@@ -91,6 +93,7 @@ def test_get_solarpark(db: Session) -> None:
     assert solarpark.comment == stored_solarpark.comment
     assert solarpark.lat == stored_solarpark.lat
     assert solarpark.lon == stored_solarpark.lon
+
 
 def test_update_solarpark(db: Session) -> None:
     name_of_model = random_lower_string()
@@ -161,6 +164,7 @@ def test_update_solarpark(db: Session) -> None:
     assert solarpark.lat == solarpark2.lat
     assert solarpark.lon == solarpark2.lon
 
+
 def test_delete_solarpark(db: Session) -> None:
     name_of_model = random_lower_string()
     size_in_sq_m = 100.0
@@ -205,4 +209,3 @@ def test_delete_solarpark(db: Session) -> None:
     assert solarpark2.comment == solarpark.comment
     assert solarpark2.lat == solarpark.lat
     assert solarpark2.lon == solarpark.lon
-    

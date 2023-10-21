@@ -12,5 +12,3 @@ torch-model-archiver --model-name solar-park-detection \
                      --force
                     # should be available in torchserve 0.8.0
                     # --config-file ml-serve/app/model-store/model-config.yaml
-
-
