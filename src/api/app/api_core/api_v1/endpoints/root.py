@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/")
 def root():
-    return {"message": "Hello World!"}
+    return {"message": "API is running"}
 
 
 # @router.get("/start-preprocess")
