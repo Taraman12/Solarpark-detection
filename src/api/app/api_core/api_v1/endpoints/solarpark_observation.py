@@ -20,12 +20,9 @@ def read_solarpark_observation(
     solarpark_id: int = None,
 ) -> Any:
     """Retrieve solarpark observation."""
-    if solarpark_id is not None:
-        solarpark_observation = crud.solarpark_observation.get_multi_by_solarpark_id(
-            db, solarpark_id=solarpark_id, skip=skip, limit=limit
-        )
-        return solarpark_observation
-    return crud.solarpark_observation.get_multi(db, skip=skip, limit=limit)
+    return crud.solarpark_observation.get_multi(
+        db, skip=skip, limit=limit, solarpark_id=solarpark_id
+    )
 
 
 @router.get("/{id}", response_model=schemas.SolarParkObservation)
@@ -75,4 +72,36 @@ def create_solarpark_observation(
             db=db, obj_in=solarpark_observation_in, solarpark_id=solarpark.id
         )
         # crud.solarpark.update(db=db, db_obj=solarpark, obj_in=solarpark_observation_in)
+    return solarpark_observation
+
+
+@router.put("/{id}", response_model=schemas.SolarParkObservation)
+def update_solarpark_observation(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
+    solarpark_observation_in: schemas.SolarParkObservationUpdate,
+) -> Any:
+    """Update an solarpark observation."""
+    solarpark_observation = crud.solarpark_observation.get(db=db, id=id)
+    if not solarpark_observation:
+        raise HTTPException(status_code=404, detail="solarpark observation not found")
+
+    solarpark_observation = crud.solarpark_observation.update(
+        db=db, db_obj=solarpark_observation, obj_in=solarpark_observation_in
+    )
+    return solarpark_observation
+
+
+@router.delete("/{id}", response_model=schemas.SolarParkObservation)
+def delete_solarpark_observation(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
+) -> Any:
+    """Delete an solarpark observation."""
+    solarpark_observation = crud.solarpark_observation.get(db=db, id=id)
+    if not solarpark_observation:
+        raise HTTPException(status_code=404, detail="solarpark observation not found")
+    solarpark_observation = crud.solarpark_observation.remove(db=db, id=id)
     return solarpark_observation

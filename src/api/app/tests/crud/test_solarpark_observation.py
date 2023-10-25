@@ -88,3 +88,31 @@ def test_create_solarpark_observation(db: Session) -> None:
 
 
 # def test_update_solarpark_observation(db: Session) -> None:
+
+
+# ToDo: Update this test
+# 1. Check if solarpark is updated
+# 2. Check if this was the last observation, that solarpark is deleted
+def test_delete_solarpark_observation(db: Session) -> None:
+    solarpark_observation_in = random_solarpark_observation()
+    solarpark_observation = crud.solarpark_observation.create(
+        db, obj_in=solarpark_observation_in, solarpark_id=1
+    )
+    solarpark_observation2 = crud.solarpark_observation.remove(
+        db, id=solarpark_observation.id
+    )
+    solarpark_observation3 = crud.solarpark_observation.get(
+        db, id=solarpark_observation.id
+    )
+    assert solarpark_observation3 is None
+    assert solarpark_observation2.id == solarpark_observation.id
+    assert solarpark_observation2.name_of_model == solarpark_observation.name_of_model
+    assert solarpark_observation2.date_of_data == solarpark_observation.date_of_data
+    assert solarpark_observation2.size_in_sq_m == solarpark_observation.size_in_sq_m
+    assert solarpark_observation2.peak_power == solarpark_observation.peak_power
+    assert solarpark_observation2.avg_confidence == solarpark_observation.avg_confidence
+    assert solarpark_observation2.name_in_aws == solarpark_observation.name_in_aws
+    assert solarpark_observation2.comment == solarpark_observation.comment
+    assert solarpark_observation2.lat == solarpark_observation.lat
+    assert solarpark_observation2.lon == solarpark_observation.lon
+    assert solarpark_observation2.geom == solarpark_observation.geom
