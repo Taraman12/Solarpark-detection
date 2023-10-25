@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   db:
-    image: postgres:15.3 # alt: postgis/postgis:15-3.3
+    image: postgis/postgis:16-3.4 # alt: postgis/postgis:15-3.3
     restart: always
     volumes:
       - data:/var/lib/postgres/data
@@ -49,70 +49,70 @@ services:
     #   - my-network
 
 
-  # downloader:
+    # downloader:
+    #   build:
+    #     context: ./src/downloader
+    #     dockerfile: downloader.dockerfile
+    #   environment:
+    #     - DOCKERIZED=true
+
+  # ml-serve:
   #   build:
-  #     context: ./src/downloader
-  #     dockerfile: downloader.dockerfile
+  #     context: ./src/ml-serve
+  #     dockerfile: ml-serve.dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #     - "8081:8081"
+  #     - "8082:8082"
+  #   expose:
+  #     - "8080"
+  #     - "8081"
+  #     - "8082"
+  #   # limits the number of cpus the container can use
+  #   # else on each thread (core) a model will be loaded
+  #   cpus: 1.0
+
+  # preprocessing:
+  #   build:
+  #     context: ./src/preprocessing
+  #     dockerfile: preprocessing.dockerfile
+  #   depends_on:
+  #     - ml-serve
   #   environment:
   #     - DOCKERIZED=true
+  #     - MAKE_TRAININGS_DATA=False
+  #     - PRODUCTION=true
+  #   ports:
+  #     - "5678:5678"
+  #   expose:
+  #     - "5678"
+  #   # prevents the container from being started automatically
+  #   # when running `docker-compose up`
+  #   profiles: [ "cli-only" ]
 
-  ml-serve:
-    build:
-      context: ./src/ml-serve
-      dockerfile: ml-serve.dockerfile
-    ports:
-      - "8080:8080"
-      - "8081:8081"
-      - "8082:8082"
-    expose:
-      - "8080"
-      - "8081"
-      - "8082"
-    # limits the number of cpus the container can use
-    # else on each thread (core) a model will be loaded
-    cpus: 1.0
-
-  preprocessing:
-    build:
-      context: ./src/preprocessing
-      dockerfile: preprocessing.dockerfile
-    depends_on:
-      - ml-serve
-    environment:
-      - DOCKERIZED=true
-      - MAKE_TRAININGS_DATA=False
-      - PRODUCTION=true
-    ports:
-      - "5678:5678"
-    expose:
-      - "5678"
-    # prevents the container from being started automatically
-    # when running `docker-compose up`
-    profiles: [ "cli-only" ]
-
-  frontend:
-    build:
-      context: ./src/frontend
-      dockerfile: frontend.dockerfile
-    environment:
-      - VITE_DOCKERIZED=true
-      - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-      - VITE_AWS_ACCESS_KEY_ID=${aws_access_key_id}
-      - VITE_AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
-      - VITE_BASE_IP=${VITE_BASE_IP}
-    ports:
-      - "80:5000"
-    expose:
-      - "80"
-    # networks:
-    #   - my-network
+  # frontend:
+  #   build:
+  #     context: ./src/frontend
+  #     dockerfile: frontend.dockerfile
+  #   environment:
+  #     - VITE_DOCKERIZED=true
+  #     - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+  #     - VITE_AWS_ACCESS_KEY_ID=${aws_access_key_id}
+  #     - VITE_AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+  #     - VITE_BASE_IP=${VITE_BASE_IP}
+  #   ports:
+  #     - "80:5000"
+  #   expose:
+  #     - "80"
+  #   # networks:
+  #   #   - my-network
 
 volumes:
   data:
 
-# networks:
-#   my-network:
-#     driver: bridge
+    # networks:
+    #   my-network:
+    #     driver: bridge
     # networks:
     #   default:
     #     external:
