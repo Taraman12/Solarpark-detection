@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Status(str, Enum):
@@ -11,6 +11,8 @@ class Status(str, Enum):
 
 
 class InstanceBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     status: Status = Status.started
     service: str = "None"
     ec2_instance_id: str = "None"
@@ -23,8 +25,8 @@ class InstanceBase(BaseModel):
     #             "ec2_instance_id": "i-0b22a22eec53b9321",
     #         }
     #     }
-    class Config:
-        orm_mode = True
+    # class Config:
+    #     from_attributes = True
 
 
 class Instance(InstanceBase):

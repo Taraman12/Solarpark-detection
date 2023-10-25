@@ -1,19 +1,17 @@
 # third-party
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class MailListBase(BaseModel):
-    email: EmailStr
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        orm_mode = True
+    email: EmailStr
 
 
 class MailList(MailListBase):
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        orm_mode = True
+    id: int
 
 
 class MailListCreate(MailListBase):
