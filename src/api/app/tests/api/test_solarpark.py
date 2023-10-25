@@ -109,7 +109,6 @@ def test_read_solarpark(client: TestClient, db: Session) -> None:
 
 def test_update_solarpark(client: TestClient, db: Session) -> None:
     solarpark = create_random_solarpark(db)
-    print(f"solarpark: {solarpark.id}")
     data = {
         "name_of_model": ["Test"],
         "size_in_sq_m": 100.0,
