@@ -2,14 +2,18 @@ import os
 from logging.config import fileConfig
 from os.path import abspath, dirname, join
 
+import geoalchemy2  # noqa
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config, pool
 
 # added for geo spacial data support
-# from geoalchemy2 import alembic_helpers
-# import geoalchemy2  # noqa
+from geoalchemy2 import alembic_helpers
+from sqlalchemy import engine_from_config, pool
 
+"""
+Docs for geoalchemy2 with alembic:
+https://geoalchemy-2.readthedocs.io/en/latest/alembic.html
+"""
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -84,9 +88,9 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         # added for geo spacial data support
-        # include_object=alembic_helpers.include_object,
-        # process_revision_directives=alembic_helpers.writer,
-        # render_item=alembic_helpers.render_item,
+        include_object=alembic_helpers.include_object,
+        process_revision_directives=alembic_helpers.writer,
+        render_item=alembic_helpers.render_item,
     )
 
     with context.begin_transaction():
@@ -114,9 +118,9 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             # added for geo spacial data support
-            # include_object=alembic_helpers.include_object,
-            # process_revision_directives=alembic_helpers.writer,
-            # render_item=alembic_helpers.render_item,
+            include_object=alembic_helpers.include_object,
+            process_revision_directives=alembic_helpers.writer,
+            render_item=alembic_helpers.render_item,
         )
 
         with context.begin_transaction():

@@ -1,13 +1,19 @@
 # build-in
 import json
-from typing import Any, TypeVar
+from typing import Any, Dict, TypeVar, Union
 
 # third-party
 from fastapi import File, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
+from geoalchemy2 import WKTElement
+from geoalchemy2.shape import to_shape
+
+# from geoalchemy2.types import WKBElement
 from geojson import Feature, FeatureCollection, Polygon
 from shapely.geometry import shape
+
+# from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.cloud.logging_config import get_logger
@@ -18,6 +24,9 @@ from app.models.solarpark import SolarPark
 from app.schemas.solarpark import SolarParkCreate, SolarParkUpdate
 
 from .base import CRUDBase
+
+# import shapely.wkt
+
 
 logger = get_logger("BaseConfig")
 # import geojson
@@ -40,11 +49,57 @@ def generate(feature_collection: FeatureCollection):
 
 
 class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
-    # super().__init__(model=SolarPark)
-    # def create(self, db):
-    #     # check if SolarPark already exists
-    #     # if not, create new SolarPark
-    #     query = get_multi()
+    def get(self, db: Session, *, id: int) -> SolarPark:
+        db_obj = db.query(SolarPark).filter(SolarPark.id == id).first()
+        if db_obj is None:
+            return None
+
+        if isinstance(db_obj.geom, str):
+            db_obj.geom = WKTElement(db_obj.geom)
+        db_obj.geom = to_shape(db_obj.geom).wkt
+        return db_obj
+
+    def get_multi(self, db: Session, *, skip: int = 0, limit: int = 100) -> SolarPark:
+        db_obj = db.query(SolarPark).offset(skip).limit(limit).all()
+        if db_obj is None:
+            return None
+
+        for obj in db_obj:
+            if isinstance(obj.geom, str):
+                obj.geom = WKTElement(obj.geom)
+            obj.geom = to_shape(obj.geom).wkt
+        return db_obj
+        # return db.query(SolarPark).offset(skip).limit(limit).all()
+
+    def create(self, db: Session, *, obj_in: SolarParkCreate) -> SolarPark:
+        obj_in_data = jsonable_encoder(obj_in)
+        db_obj = SolarPark(**obj_in_data)  # type: ignore
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        db_obj.geom = to_shape(db_obj.geom).wkt
+        return db_obj
+
+    def update(
+        self,
+        db: Session,
+        *,
+        db_obj: SolarPark,
+        obj_in: Union[SolarParkUpdate, Dict[str, Any]],
+    ) -> SolarPark:
+        obj_data = jsonable_encoder(db_obj)
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
+        for field in obj_data:
+            if field in update_data:
+                setattr(db_obj, field, update_data[field])
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        db_obj.geom = to_shape(db_obj.geom).wkt
+        return db_obj
 
     def get_as_geojson(
         self,
@@ -130,21 +185,35 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         # db.commit()
         return {"filename": file.filename}
 
-    # def get(self, db: Session, id: Any, *, polygon: bool = False) -> SolarPark:
-    #     if polygon:
-    #         db_obj = db.query(SolarPark).filter(SolarPark.id == id).first()
-    #         db_obj.geometry = Polygon(db_obj.geometry)
-    #         return db_obj
-    #     return db.query(SolarPark).filter(SolarPark.id == id).first()
+    def check_overlap(self, db: Session, *, obj_in: SolarParkCreate) -> bool:
+        # print(WKTElement(obj_in.geom))
 
-    # def get_multi(
-    #     self, db: Session, *, skip: int = 0, limit: int = 100, polygon: bool = False
-    # ) -> SolarPark:
-    #     if polygon:
-    #         db_obj = db.query(SolarPark).offset(skip).limit(limit).all()
-    #         db_obj.geometry = Polygon(db_obj.geometry)
-    #         return db_obj
-    #     return db.query(SolarPark).offset(skip).limit(limit).all()
+        # db_obj = db.query(SolarPark).filter(SolarPark.geom.intersects(WKTElement(obj_in.geom))).first()
+        db_obj = (
+            db.query(SolarPark)
+            .filter(SolarPark.geom.intersects(WKTElement(obj_in.geom)))
+            .first()
+        )
+        # print(db_obj.__dict__)
+        print(db_obj.id)
+        if db_obj is None:
+            return None
+        else:
+            # here the unique id of the solarpark is returned
+            return db_obj
+
+        # print(to_shape(db_obj.geom))
+        # print("Hello")
+        # # query = db.query(SolarPark).filter(SolarPark.geom.ST_Area() > 0).one()
+        # # print(query.id)
+        # # result = db.execute(existing_solarpark)
+        # #query = db.query(SolarPark).filter(SolarPark.geom.ST_Overlaps(WKTElement("POLYGON ((599968.55 5570202.63, 599970.90 5570205.59, 599973.65 5570203.42, 599971.31 5570200.46, 599968.55 5570202.63))")))
+        # #print(query)
+        # # result = db.execute(existing_solarpark)
+        # # print(result)
+        # for row in query:
+        #     print(row.id)
+        # return existing_solarpark
 
     # pass
     # def create(self, db: Session, *, obj_in: SolarParkCreate):

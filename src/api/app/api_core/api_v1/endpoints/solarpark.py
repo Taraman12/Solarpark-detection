@@ -19,7 +19,6 @@ def read_solarpark(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 10000,  # 100 originally
-    polygon: bool = False,
 ) -> Any:
     """Retrieve solarpark."""
     solarpark = crud.solarpark.get_multi(db, skip=skip, limit=limit)
@@ -27,14 +26,10 @@ def read_solarpark(
 
 
 @router.get("/{id}", response_model=schemas.SolarPark)
-def read_solarpark(  # noqa: F811
-    *,
-    db: Session = Depends(deps.get_db),
-    id: int,
-    polygon: bool = False,
-) -> Any:
+def read_solarpark(*, db: Session = Depends(deps.get_db), id: int) -> Any:  # noqa: F811
     """Get solarpark by ID."""
     solarpark = crud.solarpark.get(db=db, id=id)
+    # print(**solarpark.dict())
     if not solarpark:
         raise HTTPException(status_code=404, detail="solarpark not found")
     return solarpark
@@ -103,3 +98,27 @@ async def upload_as_geojson(
     # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
     message = await crud.solarpark.create_upload_file(db, file)
     return message
+
+
+@router.post("/check-overlap", response_model=schemas.SolarPark)
+def create_solarpark_with_check_overlap(
+    *, db: Session = Depends(deps.get_db), solarpark_in: schemas.SolarParkCreate
+) -> Any:
+    # ToDo: Refactor this function and move to a util function
+
+    solarpark_id = crud.solarpark.check_overlap(db=db, obj_in=solarpark_in)
+    if solarpark_id is None:
+        solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
+        return solarpark
+
+    solarpark_in.solarpark_id = solarpark_id
+    solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
+    return solarpark
+    # print("create_solarpark_with_check_overlap")
+    # print(solarpark_in)
+    # existing_solarpark = db.query(SolarPark).filter(func.ST_Overlaps(SolarPark.geom, solarpark_in.geom))
+    # print(existing_solarpark)
+    """Upload geojson file."""
+    # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
+    # message = crud.solarpark.create_upload_file(db, file)
+    # return message

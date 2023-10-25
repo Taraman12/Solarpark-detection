@@ -3,6 +3,8 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 # third-party
 from fastapi.encoders import jsonable_encoder
+from geoalchemy2 import WKTElement
+from geoalchemy2.shape import to_shape
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -67,3 +69,41 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.delete(obj)
         db.commit()
         return obj
+
+
+class CRUDGeomBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
+    def __init__(self, model: Type[ModelType]):
+        """CRUD object with default methods to Create, Read, Update, Delete
+        (CRUD) for all tables with geometry (geom) column.
+
+        **Parameters**
+
+        * `model`: A SQLAlchemy model class
+        * `schema`: A Pydantic model (schema) class
+        """
+        self.model = model
+
+    def get(self, db: Session, id: Any) -> Optional[ModelType]:
+        db_obj = db.query(self.model).filter(self.model.id == id).first()
+        if db_obj is None:
+            return None
+
+        if isinstance(db_obj.geom, str):
+            db_obj.geom = WKTElement(db_obj.geom)
+        db_obj.geom = to_shape(db_obj.geom).wkt
+        return db_obj
+
+    def get_multi(
+        self, db: Session, *, skip: int = 0, limit: int = 100
+    ) -> List[ModelType]:
+        db_obj = db.query(self.model).offset(skip).limit(limit).all()
+
+        if db_obj is None:
+            return None
+
+        for obj in db_obj:
+            if isinstance(obj.geom, str):
+                obj.geom = WKTElement(obj.geom)
+            obj.geom = to_shape(obj.geom).wkt
+        print(type(db_obj[0]))
+        return db_obj

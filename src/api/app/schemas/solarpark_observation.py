@@ -1,7 +1,7 @@
 # build-in
 from datetime import date
 from enum import Enum
-from typing import List  # Any, Sequence, Tuple, Union, TypeVar
+from typing import List  # , Any,Sequence, Tuple, TypeVar, Union
 
 # from geoalchemy2.types import Geometry
 from geoalchemy2.types import WKBElement
@@ -31,15 +31,15 @@ class CustomStr(str):
     pass
 
 
-class SolarParkBase(BaseModel):
+class SolarParkObservationBase(BaseModel):
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
-    name_of_model: List[str] = Field(["test-model"])
+    # solarpark_id: int = Field("Test_id")
+    name_of_model: str = Field("test-model")
     size_in_sq_m: float = Field(100.0)
     peak_power: float = Field(10.0)
-    first_detection: date = Field(date.today())
-    last_detection: date = Field(date.today())
-    avg_confidence_over_all_observations: float = Field(0.8)
+    date_of_data: date = Field(date.today())
+    avg_confidence: float = Field(0.8)
     name_in_aws: str = Field("31UGR_1011_2018-10-10.tif")
     is_valid: Status = Field(Status.none)
     comment: str = "None"
@@ -53,13 +53,15 @@ class SolarParkBase(BaseModel):
     # WKTElement #Polygon
 
 
-class SolarPark(SolarParkBase):
+class SolarParkObservation(SolarParkObservationBase):
     id: int
+    solarpark_id: int
+    # group_id: str = Field(default_factory=lambda: str(uuid4()))
 
 
-class SolarParkCreate(SolarParkBase):
+class SolarParkObservationCreate(SolarParkObservationBase):
     pass
 
 
-class SolarParkUpdate(SolarParkBase):
+class SolarParkObservationUpdate(SolarParkObservationBase):
     pass
