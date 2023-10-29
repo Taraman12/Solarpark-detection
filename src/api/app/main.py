@@ -1,10 +1,13 @@
 # third party
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 # local modules
 from app.api_core.api_v1.api import api_router
 from app.core.config import settings
+
+# from starlette.middleware.cors import CORSMiddleware
+
 
 # os.chdir(Path(__file__).parent)
 description = """
@@ -51,9 +54,9 @@ if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_credentials=True,
+        # allow_credentials=False,
         allow_methods=["*"],
-        allow_headers=["*"],
+        allow_headers=["*"],  # Content-Type
         expose_headers=["*"],
     )
 

@@ -16,24 +16,25 @@ class Settings(BaseSettings):
     SERVER_NAME: str = "localhost"
     SERVER_HOST: AnyHttpUrl = "http://localhost:8080"
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
+        "http://localhost",
+        "http://localhost:5000",
+        "http://localhost:5678",
+        "http://localhost:8000",
+        "http://localhost:8080",
+        "http://localhost:8081",
         "http://3.66.239.204:80",
         "http://3.66.239.204",
         "http://localhost",
         "http://preprocessing:5678",
         "http://preprocessing",
-        "http://localhost:80",
         "http://frontend:80",
-        "http://localhost:8080",
         "http://frontend:8080",
         "http://frontend:5000",
-        "http://localhost:5000",
-        "http://localhost:5678",
         "http://preprocessing:5678",
         "http://ml-serve:8081",
-        "http://localhost:8081",
     ]
 
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @field_validator("BACKEND_CORS_ORIGINS", mode="plain")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
