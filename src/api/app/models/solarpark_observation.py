@@ -9,7 +9,7 @@ from app.db.base_class import Base
 
 class SolarParkObservation(Base):
     id = Column(Integer, primary_key=True, index=True)
-    solarpark_id = Column(Integer, ForeignKey("solarpark.id"))
+    solarpark_id = Column(Integer, ForeignKey("solarpark.id", ondelete="CASCADE"))
     name_of_model = Column(String)
     size_in_sq_m = Column(Float)
     peak_power = Column(Float)

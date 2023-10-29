@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 # local modules
 from app import crud, schemas
 from app.api_core import deps
+from app.crud.utils import check_overlap
 
 router = APIRouter()
 
@@ -30,8 +31,9 @@ def read_solarpark_observation(  # noqa: F811
     *, db: Session = Depends(deps.get_db), id: int
 ) -> Any:
     """Get solarpark observation by ID."""
+
     solarpark_observation = crud.solarpark_observation.get(db=db, id=id)
-    print(solarpark_observation.__dict__)
+
     if not solarpark_observation:
         raise HTTPException(status_code=404, detail="solarpark observation not found")
     return solarpark_observation
@@ -46,7 +48,8 @@ def create_solarpark_observation(
     """Create new solarpark observation."""
     # if polygon is in solarpark, than use solarpark_id as foreign key
     # else create new solarpark and use solarpark_id as foreign key
-    solarpark = crud.solarpark.check_overlap(db=db, obj_in=solarpark_observation_in)
+    #
+    solarpark = check_overlap(db=db, obj_in=solarpark_observation_in)
     if solarpark is None:
         # TODO: move to utils
         solarpark_in = vars(solarpark_observation_in).copy()
@@ -61,17 +64,23 @@ def create_solarpark_observation(
         ] = solarpark_observation_in.avg_confidence
 
         solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
-        # ToDo: check if solarpark is created
-        print(f"solarpark created:{solarpark}")
+        if not solarpark:
+            raise HTTPException(
+                status_code=404, detail="solarpark could not be created"
+            )
         solarpark_observation = crud.solarpark_observation.create(
             db=db, obj_in=solarpark_observation_in, solarpark_id=solarpark.id
         )
+        return solarpark_observation
     else:
         # ToDo: Add solarpark update
+        # solve with event listener https://docs.sqlalchemy.org/en/20/orm/session_events.html
         solarpark_observation = crud.solarpark_observation.create(
             db=db, obj_in=solarpark_observation_in, solarpark_id=solarpark.id
         )
-        # crud.solarpark.update(db=db, db_obj=solarpark, obj_in=solarpark_observation_in)
+        # update solarpark
+
+        # solarparks_in = crud.solarpark_observation.get_multi(db=db, skip=0, limit=10000, solarpark_id=solarpark.id)
     return solarpark_observation
 
 

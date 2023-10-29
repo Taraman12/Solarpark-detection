@@ -29,49 +29,48 @@ def read_solarpark(
 def read_solarpark(*, db: Session = Depends(deps.get_db), id: int) -> Any:  # noqa: F811
     """Get solarpark by ID."""
     solarpark = crud.solarpark.get(db=db, id=id)
-    # print(**solarpark.dict())
     if not solarpark:
         raise HTTPException(status_code=404, detail="solarpark not found")
     return solarpark
 
 
-@router.post("/", response_model=schemas.SolarPark)
-def create_solarpark(
-    *, db: Session = Depends(deps.get_db), solarpark_in: schemas.SolarParkCreate
-) -> Any:
-    """Create new solarpark."""
-    solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
-    return solarpark
+# @router.post("/", response_model=schemas.SolarPark)
+# def create_solarpark(
+#     *, db: Session = Depends(deps.get_db), solarpark_in: schemas.SolarParkCreate
+# ) -> Any:
+#     """Create new solarpark."""
+#     solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
+#     return solarpark
 
 
-@router.put("/{id}", response_model=schemas.SolarPark)
-def update_solarpark(
-    *,
-    db: Session = Depends(deps.get_db),
-    id: int,
-    solarpark_in: schemas.SolarParkUpdate,
-) -> Any:
-    """Update an solarpark."""
-    solarpark = crud.solarpark.get(db=db, id=id)
-    if not solarpark:
-        raise HTTPException(status_code=404, detail="solarpark not found")
+# @router.put("/{id}", response_model=schemas.SolarPark)
+# def update_solarpark(
+#     *,
+#     db: Session = Depends(deps.get_db),
+#     id: int,
+#     solarpark_in: schemas.SolarParkUpdate,
+# ) -> Any:
+#     """Update an solarpark."""
+#     solarpark = crud.solarpark.get(db=db, id=id)
+#     if not solarpark:
+#         raise HTTPException(status_code=404, detail="solarpark not found")
 
-    solarpark = crud.solarpark.update(db=db, db_obj=solarpark, obj_in=solarpark_in)
-    return solarpark
+#     solarpark = crud.solarpark.update(db=db, db_obj=solarpark, obj_in=solarpark_in)
+#     return solarpark
 
 
-@router.delete("/{id}", response_model=schemas.SolarPark)
-def delete_solarpark(
-    *,
-    db: Session = Depends(deps.get_db),
-    id: int,
-) -> Any:
-    """Delete an solarpark."""
-    solarpark = crud.solarpark.get(db=db, id=id)
-    if not solarpark:
-        raise HTTPException(status_code=404, detail="solarpark not found")
-    solarpark = crud.solarpark.remove(db=db, id=id)
-    return solarpark
+# @router.delete("/{id}", response_model=schemas.SolarPark)
+# def delete_solarpark(
+#     *,
+#     db: Session = Depends(deps.get_db),
+#     id: int,
+# ) -> Any:
+#     """Delete an solarpark."""
+#     solarpark = crud.solarpark.get(db=db, id=id)
+#     if not solarpark:
+#         raise HTTPException(status_code=404, detail="solarpark not found")
+#     solarpark = crud.solarpark.remove(db=db, id=id)
+#     return solarpark
 
 
 @router.get("/download/as-geojson", response_class=StreamingResponse)
@@ -100,25 +99,25 @@ async def upload_as_geojson(
     return message
 
 
-@router.post("/check-overlap", response_model=schemas.SolarPark)
-def create_solarpark_with_check_overlap(
-    *, db: Session = Depends(deps.get_db), solarpark_in: schemas.SolarParkCreate
-) -> Any:
-    # ToDo: Refactor this function and move to a util function
+# @router.post("/check-overlap", response_model=schemas.SolarPark)
+# def create_solarpark_with_check_overlap(
+#     *, db: Session = Depends(deps.get_db), solarpark_in: schemas.SolarParkCreate
+# ) -> Any:
+#     # ToDo: Refactor this function and move to a util function
 
-    solarpark_id = crud.solarpark.check_overlap(db=db, obj_in=solarpark_in)
-    if solarpark_id is None:
-        solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
-        return solarpark
+#     solarpark_id = crud.solarpark.check_overlap(db=db, obj_in=solarpark_in)
+#     if solarpark_id is None:
+#         solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
+#         return solarpark
 
-    solarpark_in.solarpark_id = solarpark_id
-    solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
-    return solarpark
-    # print("create_solarpark_with_check_overlap")
-    # print(solarpark_in)
-    # existing_solarpark = db.query(SolarPark).filter(func.ST_Overlaps(SolarPark.geom, solarpark_in.geom))
-    # print(existing_solarpark)
-    """Upload geojson file."""
-    # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
-    # message = crud.solarpark.create_upload_file(db, file)
-    # return message
+#     solarpark_in.solarpark_id = solarpark_id
+#     solarpark = crud.solarpark.create(db=db, obj_in=solarpark_in)
+#     return solarpark
+#     # print("create_solarpark_with_check_overlap")
+#     # print(solarpark_in)
+#     # existing_solarpark = db.query(SolarPark).filter(func.ST_Overlaps(SolarPark.geom, solarpark_in.geom))
+#     # print(existing_solarpark)
+#     """Upload geojson file."""
+#     # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
+#     # message = crud.solarpark.create_upload_file(db, file)
+#     # return message

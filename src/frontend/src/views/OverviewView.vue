@@ -75,7 +75,8 @@ const polygonOptions = {
 
 async function fetchData(id) {
     try {
-        const response = await get(`/solarpark/${id}`);
+        // change to solarpark
+        const response = await get(`/solarpark_observation/${id}`);
         const data = await response.json();
         return data;
     } catch (error) {
@@ -314,8 +315,8 @@ watch(FilterModelName, () => {
                                 <th>ID</th>
                                 <th>Size in m&sup2;</th>
                                 <th>Peak Power (MW)</th>
-                                <th>First detection</th>
-                                <th>Last detection</th>
+                                <!-- <th>First detection</th>
+                                <th>Last detection</th> -->
                                 <th>Name of Model</th>
                                 <th>Classification</th>
                             </tr>
@@ -325,8 +326,8 @@ watch(FilterModelName, () => {
                                 <td>{{ item.id }}</td>
                                 <td>{{ item.size_in_sq_m }}</td>
                                 <td>{{ item.peak_power.toFixed(2) }}</td>
-                                <td>{{ item.first_detection }}</td>
-                                <td>{{ item.last_detection }}</td>
+                                <!-- <td>{{ item.first_detection }}</td>
+                                <td>{{ item.last_detection }}</td> -->
                                 <td>{{ item.name_of_model }}</td>
                                 <td v-if="item.is_valid === 'None'">
                                     <span>Unclassified</span>

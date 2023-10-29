@@ -26,4 +26,6 @@ class SolarPark(Base):
     lon = Column(ARRAY(Float))
     geom = Column(Geometry("POLYGON", srid=4326))  # Column(String)
 
-    observations = relationship("SolarParkObservation", back_populates="solarpark")
+    observations = relationship(
+        "SolarParkObservation", back_populates="solarpark", passive_deletes="all"
+    )

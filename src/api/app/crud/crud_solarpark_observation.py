@@ -40,24 +40,25 @@ class CRUDSolarParkObservation(
         limit: int = 10000,
         solarpark_id: int = None,
     ) -> SolarParkObservation:
-        query = db.query(SolarParkObservation).offset(skip).limit(limit)
+        # db_obj = db.query(SolarParkObservation).offset(skip).limit(limit).all()
 
-        if solarpark_id is not None:
-            query = query.filter(SolarParkObservation.solarpark_id == solarpark_id)
-
-        db_obj = query.all()
-
+        if solarpark_id is None:
+            db_obj = db.query(SolarParkObservation).offset(skip).limit(limit).all()
+        else:
+            db_obj = (
+                db.query(SolarParkObservation)
+                .filter(SolarParkObservation.solarpark_id == solarpark_id)
+                .all()
+            )
         if not db_obj:
-            return None
+            return db_obj
 
         db_obj = [
             obj if not isinstance(obj.geom, str) else WKTElement(obj.geom)
             for obj in db_obj
         ]
-
         for obj in db_obj:
             obj.geom = to_shape(obj.geom).wkt
-
         return db_obj
 
     # def get_multi_by_solarpark_id(self, db: Session, *, solarpark_id: int):

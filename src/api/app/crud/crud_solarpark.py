@@ -155,10 +155,8 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         contents = await file.read()
 
         data = json.loads(contents)
-        # print(data)
         for feature in data["features"]:
             polygon = shape(feature["geometry"])
-            # print(polygon)
             coords = polygon.exterior.coords
             # Extract the latitude and longitude coordinates into separate lists
             latitudes = [coord[1] for coord in coords]
@@ -186,34 +184,11 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         return {"filename": file.filename}
 
     def check_overlap(self, db: Session, *, obj_in: SolarParkCreate) -> bool:
-        # print(WKTElement(obj_in.geom))
-
-        # db_obj = db.query(SolarPark).filter(SolarPark.geom.intersects(WKTElement(obj_in.geom))).first()
-        db_obj = (
+        return (
             db.query(SolarPark)
             .filter(SolarPark.geom.intersects(WKTElement(obj_in.geom)))
             .first()
         )
-        # print(db_obj.__dict__)
-        print(db_obj.id)
-        if db_obj is None:
-            return None
-        else:
-            # here the unique id of the solarpark is returned
-            return db_obj
-
-        # print(to_shape(db_obj.geom))
-        # print("Hello")
-        # # query = db.query(SolarPark).filter(SolarPark.geom.ST_Area() > 0).one()
-        # # print(query.id)
-        # # result = db.execute(existing_solarpark)
-        # #query = db.query(SolarPark).filter(SolarPark.geom.ST_Overlaps(WKTElement("POLYGON ((599968.55 5570202.63, 599970.90 5570205.59, 599973.65 5570203.42, 599971.31 5570200.46, 599968.55 5570202.63))")))
-        # #print(query)
-        # # result = db.execute(existing_solarpark)
-        # # print(result)
-        # for row in query:
-        #     print(row.id)
-        # return existing_solarpark
 
     # pass
     # def create(self, db: Session, *, obj_in: SolarParkCreate):

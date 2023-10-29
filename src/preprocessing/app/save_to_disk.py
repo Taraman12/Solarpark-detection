@@ -44,6 +44,13 @@ from shapely.geometry import Polygon
 logger = get_logger("BaseConfig")
 
 """
+TODO: Add Class Solarpark (or Polygon)
+ToDo: Calculate confidence score
+pred = torch.rand(1, 256, 256)
+print(f"pred mean: {np.mean(pred[0].detach().numpy())}")
+mask = np.where(pred[0] < 0.5, 0, pred)
+print(f"mask mean -> Confidence: {np.mean(mask, where=mask!=0)}")
+# Find a solution for multiple solarparks in one image (hashmap or something)
 ToDo: Add padding to the image/mask
 ToDo: Needs better documentation
 ToDo: handle memory consumption (but not so important)
@@ -276,7 +283,11 @@ def send_to_ml_model(data_array: np.ndarray, metadata: dict) -> dict:
         data=json_data,
     )
     logger.debug(f"Got response from ml model: {req.status_code}")
-    pred = np.array(req.json())
+    pred = np.array(req.json()).squeeze()
+    # ! check if the [0] dimension is correct
+    if pred.shape != (1, 256, 256):
+        pred = pred.squeeze()
+        logger.debug(f"Prediction shape: {pred.shape}")
     mask = np.where(pred[0] < 0.5, 0, 1)
     if mask.sum() == 0:
         return {}
@@ -332,16 +343,15 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
         "size_in_sq_m": area,
         "peak_power": calc_peak_power(area_in_sq_m=area),
         "date_of_data": tile_date,
-        "first_detection": tile_date,  # will be handled on api level
-        "last_detection": tile_date,  # will be handled on api level
         "avg_confidence": 0,
         "name_in_aws": filename,
         "is_valid": "None",
         "comment": "None",
         "lat": lat,
         "lon": lon,
+        "geom": polygon.wkt,
     }
-    url = f"{URL_API}/solarpark/"
+    url = f"{URL_API}/solarpark_observation/"
     logger.debug(f"Writing to DB: {data}")
     try:
         response = requests.post(url, headers=HEADERS, json=data)
