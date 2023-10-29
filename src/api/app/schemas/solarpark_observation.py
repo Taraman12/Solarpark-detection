@@ -43,12 +43,12 @@ class SolarParkObservationBase(BaseModel):
     name_in_aws: str = Field("31UGR_1011_2018-10-10.tif")
     is_valid: Status = Field(Status.none)
     comment: str = "None"
-    lat: List[float] = Field([599968.55, 599970.90, 599973.65, 599971.31, 599968.55])
+    lat: List[float] = Field([599968.55, 599970.91, 599973.65, 599971.31, 599968.55])
     lon: List[float] = Field(
         [5570202.63, 5570205.59, 5570203.42, 5570200.46, 5570202.63]
     )
     geom: Annotated[str, WKBElement] = Field(
-        "POLYGON ((599968.55 5570202.63, 599970.90 5570205.59, 599973.65 5570203.42, 599971.31 5570200.46, 599968.55 5570202.63))"
+        "POLYGON ((599968.55 5570202.63, 599970.91 5570205.59, 599973.65 5570203.42, 599971.31 5570200.46, 599968.55 5570202.63))"
     )
     # WKTElement #Polygon
 

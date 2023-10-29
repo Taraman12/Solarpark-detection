@@ -11,7 +11,7 @@ function createFetch(baseURL) {
         const headers = {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
-            "Access-Control-Allow-Private-Network": "true",
+            // "Access-Control-Allow-Private-Network": "true",
         };
         async function get(url) {
             const response = await fetch(`${baseURL}${url}`, {
@@ -43,6 +43,7 @@ function createFetch(baseURL) {
             try {
                 const response = await fetch(`${baseURL}${url}`, {
                     method: "PUT", // or 'PUT'
+                    // mode: "cors",
                     headers: headers,
                     body: JSON.stringify(data),
                 });
