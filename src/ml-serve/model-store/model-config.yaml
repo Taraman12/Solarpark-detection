@@ -1,3 +1,4 @@
+# timm-resnest14d, timm-efficientnet-b0
 encoder_name: "timm-resnest14d"
 encoder_weights: "imagenet"
 batch_size: 16
