@@ -26,8 +26,10 @@ from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
 
 # set up logging
 logger = get_logger("BaseConfig")
+# Vscode remote debugging in docker
 debugpy.listen(("0.0.0.0", 5678))
 """
+ToDo: Add online downloader for Sentinel-2 images
 ToDo: Add counter for loop
 ToDo: Add check if image and mask have the same length
 ToDo: Log/logger.info the number of total files saved

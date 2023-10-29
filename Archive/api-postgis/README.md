@@ -36,7 +36,7 @@ api
 ├───app
 │   ├───api
 │   │   ├───endpoints
-│   │   │   
+│   │   │
 
 The models folder contains the tables for the database including the types of each column to build the database.
 the schemas folder contains the pydantic models for the api endpoints. These are used to validate the data sent to the server.
@@ -53,4 +53,3 @@ https://fastapi.tiangolo.com/tutorial/response-model/
 
 Json Encoder:
 https://fastapi.tiangolo.com/tutorial/encoder/
-

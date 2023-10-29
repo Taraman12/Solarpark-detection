@@ -41,7 +41,7 @@ const filteredData = ref([]);
 
 async function fetchData(id) {
   try {
-    const response = await get(`/solarpark/${id}`);
+    const response = await get(`/solarpark_observation/${id}`);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -209,10 +209,12 @@ async function addImage(name_in_aws) {
 
 async function updateItem(id, value) {
   try {
-    const item = await get(`/solarpark/${id}`);
+    const item = await get(`/solarpark_observation/${id}`);
+    console.log(item);
     const object = await item.json();
     const updatedItem = { ...object, is_valid: value };
-    await put(`/solarpark/${id}`, updatedItem);
+    console.log(updatedItem);
+    await put(`/solarpark_observation/${id}`, updatedItem);
     console.log(`Item ${id} updated to ${value}`);
     filteredData.value = await fetchData("");
     noneItem.value = filteredData.value.find(item => item.is_valid === "None");
@@ -247,6 +249,7 @@ async function loadGoogleMaps(item) {
     mapTypeId: 'satellite'
   })
 }
+
 async function loadOSMMap(item) {
   OSMmap.value = new Map({
     target: "OSMmap",
@@ -260,6 +263,7 @@ async function loadOSMMap(item) {
   await addImage(url)
   await addOSMPolygon(data);
 }
+
 onMounted(async () => {
   dataTable.value = await fetchData("");
   noneItem.value = dataTable.value.find(item => item.is_valid === "None");
@@ -345,13 +349,17 @@ watch(FilterModelName, (newVal) => {
                 <td>{{ noneItem.peak_power.toFixed(2) }}</td>
               </tr>
               <tr>
+                <td>Date of Data</td>
+                <td>{{ noneItem.date_of_data }}</td>
+              </tr>
+              <!-- <tr>
                 <td>First Detection</td>
                 <td>{{ noneItem.first_detection }}</td>
               </tr>
               <tr>
                 <td>Last Detection</td>
                 <td>{{ noneItem.last_detection }}</td>
-              </tr>
+              </tr> -->
               <!-- <tr>
                 <td>avg_confidence</td>
                 <td>{{ noneItem.avg_confidence.toFixed(2) }}</td>

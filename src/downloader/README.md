@@ -17,4 +17,3 @@ To create a trainings you can specify the seasons and the years in the `config.p
 And also the bands you want to use.
 
 The data will be downloaded to the `data` folder.
-

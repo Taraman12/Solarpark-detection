@@ -1,66 +1,78 @@
 [tool.poetry]
 name = "solarpark_detection"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["FabKoch <55655975+Taraman12@users.noreply.github.com>"]
 readme = "README.md"
 #packages = [{include = "solarpark_detection"}]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<3.11"
+python = ">=3.9,<3.11"
+# workaround for: https://github.com/python-poetry/poetry-plugin-export/issues/183
+urllib3 = ">=1.25.4,<1.27"
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
 ipykernel = "^6.22.0"
-boto3 = {extras = ["crt"], version = "^1.26.104"}
-rasterio = "^1.3.6"
-matplotlib = "^3.7.1"
-types-requests = "^2.29.0.0"
-mypy = "^1.2.0"
-debugpy = "^1.6.7"
-torch = [
-     {version = "^2.0.1", platform = "linux", source = "torch-cpu"},
-     {version = "^2.0.1", platform = "win32", source = "torch-cuda"},
- ]
-torchvision = [
-     {version = "^0.15.1", platform = "linux", source = "torch-cpu"},
-     {version = "^0.15.1", platform = "win32", source = "torch-cuda"},
- ]
+boto3 = "^1.28.64"
+rasterio = "^1.3.8.post2"
+matplotlib = "^3.8.0"
+types-requests = "2.31.0.6"
+mypy = "^1.6.0"
+debugpy = "^1.8.0"
+# torch = [
+#     { version = "^2.0.1", platform = "linux", source = "torch-cpu" },
+#     { version = "^2.0.1", platform = "win32", source = "torch-cuda" },
+# ]
+# torchvision = [
+#     { version = "^0.15.1", platform = "linux", source = "torch-cpu" },
+#     { version = "^0.15.1", platform = "win32", source = "torch-cuda" },
+# ]
+bump-pydantic = "^0.7.0"
+pre-commit = "^3.5.0"
 
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.2"
+coverage = "^7.3.2"
 
 [tool.poetry.group.api.dependencies]
-fastapi = {extras = ["all"], version = "^0.95.2"}
-uvicorn = "^0.21.1"
-sqlalchemy = "^2.0.7"
-pydantic = {extras = ["email"], version = "^1.10.7"}
-mypy = "^1.2.0"
-# psycopg2 = "^2.9.5"
-load-dotenv = "^0.1.0"
-alembic = "^1.11.1"
-psycopg2-binary = "^2.9.6"
-# geoalchemy2 = "^0.13.3"
+fastapi = { extras = ["all"], version = "^0.103.2" }
+uvicorn = "^0.23.2"
+sqlalchemy = "^2.0.22"
+pydantic = { extras = ["email"], version = "^2.4.1" }
+# psycopg2 = "^2.9.9"
+alembic = "^1.12.0"
+psycopg2-binary = "^2.9.9"
+geoalchemy2 = "^0.14.1"
+mypy = "^1.6.0"
 # celery = "^5.2.7"
-shapely = "^2.0.1"
-geojson = "^3.0.1"
-boto3 = "^1.26.146"
+shapely = "^2.0.2"
+geojson = "^3.0.1" # check if this is needed
+boto3 = "^1.28.64"
 docker = "^6.1.3"
-paramiko = "^3.2.0"
+paramiko = "^3.3.1"
+pydantic-settings = "^2.0.3"
+python-dotenv = "^1.0.0"
+# pydantic-geojson = "^0.1.1"
+httpx = "^0.25.0"
+trio = "^0.22.2"
 
 
 [tool.poetry.group.downloader.dependencies]
-sentinelsat = "^1.2.1"
-geopandas = "^0.12.2"
-load-dotenv = "^0.1.0"
-boto3 = "^1.26.125"
-typing-extensions = "^4.5.0"
+geopandas = "^0.14.0"
+boto3 = "^1.28.64"
+typing-extensions = "^4.8.0"
 requests = "^2.31.0"
+sentinelsat = "^1.2.1"
+python-dotenv = "^1.0.0"
 
 [tool.poetry.group.lint.dependencies]
 isort = "^5.12.0"
 black = "^23.1.0"
 flake8 = "^6.0.0"
 flake8-docstrings = "^1.7.0"
-docformatter = {extras = ["tomli"], version = "^1.5.1"}
+docformatter = { extras = ["tomli"], version = "^1.5.1" }
 
 
 [tool.poetry.group.ml-model.dependencies]
@@ -72,33 +84,33 @@ docformatter = {extras = ["tomli"], version = "^1.5.1"}
 # Needs to be tested:
 # since poetry 1.5.0 it is possible to use the source attribute
 # use poetry add torch --platform linux --source https://download.pytorch.org/whl/cpu
-numpy = "^1.23.5"
+# numpy = "^1.23.5"
 segmentation-models-pytorch = "^0.3.2"
-tensorflow-io-gcs-filesystem = "0.31.0"
-tensorflow = "^2.12.0"
-torchmetrics = "^0.11.4"
-torch = [
-     {version = "^2.0.1", platform = "linux", source = "torch-cpu"},
-     {version = "^2.0.1", platform = "win32", source = "torch-cuda"},
- ]
+# tensorflow-io-gcs-filesystem = "0.31.0"
+# tensorflow = "^2.12.0"
+# torchmetrics = "^0.11.4"
+# torch = [
+#     { version = "^2.0.1", platform = "linux", source = "torch-cpu" },
+#     { version = "^2.0.1", platform = "win32", source = "torch-cuda" },
+# ]
 # torchvision = "^0.15.1"
 efficientnet-pytorch = "^0.7.1"
 timm = "^0.9.2"
 
 [tool.poetry.group.preprocessing.dependencies]
-numpy = "^1.23.5"
-geopandas = "^0.12.2"
-rasterio = "^1.3.6"
-boto3 = "^1.26.125"
-load-dotenv = "^0.1.0"
+numpy = "^1.26.1"
+geopandas = "^0.14.0"
+rasterio = "^1.3.8.post2"
+boto3 = "^1.28.64"
 requests = "^2.31.0"
-debugpy = "^1.6.7"
+debugpy = "^1.8.0"
+python-dotenv = "^1.0.0"
 
 
 [tool.poetry.group.ml-serve.dependencies]
 # psycopg2 = "^2.9.6"
 # torch = "^2.0.0"
-# torchvision = "^0.15.1"
+torchvision = "^0.15.1"
 torchserve = "0.8.0"
 torch-model-archiver = "^0.7.1"
 boto3 = "^1.26.125"
@@ -107,18 +119,18 @@ segmentation-models-pytorch = "^0.3.2"
 # types-pyyaml = "^6.0.12.9"
 
 
-[tool.poetry.group.ml-feeder.dependencies]
-rasterio = {extras = ["s3"], version = "^1.3.6"}
+# [tool.poetry.group.ml-feeder.dependencies]
+# rasterio = { extras = ["s3"], version = "^1.3.6" }
 
 [[tool.poetry.source]]
- name = "torch-cuda"
- url = "https://download.pytorch.org/whl/cu117"
- priority = "explicit"
+name = "torch-cuda"
+url = "https://download.pytorch.org/whl/cu117"
+priority = "explicit"
 
 [[tool.poetry.source]]
- name = "torch-cpu"
- url = "https://download.pytorch.org/whl/cpu"
- priority = "explicit"
+name = "torch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
 
 #torchvision = { version = "0.15.0+cu117", source = "pytorch" }
 
@@ -128,10 +140,19 @@ rasterio = {extras = ["s3"], version = "^1.3.6"}
 # default = false
 # secondary = true
 
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]
+
+[tool.coverage.run]
+omit = [
+    # omit anything in a .local directory anywhere
+    "src/api/app/*",
+]
+
 [tool.isort]
 profile = "black"
 # recognize a module as being part of the current python project
-known_first_party="app"
+known_first_party = "app"
 
 [tool.mypy]
 # 3rd party import
