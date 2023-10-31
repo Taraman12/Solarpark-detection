@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 # local modules
-from app import crud, schemas
+from app import crud, models, schemas
 from app.api_core import deps
 
 router = APIRouter()
@@ -70,6 +70,7 @@ def create(
     *,
     db: Session = Depends(deps.get_db),
     instance_in: schemas.InstanceCreate = Depends(),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Shut down instance and start next instance"""
     instance = crud.instance.create(db=db, instance_in=instance_in)
@@ -82,6 +83,7 @@ def update_instance(
     db: Session = Depends(deps.get_db),
     id: int,
     instance_in: schemas.InstanceUpdate,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Update an instance."""
     instance = crud.instance.get(db=db, id=id)
@@ -96,6 +98,7 @@ def delete_instance_from_db(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Delete an instance from DB."""
     instance = crud.instance.get(db=db, id=id)
@@ -107,7 +110,11 @@ def delete_instance_from_db(
 
 @router.post("/start/{service}", response_model=schemas.Instance)
 def start_instance(
-    *, db: Session = Depends(deps.get_db), service: str, instance_type: str = "t3.micro"
+    *,
+    db: Session = Depends(deps.get_db),
+    service: str,
+    instance_type: str = "t3.micro",
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Start an instance."""
     instance = crud.instance.start_instance(
@@ -121,6 +128,7 @@ def terminate_instance_by_service(
     *,
     db: Session = Depends(deps.get_db),
     service: str,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Terminate an instance."""
     instance = crud.instance.get_by_service(db=db, service=service)

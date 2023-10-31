@@ -1,8 +1,8 @@
-"""Base
+"""base
 
-Revision ID: 9c33465701fc
+Revision ID: ca07a90b7ff6
 Revises:
-Create Date: 2023-10-26 20:55:43.442287
+Create Date: 2023-10-30 20:03:00.007781
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from geoalchemy2 import Geometry
 
 # revision identifiers, used by Alembic.
-revision = "9c33465701fc"
+revision = "ca07a90b7ff6"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -73,6 +73,19 @@ def upgrade() -> None:
         postgresql_ops={},
     )
     op.create_index(op.f("ix_solarpark_id"), "solarpark", ["id"], unique=False)
+    op.create_table(
+        "user",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("full_name", sa.String(), nullable=True),
+        sa.Column("email", sa.String(), nullable=False),
+        sa.Column("hashed_password", sa.String(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=True),
+        sa.Column("is_superuser", sa.Boolean(), nullable=True),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_index(op.f("ix_user_email"), "user", ["email"], unique=True)
+    op.create_index(op.f("ix_user_full_name"), "user", ["full_name"], unique=False)
+    op.create_index(op.f("ix_user_id"), "user", ["id"], unique=False)
     op.create_geospatial_table(
         "solarparkobservation",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -98,10 +111,7 @@ def upgrade() -> None:
             ),
             nullable=True,
         ),
-        sa.ForeignKeyConstraint(
-            ["solarpark_id"],
-            ["solarpark.id"],
-        ),
+        sa.ForeignKeyConstraint(["solarpark_id"], ["solarpark.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_geospatial_index(
@@ -128,6 +138,10 @@ def downgrade() -> None:
         column_name="geom",
     )
     op.drop_geospatial_table("solarparkobservation")
+    op.drop_index(op.f("ix_user_id"), table_name="user")
+    op.drop_index(op.f("ix_user_full_name"), table_name="user")
+    op.drop_index(op.f("ix_user_email"), table_name="user")
+    op.drop_table("user")
     op.drop_index(op.f("ix_solarpark_id"), table_name="solarpark")
     op.drop_geospatial_index(
         "idx_solarpark_geom",

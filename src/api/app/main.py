@@ -5,11 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 # local modules
 from app.api_core.api_v1.api import api_router
 from app.core.config import settings
+from app.db.init_db import init_db
+from app.db.session import SessionLocal
 
-# from starlette.middleware.cors import CORSMiddleware
+# TODO: Update description and tags_metadata
 
-
-# os.chdir(Path(__file__).parent)
 description = """
 This is the API for the Solarpark Detection Project.
 
@@ -32,11 +32,27 @@ tags_metadata = [
     },
     {
         "name": "solarpark",
-        "description": "Operations with solarparks. The solarpark is used to group the observations.",
+        "description": "The solarpark is used to group the observations.",
     },
     {
         "name": "solarpark_observation",
         "description": "Operations with solarpark observations. The observation is used to detect the solarpark.",
+    },
+    {
+        "name": "user",
+        "description": "A user needs to be registered to use the API post/put/delete methods.",
+    },
+    {
+        "name": "login",
+        "description": "Login to the API.",
+    },
+    {
+        "name": "models",
+        "description": "Operations to CRUD models to and from the ml server.",
+    },
+    {
+        "name": "instance",
+        "description": "Operations to keep track of the ec2 instances.",
     },
 ]
 
@@ -54,10 +70,14 @@ if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        # allow_credentials=False,
+        allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],  # Content-Type
         expose_headers=["*"],
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# will be moved to a startup script
+db = SessionLocal()
+init_db(db)

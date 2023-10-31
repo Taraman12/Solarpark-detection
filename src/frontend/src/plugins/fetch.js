@@ -3,6 +3,14 @@ import { ref } from 'vue'
 
 const BASE_IP = import.meta.env.VITE_BASE_IP || 'localhost';
 
+// function authHeaders(token) {
+//     return {
+//         headers: {
+//             Authorization: `Bearer ${token}`,
+//         },
+//     };
+// }
+
 function createFetch(baseURL) {
     return function useFetch() {
 
@@ -46,6 +54,7 @@ function createFetch(baseURL) {
                     // mode: "cors",
                     headers: headers,
                     body: JSON.stringify(data),
+                    formData: data,
                 });
 
                 const result = await response;
@@ -53,6 +62,30 @@ function createFetch(baseURL) {
             } catch (error) {
                 console.error("Error:", error);
             }
+        }
+        async function logInGetToken(username, password) {
+            const params = new URLSearchParams();
+            params.append('username', username);
+            params.append('password', password);
+            const response = await fetch(`${baseURL}/login/access-token`, {
+                method: 'POST',
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params,
+            });
+            const data = await response.json();
+            return data;
+        }
+        async function getMe(token) {
+            const response = await fetch(`${baseURL}/user/me`, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                }
+            })
+            return response;
         }
         // async function put(url, data) {
         //     console.log(JSON.stringify(data));
@@ -88,7 +121,7 @@ function createFetch(baseURL) {
                 .catch((err) => (error.value = err))
         }
 
-        return { data, error, get, post, filePost, put, del }
+        return { data, error, get, post, filePost, put, del, logInGetToken, getMe }
     }
 }
 // const DOCKERIZED = process.env.DOCKERIZED || false;
