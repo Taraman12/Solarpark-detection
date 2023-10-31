@@ -8,15 +8,23 @@ from typing import Any, Dict, List, Optional, Tuple
 
 # third-party
 import geopandas as gpd
+from geopandas import GeoDataFrame
 import numpy as np
-import rasterio
-import rasterio.features
 import requests
 
+
+# from rasterio import DatasetReader
+import rasterio
+import rasterio.features
+from rasterio.features import geometry_mask
+from rasterio.warp import transform_geom
+from rasterio.windows import Window
+from shapely.geometry import Polygon
+
 # local modules
-from aws_functions import delete_folder_on_aws, download_from_aws, upload_file_to_aws
-from cloud_clients import aws_available
-from constants import (
+from app.logging_config import get_logger
+from app.settings import MAKE_TRAININGS_DATA, PRODUCTION
+from app.constants import (
     HEADERS,
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
@@ -31,15 +39,12 @@ from constants import (
     URL_API,
     URL_ML,
 )
-from geopandas import GeoDataFrame
-from logging_config import get_logger
-
-# from rasterio import DatasetReader
-from rasterio.features import geometry_mask
-from rasterio.warp import transform_geom
-from rasterio.windows import Window
-from settings import MAKE_TRAININGS_DATA, PRODUCTION
-from shapely.geometry import Polygon
+from app.aws_functions import (
+    delete_folder_on_aws,
+    download_from_aws,
+    upload_file_to_aws,
+)
+from app.cloud_clients import aws_available
 
 logger = get_logger("BaseConfig")
 

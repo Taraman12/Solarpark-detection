@@ -8,9 +8,9 @@ from typing import List, Optional
 from botocore.errorfactory import ClientError
 
 # local-modules
-from cloud_clients import s3_client
-from constants import BUCKET_NAME, IDENTIFIER_REGEX, IMAGE_INPUT_DIR
-from logging_config import get_logger
+from app.cloud_clients import s3_client
+from app.constants import BUCKET_NAME, IDENTIFIER_REGEX, IMAGE_INPUT_DIR
+from app.logging_config import get_logger
 
 logger = get_logger("BaseConfig")
 
