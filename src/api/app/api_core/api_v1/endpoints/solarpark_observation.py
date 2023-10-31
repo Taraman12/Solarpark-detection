@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 # local modules
-from app import crud, schemas
+from app import crud, models, schemas
 from app.api_core import deps
 from app.crud.utils import check_overlap
 
@@ -44,6 +44,7 @@ def create_solarpark_observation(
     *,
     db: Session = Depends(deps.get_db),
     solarpark_observation_in: schemas.SolarParkObservationCreate,
+    current_user: models.User = Depends(deps.get_current_active_superuser)
 ) -> Any:
     """Create new solarpark observation."""
     # if polygon is in solarpark, than use solarpark_id as foreign key
@@ -90,6 +91,7 @@ def update_solarpark_observation(
     db: Session = Depends(deps.get_db),
     id: int,
     solarpark_observation_in: schemas.SolarParkObservationUpdate,
+    current_user: models.User = Depends(deps.get_current_active_superuser)
 ) -> Any:
     """Update an solarpark observation."""
     solarpark_observation = crud.solarpark_observation.get(db=db, id=id)
@@ -107,6 +109,7 @@ def delete_solarpark_observation(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
+    current_user: models.User = Depends(deps.get_current_active_superuser)
 ) -> Any:
     """Delete an solarpark observation."""
     solarpark_observation = crud.solarpark_observation.get(db=db, id=id)

@@ -1,8 +1,15 @@
 # build-in
+# import secrets
 from typing import List, Optional, Union
 
 # third-party
-from pydantic import AnyHttpUrl, HttpUrl, field_validator  # PostgresDsn, validator
+from pydantic import (  # PostgresDsn, validator
+    AnyHttpUrl,
+    EmailStr,
+    Field,
+    HttpUrl,
+    field_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # ToDo: Revisit BACKEND_CORS_ORIGINS
@@ -10,9 +17,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
-    # SECRET_KEY: str = secrets.token_urlsafe(32)
+    SECRET_KEY: str = Field(
+        "YOUR_SECRET_KEY", alias="SECRET_KEY"
+    )  # secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
-    # ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     SERVER_NAME: str = "localhost"
     SERVER_HOST: AnyHttpUrl = "http://localhost:8080"
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
@@ -56,6 +65,11 @@ class Settings(BaseSettings):
         env_prefix="POSTGRES_", env_file=".env", case_sensitive=True
     )
 
+    FIRST_SUPERUSER: EmailStr = "John@Doe.com"
+    FIRST_SUPERUSER_PASSWORD: str = "password"
+    USERS_OPEN_REGISTRATION: bool = False
+
+    EMAILS_ENABLED: bool = False
     # SMTP_TLS: bool = True
     # SMTP_PORT: Optional[int] = None
     # SMTP_HOST: Optional[str] = None

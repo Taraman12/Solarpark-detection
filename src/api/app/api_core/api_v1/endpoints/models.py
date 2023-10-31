@@ -3,7 +3,10 @@ from typing import Any
 
 # third-party
 import requests
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from app import models
+from app.api_core import deps
 
 router = APIRouter()
 
@@ -38,7 +41,9 @@ def get_model(model: str) -> Any:  # noqa: F811
 
 
 @router.post("/")
-def register_example_model() -> Any:
+def register_example_model(
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
     """Register squeezenet1_1 model as example"""
     response = requests.post(
         "http://ml-serve:8081/models?url=https://torchserve.pytorch.org/mar_files/squeezenet1_1.mar"
@@ -48,7 +53,10 @@ def register_example_model() -> Any:
 
 
 @router.post("/{model}")
-async def register_model(model: str = "solar-park-detection") -> Any:
+async def register_model(
+    model: str = "solar-park-detection",
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
     """register model by name from ml server"""
     response = requests.post(
         f"http://ml-serve:8081/models?url=https://solar-detection-697553-eu-central-1.s3.eu-central-1.amazonaws.com/model-store/{model}.mar"
@@ -58,7 +66,10 @@ async def register_model(model: str = "solar-park-detection") -> Any:
 
 
 @router.post("/as-url/{url}")
-def register_model(url: str) -> Any:  # noqa: F811
+def register_model(  # noqa: F811
+    url: str,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
     """register model by url from ml server"""
     response = requests.post(f"http://ml-serve:8081/models?url={url}")
 
@@ -69,6 +80,7 @@ def register_model(url: str) -> Any:  # noqa: F811
 def delete_model(
     model: str,
     version: int = 1,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Delete model by name from ml server"""
     response = requests.delete(f"http://ml-serve:8081/models/{model}/{version}.0")
