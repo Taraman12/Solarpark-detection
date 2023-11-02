@@ -58,11 +58,12 @@ tags_metadata = [
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",  # {settings.API_V1_STR}
     description=description,
-    docs_url="/docs",
+    docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=None,
     openapi_tags=tags_metadata,
+    # root_path="/api/v1",
 )
 
 # Set all CORS enabled origins

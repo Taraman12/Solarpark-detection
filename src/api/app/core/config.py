@@ -1,6 +1,7 @@
 # build-in
 # import secrets
 from typing import List, Optional, Union
+import os
 
 # third-party
 from pydantic import (  # PostgresDsn, validator
@@ -12,10 +13,21 @@ from pydantic import (  # PostgresDsn, validator
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# def get_env_file() -> str:
+#     if os.getenv("ENVIRONMENT") == "DOCKERIZED":
+#         return ".env.docker"
+
+#     return ".env.local"
+
 # ToDo: Revisit BACKEND_CORS_ORIGINS
 
 
 class Settings(BaseSettings):
+    # env_file: str = get_env_file()
+    model_config = SettingsConfigDict(
+        env_prefix="POSTGRES_", env_file=".env", case_sensitive=True
+    )
+
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = Field(
         "YOUR_SECRET_KEY", alias="SECRET_KEY"
@@ -60,10 +72,6 @@ class Settings(BaseSettings):
     USER: str = "postgres"
     PASSWORD: str = "postgres"
     DB: str = "solar-park-detection"
-
-    model_config = SettingsConfigDict(
-        env_prefix="POSTGRES_", env_file=".env", case_sensitive=True
-    )
 
     FIRST_SUPERUSER: EmailStr = "John@Doe.com"
     FIRST_SUPERUSER_PASSWORD: str = "password"
