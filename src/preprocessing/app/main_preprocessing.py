@@ -10,6 +10,7 @@ import geopandas as gpd
 import requests
 
 # local-modules
+from health_checks import check_input_paths, check_ml_serve_online, check_api_online
 from aws_functions import aws_list_folders
 from cloud_clients import aws_available
 from constants import (
@@ -19,10 +20,13 @@ from constants import (
     MASK_OUTPUT_DIR,
     URL_API,
     URL_ML,
+    PATH_TO_TILES,
 )
 from logging_config import get_logger
 from save_to_disk import preprocess_and_save_data
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
+from utils import create_output_directories, load_tiles_file, create_download_path
+from sentinel_query import get_identifier, get_product_from_footprint
 
 # set up logging
 logger = get_logger("BaseConfig")
@@ -48,75 +52,52 @@ ToDo: Needs better everything
 """
 
 
-def validate_input_paths(input_dirs: List[Path]) -> bool:
-    """Validates that the input directories exist.
-
-    Args:
-        input_dirs (List[Path]): A list of input directories to validate.
-        logger: A logger instance to use for logging.
-
-    Returns:
-        bool: True if all input directories exist, False otherwise.
-    """
-    all_dirs_exist = True
-    for input_dir in input_dirs:
-        if not input_dir.exists():
-            logger.error(f"Input path: {input_dir} does not exist")
-            all_dirs_exist = False
-    return all_dirs_exist
-
-
-def create_output_directories(output_dirs: List[Path]) -> None:
-    """Creates the output directories if they do not exist.
-
-    Args:
-        output_dirs (List[Path]): A list of output directories to create.
-        logger: A logger instance to use for logging.
-    """
-    for output_dir in output_dirs:
-        if not output_dir.exists():
-            output_dir.mkdir(parents=True, exist_ok=False)
-            logger.info(
-                f"Output path: {output_dir} does not exist \n" f"Directory created"
-            )
+# ! don't delete yet
+# def check_ml_serve_online_localhost() -> bool:
+#     retries = 3
+#     while retries > 0:
+#         try:
+#             logger.info(f"Checking if TorchServe is running on {URL_ML}")
+#             response = requests.get("http://localhost:8080/ping")
+#             if response.status_code == 200:
+#                 logger.info("TorchServe is running")
+#                 return True
+#             else:
+#                 logger.info("TorchServe is not running. retry in 5 seconds.")
+#                 time.sleep(5)
+#         except requests.exceptions.ConnectionError:
+#             logger.info("TorchServe is not running. Retry in 5 seconds.")
+#             time.sleep(5)
+#         retries -= 1
+#     return False
 
 
-def check_ml_serve_online() -> bool:
-    retries = 3
-    while retries > 0:
-        try:
-            logger.info(f"Checking if TorchServe is running on {URL_ML}")
-            response = requests.get(f"{URL_ML}/ping")
-            if response.status_code == 200:
-                logger.info("TorchServe is running")
-                return True
-            else:
-                logger.info("TorchServe is not running. retry in 5 seconds.")
-                time.sleep(5)
-        except requests.exceptions.ConnectionError:
-            logger.info("TorchServe is not running. Retry in 5 seconds.")
-            time.sleep(5)
-        retries -= 1
-    return False
+def run_checks() -> None:
+    """Runs all health checks."""
+    logger.info("Running health checks")
+    input_dirs = [IMAGE_INPUT_DIR, MASK_INPUT_DIR]
+    if MAKE_TRAININGS_DATA and not check_input_paths(input_dirs):
+        logger.error("Input paths not valid. Exiting.")
+        exit()
+
+    if PRODUCTION:
+        if not aws_available:
+            logger.warning("AWS credentials not valid")
+
+        if not check_ml_serve_online():
+            logger.error("ml-serve not online. Exiting.")
+            exit()
+
+        if not check_api_online():
+            logger.error("API not online. Exiting.")
+            exit()
 
 
-def check_ml_serve_online_localhost() -> bool:
-    retries = 3
-    while retries > 0:
-        try:
-            logger.info(f"Checking if TorchServe is running on {URL_ML}")
-            response = requests.get("http://localhost:8080/ping")
-            if response.status_code == 200:
-                logger.info("TorchServe is running")
-                return True
-            else:
-                logger.info("TorchServe is not running. retry in 5 seconds.")
-                time.sleep(5)
-        except requests.exceptions.ConnectionError:
-            logger.info("TorchServe is not running. Retry in 5 seconds.")
-            time.sleep(5)
-        retries -= 1
-    return False
+def run_setup() -> None:
+    """Runs all setups."""
+    logger.info("Running setups")
+    output_dirs = [IMAGE_OUTPUT_DIR, MASK_OUTPUT_DIR]
+    create_output_directories(output_dirs)
 
 
 if __name__ == "__main__":
@@ -150,44 +131,59 @@ if __name__ == "__main__":
     # req.request.url
     # req.request.headers
     # req.request.body
-    input_dirs = [IMAGE_INPUT_DIR, MASK_INPUT_DIR]
-    output_dirs = [IMAGE_OUTPUT_DIR, MASK_OUTPUT_DIR]
+    # input_dirs = [IMAGE_INPUT_DIR, MASK_INPUT_DIR]
+    # output_dirs = [IMAGE_OUTPUT_DIR, MASK_OUTPUT_DIR]
 
-    # mandatory if trainings data should be created
-    if MAKE_TRAININGS_DATA and not validate_input_paths(input_dirs):
-        logger.error("Input paths not valid. Exiting.")
-        exit()
+    # # mandatory if trainings data should be created
+    # if MAKE_TRAININGS_DATA and not check_input_paths(input_dirs):
+    #     logger.error("Input paths not valid. Exiting.")
+    #     exit()
 
-    create_output_directories(output_dirs)
+    # create_output_directories(output_dirs)
 
-    # optional
-    if not aws_available:
-        logger.warning("AWS credentials not valid")
-
-    if PRODUCTION:
-        if not check_ml_serve_online():
-            logger.error("ml-serve not online. Exiting.")
-            exit()
+    # if PRODUCTION:
+    #     if not check_ml_serve_online():
+    #         logger.error("ml-serve not online. Exiting.")
+    #         exit()
+    run_checks()
+    run_setup()
 
     masks_gdf = gpd.read_file(MASK_INPUT_DIR)
+    tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
+    # TODO: Include Case
+    # if MAKE_TRAININGS_DATA:
+    #     folder_list = os.listdir(IMAGE_INPUT_DIR)
 
-    if MAKE_TRAININGS_DATA:
-        folder_list = os.listdir(IMAGE_INPUT_DIR)
-    else:
+    for centroid_counter, centroid in enumerate(set(tiles_gdf.centroid_of_tile)):
+        # 1. get identifier from centroid
+        identifier = get_identifier(centroid)
+        if identifier is None:
+            continue
+
+        # If Production else use downloader to read from disk
+        # 2. save image to disk
+
+        # 3. preprocess data and save to disk (in MAKE_TRAININGS_DATA case)
+
+        # 4. send to ml-serve
+
+        # ! Here the identifier from the API should be used
         # ! change to raw_data
         # ToDo: import from constants
-        folder_list = aws_list_folders(prefix=str(IMAGE_INPUT_DIR))
-        IMAGE_INPUT_DIR = Path()
+        # folder_list = aws_list_folders(prefix=str(IMAGE_INPUT_DIR))
+        # IMAGE_INPUT_DIR = Path()
 
-    saved_total = 0
+        saved_total = 0
 
-    for i, tile_folder_path in enumerate(folder_list):
-        logger.info(f"Processing file {i+1} of {len(folder_list)}")
+        # for i, tile_folder_path in enumerate(folder_list):
+        #     logger.info(f"Processing file {i+1} of {len(folder_list)}")
         try:
+            # saved_patches = preprocess_and_save_data(
+            #     tile_folder_path=tile_folder_path, masks_gdf=masks_gdf
+            # )
             saved_patches = preprocess_and_save_data(
-                tile_folder_path=tile_folder_path, masks_gdf=masks_gdf
+                tile_folder_path=identifier, masks_gdf=masks_gdf
             )
-
         except Exception as e:
             logger.error(e)
             continue
