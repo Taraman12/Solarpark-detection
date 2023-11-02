@@ -7,7 +7,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-# where will the images be stored/ name of the folder in s3 bucket
+# where the images will be stored/name of the folder in s3 bucket
 DATA_OUTPUT_PREFIX_AWS = Path(r"data_raw")
 
 # NOTE file path can be created on the fly
