@@ -1,125 +1,176 @@
-# from app.sentinel_query import get_api
-import time
-from typing import Union
-
-import geopandas as gpd
+import requests
+from models.identifier import Identifier
+import pandas as pd
+from typing import Optional
 from constants import NOW_DICT
-from geopandas import GeoSeries
 from logging_config import get_logger
-from sentinel_api import connect_to_sentinel_api
-from sentinelsat import SentinelAPI
-from sentinelsat.exceptions import ServerError, UnauthorizedError
 
 logger = get_logger("BaseConfig")
 
 
-def get_identifier(tile: str, dates: Union[dict, None] = None) -> Union[str, None]:
-    api = get_api()
+def get_identifier_handler(
+    tile_id: str,
+    dates: Optional[dict] = None,
+    cloudcover: int = 30,
+) -> Identifier | None:
+    """Queries the OpenSearch API and returns the identifier of the product with the
+    least cloud cover.
+
+    Args:
+        tile_id (str): The tile ID.
+        dates (Optional[dict], optional): The start and end date of the query.
+            - Example fixed dates: {"start_date": "2021-01-01", "end_date": "2021-01-31"}
+            - Example relative dates: {"start_date": "NOW-30DAYS", "end_date": "NOW"}
+            Defaults to None.
+        cloudcover (int, optional): The maximum cloud cover of the product. Defaults to
+            30.
+
+    Returns:
+        Identifier | None: The identifier of the product with the least cloud cover.
+    """
+    if not isinstance(dates, dict) and dates is not None:
+        raise ValueError("Dates must be a dictionary")
 
     if dates is None:
         dates = NOW_DICT
 
     start_date, end_date = dates["start_date"], dates["end_date"]
 
-    product = get_product_from_footprint(
-        api=api, footprint=tile, start_date=start_date, end_date=end_date
-    )
-    if product is None:
-        logger.info(f"No product found for {tile}")
+    # could also be validated with regex
+    if not isinstance(tile_id, str):
+        raise ValueError("Tile ID must be a string")
+
+    if not isinstance(start_date, str) or not isinstance(end_date, str):
+        raise ValueError("Start date and end date must be strings")
+
+    if not isinstance(cloudcover, int) or not 0 <= cloudcover <= 100:
+        raise ValueError("Cloud cover must be an integer between 0 and 100")
+    try:
+        query_string = make_query_string(
+            tile_id=tile_id,
+            start_date=start_date,
+            end_date=end_date,
+            cloudcover=cloudcover,
+        )
+
+    except ValueError as e:
+        logger.error(f"Error: {e}")
         return None
-    return product["identifier"]
+
+    query_response = query(query_string)
+
+    title = title_from_query(query_response)
+
+    if title is None:
+        # no products found
+        return None
+
+    return identifier_from_title(title)
 
 
-def get_api() -> SentinelAPI:
-    while True:
-        try:
-            api = wait_for_api_connection()
-            return api
-        except Exception as e:
-            logger.error(f"Error connecting to API: {e}")
-            exit()
+def make_query_string(
+    tile_id: str, start_date: str, end_date: str, cloudcover: int
+) -> str:
+    """Creates a query string for the OpenSearch API.
 
-
-def wait_for_api_connection() -> Union[bool, SentinelAPI]:
-    """Connects to sentinelAPI and checks if the connection works."""
-    api = connect_to_sentinel_api()
-
-    if isinstance(api, ServerError):
-        # ToDo: send mail to admin once a day
-        # ToDo: check if this works
-        logger.warning(
-            """Could not connect to Sentinel API. \n
-                Probably ongoing maintenance. \n
-                Retrying in 5 minutes."""
-        )
-        time.sleep(300)  # retry after 5 minutes
-        return False
-
-    elif isinstance(api, UnauthorizedError):
-        # ToDo: send mail to admin once
-        logger.error("Wrong credentials for Sentinel API. Please check .env file")
-        exit()
-
-    elif isinstance(api, ConnectionError):
-        logger.warning(
-            """Could not connect to Sentinel API. \n
-                Check your internet connection.
-            """
-        )
-        exit()
-
-    elif isinstance(api, Exception):
-        # ToDo: send mail to admin every time
-        logger.error(f"Unknown error occurred: {api}")
-        exit()
-
-    else:
-        return api
-
-
-def get_product_from_footprint(
-    api: SentinelAPI,
-    footprint: str,
-    start_date: str = "NOW-5DAYS",
-    end_date: str = "NOW",
-) -> Union[GeoSeries, None]:
-    """Queries the Sentinel API for products that intersect with a given
-    footprint. Returns the product with the lowest cloud cover percentage.
-
-    Args:
-        api (SentinelAPI): The SentinelAPI instance to use for the query.
-        footprint (str): The footprint to use for the query.
-        start_date (str, optional): The start date of the query.
-        Defaults to "NOW-5DAYS".
-        end_date (str, optional): The end date of the query.
-        Defaults to "NOW".
+    docs: https://documentation.dataspace.copernicus.eu/APIs/OpenSearch.html
 
     Returns:
-        GeoSeries: A GeoSeries containing the product with the lowest cloud cover
-        percentage.
+        str: The query string.
     """
-    # create empty GeoSeries to return
-    products_gdf = gpd.GeoSeries()
+    # Validate dates
+    # try:
+    #     datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    #     datetime.datetime.strptime(end_date, "%Y-%m-%d")
+    # except ValueError:
+    #     regex
+    #     raise ValueError("Dates must be in the format YYYY-MM-DD")
 
-    products = api.query(
-        footprint,
-        date=(start_date, end_date),
-        platformname="Sentinel-2",
-        producttype="S2MSI2A",  # S2MSI1C is more data available but stream crashes
-        cloudcoverpercentage=(0, 30),
-    )
+    # Validate cloudcover
+    if not 0 <= cloudcover <= 100:
+        raise ValueError("Cloudcover must be between 0 and 100")
 
-    # check if no product is found
-    if not products:
+    # Validate tile_id
+    if not isinstance(tile_id, str):
+        raise ValueError("Tile ID must be a string")
+
+    collection = "Sentinel2"
+    processing_level = "S2MSI2A"
+    return f"https://catalogue.dataspace.copernicus.eu/resto/api/collections/{collection}/search.json?startDate={start_date}&completionDate={end_date}&productType={processing_level}&cloudCover=[0,{cloudcover}]&tileId={tile_id}"
+
+
+def query(query_string: str) -> dict:
+    """Queries the OpenSearch API.
+
+    Returns:
+        requests.Response: The response of the query.
+    """
+    # Validate query_string
+    if not isinstance(query_string, str):
+        raise ValueError("Query string must be a string")
+
+    try:
+        response = requests.get(query_string)
+        # Raise an exception if the request was unsuccessful
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request failed: {e}")
+        raise ValueError("Request failed")
+
+    return response.json()
+
+
+def title_from_query(query_response: dict) -> str | None:
+    """Extracts the identifier from the query response.
+
+    Returns:
+        str: The identifier.
+    """
+    # Validate query_response
+    if not isinstance(query_response, dict):
+        raise ValueError("Query response must be a dictionary")
+
+    # Check if 'features' key exists in query_response
+    if "features" not in query_response:
+        raise ValueError("Query response does not contain 'features' key")
+
+    data = query_response["features"]
+
+    # Check if each feature has 'properties' key
+    for feature in data:
+        if "properties" not in feature:
+            raise ValueError("Feature does not contain 'properties' key")
+
+    properties_list = [feature["properties"] for feature in data]
+    df = pd.DataFrame(properties_list)
+
+    if df.empty:
+        logger.info("No products found for given arguments")
         return None
 
-    # Convert the products to a geopandas dataframe
-    products_gdf = api.to_geodataframe(products)
+    # Check if 'title' and 'cloudCover' keys exist in properties
+    if "title" not in df.columns or "cloudCover" not in df.columns:
+        raise ValueError("Properties do not contain 'title' or 'cloudCover' key")
 
-    # sort products by cloud cover percentage
-    products_gdf_sorted = products_gdf.sort_values(
-        ["cloudcoverpercentage"], ascending=True
-    )
+    df_sorted = df[["title", "cloudCover"]].sort_values("cloudCover")
 
-    # return first product
-    return products_gdf_sorted.iloc[0]
+    return df_sorted.iloc[0]["title"]
+
+
+def identifier_from_title(title: str) -> Identifier:
+    """Extracts the identifier from the title.
+
+    Returns:
+        Identifier: The identifier.
+    """
+    if not isinstance(title, str):
+        raise ValueError("Title must be a string")
+
+    if title.endswith(".SAFE"):
+        title[:-5]
+    # check if title is already an identifier
+    try:
+        return Identifier(title)
+
+    except ValueError:
+        raise ValueError(f"Invalid title: {title}")
