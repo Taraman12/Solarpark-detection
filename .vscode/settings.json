@@ -1,7 +1,8 @@
 {
     "cSpell.words": [
         "sessionmaker",
-        "solarparks"
+        "solarparks",
+        "Winsorization"
     ],
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
@@ -9,6 +10,4 @@
     },
     "python.terminal.activateEnvInCurrentTerminal": true,
     "python.defaultInterpreterPath": "~/.venv/bin/python",
-    "python.linting.mypyEnabled": true,
-    "python.linting.enabled": true,
 }
