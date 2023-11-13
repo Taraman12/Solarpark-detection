@@ -1,7 +1,7 @@
 # build-in
 # import secrets
+# import os
 from typing import List, Optional, Union
-import os
 
 # third-party
 from pydantic import (  # PostgresDsn, validator
