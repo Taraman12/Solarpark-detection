@@ -53,7 +53,7 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
     if not isinstance(filename, str):
         raise TypeError("filename must be a string")
 
-    tile_date = to_datetime_str(tile_date)
+    # tile_date = to_datetime_str(tile_date)
     lat, lon = extract_polygon_coordinates(polygon)
     # TODO: refactor into a dataclass or something (DataBuilder class)
     data = {
@@ -82,31 +82,31 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
         raise e
 
 
-def to_datetime_str(date_string: str) -> str:
-    """
-    Formats the date string to a real datetime string.
-    tile_date does not have a leading zeros due to previous constraints.
-    Therefore we need to add them, but the output must be a string again
+# def to_datetime_str(date_string: str) -> str:
+#     """
+#     Formats the date string to a real datetime string.
+#     tile_date does not have a leading zeros due to previous constraints.
+#     Therefore we need to add them, but the output must be a string again
 
-    Args:
-        date_string (str): The date string to format.
+#     Args:
+#         date_string (str): The date string to format.
 
-    Returns:
-        str: The formatted date string.
+#     Returns:
+#         str: The formatted date string.
 
-    Raises:
-        TypeError: If date_string is not a string.
-        ValueError: If date_string is not in the correct format.
-    """
-    if not isinstance(date_string, str):
-        raise TypeError("date_string must be a string")
+#     Raises:
+#         TypeError: If date_string is not a string.
+#         ValueError: If date_string is not in the correct format.
+#     """
+#     if not isinstance(date_string, str):
+#         raise TypeError("date_string must be a string")
 
-    try:
-        date_obj = datetime.strptime(date_string, "%Y-%m-%d").date()
-    except ValueError:
-        raise ValueError("date_string must be in the format 'YYYY-MM-DD'")
+#     try:
+#         date_obj = datetime.strptime(date_string, "%Y-%m-%d").date()
+#     except ValueError:
+#         raise ValueError("date_string must be in the format 'YYYY-MM-DD'")
 
-    return date_obj.strftime("%Y-%m-%d")
+#     return date_obj.strftime("%Y-%m-%d")
 
 
 def extract_polygon_coordinates(polygon: Polygon) -> Tuple[List[float], List[float]]:
