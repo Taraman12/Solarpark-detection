@@ -26,6 +26,11 @@ def download_from_sentinel_aws_handler(
             - 'file_path' (Path): The local file path to the band file.
         Returns None if there was an error downloading the files.
     """
+    if not isinstance(identifier, Identifier):
+        raise ValueError("Identifier must be an Identifier object")
+    if not isinstance(target_folder, Path):
+        raise ValueError("Target folder must be a Path object")
+    target_folder = target_folder / identifier.to_string()
     band_file_info = {}
     sentinel_bucket, prefix = make_sentinel_aws_path(identifier)
     for band, resolution in USED_BANDS.items():
@@ -56,9 +61,11 @@ def make_sentinel_aws_path(identifier: Identifier) -> str:
     Returns:
         str: The constructed S3 bucket name and prefix.
     """
+    if not isinstance(identifier, Identifier):
+        raise ValueError("Identifier must be an Identifier object")
     # https://roda.sentinel-hub.com/sentinel-s2-l2a/readme.html
     sentinel_bucket = f"sentinel-s2-{identifier.product_level.lower()}"
-    prefix = f"tiles/{identifier.utm_code}/{identifier.latitude_band}/{identifier.square}/{identifier.year}/{identifier.month}/{identifier.day}/0"  # /R10m
+    prefix = f"tiles/{identifier.utm_code}/{identifier.latitude_band}/{identifier.square}/{identifier.year}/{identifier.month_no_leading_zeros}/{identifier.day_no_leading_zeros}/0"  # /R10m
     return sentinel_bucket, prefix
 
 
@@ -82,7 +89,7 @@ def download_from_sentinel_aws(
         FileNotFoundError: If the file does not exist in the S3 bucket.
         Exception: If any other error occurs during the download.
     """
-    prefix_with_resolution = f"{prefix}/{resolution}"
+    prefix_with_resolution = f"{prefix}/R{resolution}"
     band_file_input = f"{band}.jp2"
     band_file_output = f"{band}_{resolution}.jp2"
     try:
@@ -101,10 +108,10 @@ def download_from_sentinel_aws(
         return target_folder / band_file_output
     except s3_client.exceptions.NoSuchKey:
         logger.warning(
-            f"No such key: {prefix}/{band_file_input} in bucket: {sentinel_bucket}"
+            f"No such key: {prefix_with_resolution}/{band_file_input} in bucket: {sentinel_bucket}"
         )
         raise FileNotFoundError(
-            f"No such key: {prefix}/{band_file_input} in bucket: {sentinel_bucket}"
+            f"No such key: {prefix_with_resolution}/{band_file_input} in bucket: {sentinel_bucket}"
         )
     except Exception as e:
         logger.error(f"Error downloading from AWS: {e}")
