@@ -1,28 +1,32 @@
 # build-in
-import os
-import time
-from pathlib import Path
-from typing import List
+import copy
 
 # third-party
 import debugpy
-import geopandas as gpd
-import requests
+import rasterio
 
 # local-modules
-from aws_functions import aws_list_folders
-from cloud_clients import aws_available
 from constants import (
-    IMAGE_INPUT_DIR,
     IMAGE_OUTPUT_DIR,
-    MASK_INPUT_DIR,
+    KERNEL_SIZE,
     MASK_OUTPUT_DIR,
+    PATH_TO_TILES,
+    STEP_SIZE,
     URL_API,
     URL_ML,
 )
+from health_checks import run_checks
+from jwt_functions import get_jwt_from_api, store_jwt
 from logging_config import get_logger
-from save_to_disk import preprocess_and_save_data
+from models.identifier import Identifier
+from open_data import open_data_handler
+from prediction import prediction_handler
+from preprocess import pad_image, preprocess_handler
+from sentinel_on_aws import download_from_sentinel_aws_handler
+from sentinel_query import get_identifier
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
+from utils import create_output_directories, load_tiles_file
+from write_to_db import write_to_db_handler
 
 # set up logging
 logger = get_logger("BaseConfig")
@@ -48,75 +52,38 @@ ToDo: Needs better everything
 """
 
 
-def validate_input_paths(input_dirs: List[Path]) -> bool:
-    """Validates that the input directories exist.
-
-    Args:
-        input_dirs (List[Path]): A list of input directories to validate.
-        logger: A logger instance to use for logging.
-
-    Returns:
-        bool: True if all input directories exist, False otherwise.
-    """
-    all_dirs_exist = True
-    for input_dir in input_dirs:
-        if not input_dir.exists():
-            logger.error(f"Input path: {input_dir} does not exist")
-            all_dirs_exist = False
-    return all_dirs_exist
-
-
-def create_output_directories(output_dirs: List[Path]) -> None:
-    """Creates the output directories if they do not exist.
-
-    Args:
-        output_dirs (List[Path]): A list of output directories to create.
-        logger: A logger instance to use for logging.
-    """
-    for output_dir in output_dirs:
-        if not output_dir.exists():
-            output_dir.mkdir(parents=True, exist_ok=False)
-            logger.info(
-                f"Output path: {output_dir} does not exist \n" f"Directory created"
-            )
+# ! don't delete yet
+# def check_ml_serve_online_localhost() -> bool:
+#     retries = 3
+#     while retries > 0:
+#         try:
+#             logger.info(f"Checking if TorchServe is running on {URL_ML}")
+#             response = requests.get("http://localhost:8080/ping")
+#             if response.status_code == 200:
+#                 logger.info("TorchServe is running")
+#                 return True
+#             else:
+#                 logger.info("TorchServe is not running. retry in 5 seconds.")
+#                 time.sleep(5)
+#         except requests.exceptions.ConnectionError:
+#             logger.info("TorchServe is not running. Retry in 5 seconds.")
+#             time.sleep(5)
+#         retries -= 1
+#     return False
 
 
-def check_ml_serve_online() -> bool:
-    retries = 3
-    while retries > 0:
-        try:
-            logger.info(f"Checking if TorchServe is running on {URL_ML}")
-            response = requests.get(f"{URL_ML}/ping")
-            if response.status_code == 200:
-                logger.info("TorchServe is running")
-                return True
-            else:
-                logger.info("TorchServe is not running. retry in 5 seconds.")
-                time.sleep(5)
-        except requests.exceptions.ConnectionError:
-            logger.info("TorchServe is not running. Retry in 5 seconds.")
-            time.sleep(5)
-        retries -= 1
-    return False
-
-
-def check_ml_serve_online_localhost() -> bool:
-    retries = 3
-    while retries > 0:
-        try:
-            logger.info(f"Checking if TorchServe is running on {URL_ML}")
-            response = requests.get("http://localhost:8080/ping")
-            if response.status_code == 200:
-                logger.info("TorchServe is running")
-                return True
-            else:
-                logger.info("TorchServe is not running. retry in 5 seconds.")
-                time.sleep(5)
-        except requests.exceptions.ConnectionError:
-            logger.info("TorchServe is not running. Retry in 5 seconds.")
-            time.sleep(5)
-        retries -= 1
-    return False
+def run_setup() -> None:
+    """Runs all setups."""
+    logger.info("Running setups")
+    output_dirs = [IMAGE_OUTPUT_DIR, MASK_OUTPUT_DIR]
+    create_output_directories(output_dirs)
+    # ! Change later
+    try:
+        token = get_jwt_from_api(username="John@Doe.com", password="password")
+        store_jwt(token)
+    except Exception as e:
+        logger.error(f"Could not get JWT from API: {e}")
+        exit(1)
 
 
 if __name__ == "__main__":
@@ -127,71 +94,98 @@ if __name__ == "__main__":
     logger.info(f"URL_ML = {URL_ML}")
     logger.info(f"URL_API = {URL_API}")
 
-    ##########################################
-    # data = {
-    #     "size_in_sq_m": 0,
-    #     "peak_power": 0,
-    #     "date_of_data": "2023-05-20",
-    #     "first_detection": "2023-05-20",
-    #     "last_detection": "2023-05-20",
-    #     "geometry": "Test",  # lon_lat_polygon
-    # }
-    # url = "http://api:8000/api/v1/solarpark/"
-    # headers = {"content-type": "application/json"}
-    # logger.info(f"Writing to DB: {data}")
-    # response = requests.get(url, headers=headers)
-    # logger.info(f"Response get: {response.status_code}")
-    # response = requests.post(url, headers=headers, json=data)
-    # logger.info(f"Response post: {response.status_code}")
+    run_setup()
+    run_checks()
 
-    # url = "http://localhost:8081/models"
-    # req = requests.get(url)
-    # logger.info(f"Response get model: {req.status_code}")
-    # req.request.url
-    # req.request.headers
-    # req.request.body
-    input_dirs = [IMAGE_INPUT_DIR, MASK_INPUT_DIR]
-    output_dirs = [IMAGE_OUTPUT_DIR, MASK_OUTPUT_DIR]
+    tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
+    # TODO: Include Case
+    # if MAKE_TRAININGS_DATA:
+    #     folder_list = os.listdir(IMAGE_INPUT_DIR)
 
-    # mandatory if trainings data should be created
-    if MAKE_TRAININGS_DATA and not validate_input_paths(input_dirs):
-        logger.error("Input paths not valid. Exiting.")
+    for centroid_counter, centroid in enumerate(set(tiles_gdf.centroid_of_tile)):
+        # 1. get identifier from centroid
+        identifier_string = get_identifier(centroid)
+        if identifier_string is None:
+            continue
+        identifier = Identifier(identifier_string)
         exit()
-
-    create_output_directories(output_dirs)
-
-    # optional
-    if not aws_available:
-        logger.warning("AWS credentials not valid")
-
-    if PRODUCTION:
-        if not check_ml_serve_online():
-            logger.error("ml-serve not online. Exiting.")
-            exit()
-
-    masks_gdf = gpd.read_file(MASK_INPUT_DIR)
-
-    if MAKE_TRAININGS_DATA:
-        folder_list = os.listdir(IMAGE_INPUT_DIR)
-    else:
-        # ! change to raw_data
-        # ToDo: import from constants
-        folder_list = aws_list_folders(prefix=str(IMAGE_INPUT_DIR))
-        IMAGE_INPUT_DIR = Path()
-
-    saved_total = 0
-
-    for i, tile_folder_path in enumerate(folder_list):
-        logger.info(f"Processing file {i+1} of {len(folder_list)}")
-        try:
-            saved_patches = preprocess_and_save_data(
-                tile_folder_path=tile_folder_path, masks_gdf=masks_gdf
-            )
-
-        except Exception as e:
-            logger.error(e)
+        # If Production else use downloader to read from disk
+        band_file_info = download_from_sentinel_aws_handler(identifier_string)
+        if band_file_info is None:
             continue
 
-        saved_total += saved_patches
-        logger.info(f"Number of files saved: {saved_patches}")
-    logger.info(f"program finished. Total images saved: {saved_total}")
+        # 3. open dataset readers
+        stacked_bands, first_band_open, original_metadata = open_data_handler(
+            band_file_info
+        )
+        if stacked_bands is None:
+            continue
+        metadata = copy.deepcopy(original_metadata)
+
+        stacked_bands = pad_image(stacked_bands, KERNEL_SIZE, STEP_SIZE)
+        num_rows = (metadata["height"] - KERNEL_SIZE) // STEP_SIZE + 1
+        num_cols = (metadata["width"] - KERNEL_SIZE) // STEP_SIZE + 1
+        file_identifier = 0
+        for row in range(num_rows + 1):
+            for col in range(num_cols + 1):
+                # Define the window coordinates for the snippet
+                window = rasterio.windows.Window(
+                    col * STEP_SIZE, row * STEP_SIZE, KERNEL_SIZE, KERNEL_SIZE
+                )
+                small_image = preprocess_handler(stacked_bands, window)
+                if small_image is None:
+                    continue
+
+                # 5. send to ml-serve
+                prediction = prediction_handler(small_image, metadata)
+                if prediction is None:
+                    continue
+
+                file_identifier += 1
+                filename = (
+                    f"{identifier.tile}_{file_identifier}_{identifier.tile_date}.tif"
+                )
+                # 6. update metadata
+                # ! IMPLEMENTATION NEEDED
+                metadata.update(
+                    {
+                        "width": window.width,
+                        "height": window.height,
+                        "transform": first_band_open.window_transform(window),
+                    }
+                )
+
+                # 7. send to api
+                write_to_db_handler(
+                    prediction, metadata, identifier.tile_date, filename
+                )
+                print("writen to db")
+                # 8. send to aws
+                # ! IMPLEMENTATION NEEDED
+
+        # 4. if MAKE_TRAININGS_DATA: save to disk
+
+        # ! Here the identifier from the API should be used
+        # ! change to raw_data
+        # ToDo: import from constants
+        # folder_list = aws_list_folders(prefix=str(IMAGE_INPUT_DIR))
+        # IMAGE_INPUT_DIR = Path()
+
+    #     saved_total = 0
+
+    #     # for i, tile_folder_path in enumerate(folder_list):
+    #     #     logger.info(f"Processing file {i+1} of {len(folder_list)}")
+    #     try:
+    #         # saved_patches = preprocess_and_save_data(
+    #         #     tile_folder_path=tile_folder_path, masks_gdf=masks_gdf
+    #         # )
+    #         saved_patches = preprocess_and_save_data(
+    #             tile_folder_path=identifier, masks_gdf=masks_gdf
+    #         )
+    #     except Exception as e:
+    #         logger.error(e)
+    #         continue
+
+    #     saved_total += saved_patches
+    #     logger.info(f"Number of files saved: {saved_patches}")
+    # logger.info(f"program finished. Total images saved: {saved_total}")

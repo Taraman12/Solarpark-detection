@@ -56,62 +56,82 @@ services:
     #   environment:
     #     - DOCKERIZED=true
 
-  ml-serve:
-    build:
-      context: ./src/ml-serve
-      dockerfile: ml-serve.dockerfile
-    ports:
-      - "8080:8080"
-      - "8081:8081"
-      - "8082:8082"
-    expose:
-      - "8080"
-      - "8081"
-      - "8082"
-    # limits the number of cpus the container can use
-    # else on each thread (core) a model will be loaded
-    cpus: 1.0
+    # ml-serve:
+    #   build:
+    #     context: ./src/ml-serve
+    #     dockerfile: ml-serve.dockerfile
+    #     env_file:
+    #       - .env.docker
+    #   ports:
+    #     - "8080:8080"
+    #     - "8081:8081"
+    #     - "8082:8082"
+    #   expose:
+    #     - "8080"
+    #     - "8081"
+    #     - "8082"
+    #   # limits the number of cpus the container can use
+    #   # else on each thread (core) a model will be loaded
+    #   cpus: 1.0
 
-  preprocessing:
+    # preprocessing:
+    #   build:
+    #     context: ./src/preprocessing
+    #     dockerfile: preprocessing.dockerfile
+    #   # env_file:
+    #   #   - .env.docker
+    #   depends_on:
+    #     - ml-serve
+    #   environment:
+    #     - DOCKERIZED=true
+    #     - MAKE_TRAININGS_DATA=False
+    #     - PRODUCTION=true
+    #   ports:
+    #     - "5678:5678"
+    #   expose:
+    #     - "5678"
+    #   # prevents the container from being started automatically
+    #   # when running `docker-compose up`
+    #   profiles: [ "cli-only" ]
+
+  frontend:
     build:
-      context: ./src/preprocessing
-      dockerfile: preprocessing.dockerfile
-    depends_on:
-      - ml-serve
+      context: ./src/frontend
+      dockerfile: frontend.dockerfile
+    # env_file:
+    #   - .env.docker
     environment:
-      - DOCKERIZED=true
-      - MAKE_TRAININGS_DATA=False
-      - PRODUCTION=true
+      - VITE_DOCKERIZED=true
+      - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - VITE_AWS_ACCESS_KEY_ID=${aws_access_key_id}
+      - VITE_AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+      - VITE_BASE_IP=${VITE_BASE_IP}
     ports:
-      - "5678:5678"
-    expose:
-      - "5678"
-    # prevents the container from being started automatically
-    # when running `docker-compose up`
-    profiles: [ "cli-only" ]
+      - "5000:5000"
+    # expose:
+    #   - "80"
+    # networks:
+    #   - my-network
 
-  # frontend:
-  #   build:
-  #     context: ./src/frontend
-  #     dockerfile: frontend.dockerfile
-  #   environment:
-  #     - VITE_DOCKERIZED=true
-  #     - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-  #     - VITE_AWS_ACCESS_KEY_ID=${aws_access_key_id}
-  #     - VITE_AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
-  #     - VITE_BASE_IP=${VITE_BASE_IP}
-  #   ports:
-  #     - "80:5000"
-  #   expose:
-  #     - "80"
-  #   # networks:
-  #   #   - my-network
+    # add ssl-certificates to nginx
+    # https://sitegeist.de/blog/typo3-blog/docker-compose-setup-mit-nginx-reverse-proxy.html
+
+  proxy:
+    image: nginx:1.25.3
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./src/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - api
 
 volumes:
   data:
 
-    # networks:
-    #   my-network:
+    #     networks:
+    #       my-network
     #     driver: bridge
     # networks:
     #   default:

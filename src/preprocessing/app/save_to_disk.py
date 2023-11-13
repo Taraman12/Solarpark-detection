@@ -9,11 +9,11 @@ from typing import Any, Dict, List, Optional, Tuple
 # third-party
 import geopandas as gpd
 import numpy as np
+
+# from rasterio import DatasetReader
 import rasterio
 import rasterio.features
 import requests
-
-# local modules
 from aws_functions import delete_folder_on_aws, download_from_aws, upload_file_to_aws
 from cloud_clients import aws_available
 from constants import (
@@ -32,10 +32,10 @@ from constants import (
     URL_ML,
 )
 from geopandas import GeoDataFrame
-from logging_config import get_logger
 
-# from rasterio import DatasetReader
-from rasterio.features import geometry_mask
+# local modules
+from logging_config import get_logger
+from rasterio.features import geometry_mask  # noqa F401
 from rasterio.warp import transform_geom
 from rasterio.windows import Window
 from settings import MAKE_TRAININGS_DATA, PRODUCTION
@@ -66,6 +66,20 @@ FILENAME_REGEX = re.compile(
 )
 
 
+# def get_image_from_aws(
+#     identifier_string: str | None = None, tile_folder_path: str | None = None
+# ) -> bool:
+#     if identifier is not None:
+#         return download_from_aws(identifier_string)
+#     elif tile_folder_path is not None:
+#         tile_folder_path = tile_folder_path.strip("/")
+#         identifier_string = tile_folder_path.split("/")[-1]
+#         identifier = Identifier(identifier_string)
+#         ...
+#     raise ValueError("Either identifier_string or tile_folder_path must be specified")
+
+
+# # TODO: rename to get_data_from_aws or save_data
 def preprocess_and_save_data(  # noqa: C901
     tile_folder_path: str,
     masks_gdf: GeoDataFrame,
