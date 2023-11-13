@@ -1,19 +1,14 @@
 # from app.sentinel_query import get_api
 import time
-import geopandas as gpd
-from pathlib import Path
 from typing import Union
-from distutils.util import strtobool
 
+import geopandas as gpd
+from constants import NOW_DICT
+from geopandas import GeoSeries
+from logging_config import get_logger
+from sentinel_api import connect_to_sentinel_api
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import ServerError, UnauthorizedError
-from geopandas import GeoDataFrame, GeoSeries
-
-
-from sentinel_api import connect_to_sentinel_api
-from logging_config import get_logger
-from constants import NOW_DICT
-
 
 logger = get_logger("BaseConfig")
 
@@ -24,7 +19,6 @@ def get_identifier(tile: str, dates: Union[dict, None] = None) -> Union[str, Non
     if dates is None:
         dates = NOW_DICT
 
-    print(dates)
     start_date, end_date = dates["start_date"], dates["end_date"]
 
     product = get_product_from_footprint(

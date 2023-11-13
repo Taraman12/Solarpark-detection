@@ -6,8 +6,7 @@ import boto3
 from botocore.credentials import InstanceMetadataFetcher, InstanceMetadataProvider
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
-
-from app.logging_config import get_logger
+from logging_config import get_logger
 
 logger = get_logger("BaseConfig")
 

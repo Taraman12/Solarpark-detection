@@ -22,9 +22,10 @@ IMAGE_OUTPUT_DIR = Path(r".\data_local\images_undersampling_new")
 MASK_OUTPUT_DIR = Path(r".\data_local\mask_undersampling_new")
 
 KERNEL_SIZE = 256
+STEP_SIZE = 236  # Define the step size
 PADDING = 25
 UNDERSAMPLING_RATE = 0.05
-
+AREA_THRESHOLD = 1000
 
 URL_ML = f"http://{ML_HOST}:8080"  # ml-serve
 URL_API = f"http://{API_HOST}:8000/api/v1"  # api
@@ -60,4 +61,5 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 PATH_TO_TILES = SCRIPT_DIR / "data" / "tiles_germany.geojson"
 
 # NOTE if you change this, you have to change in save_to_disk.py -> stack_bands() as well (due to the order of the bands)
-REQUIRED_BANDS = ["B02", "B03", "B04", "B08"]
+# REQUIRED_BANDS = ["B02", "B03", "B04", "B08"]
+USED_BANDS = {"B02": "10m", "B03": "10m", "B04": "10m", "B08": "10m"}

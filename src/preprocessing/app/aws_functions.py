@@ -8,14 +8,14 @@ from typing import List, Optional
 from botocore.errorfactory import ClientError
 
 # local-modules
-from app.cloud_clients import s3_client
-from app.constants import BUCKET_NAME, IDENTIFIER_REGEX, IMAGE_INPUT_DIR
-from app.logging_config import get_logger
+from cloud_clients import s3_client
+from constants import BUCKET_NAME, IDENTIFIER_REGEX, IMAGE_INPUT_DIR
+from logging_config import get_logger
 
 logger = get_logger("BaseConfig")
 
 
-def download_from_aws(output_path: str) -> bool:
+def download_from_aws(output_path: str) -> str | bool:
     prefix = IMAGE_INPUT_DIR
     identifier = output_path.split("/")[-1]
     regex_match = re.search(IDENTIFIER_REGEX, output_path)
@@ -25,6 +25,9 @@ def download_from_aws(output_path: str) -> bool:
     # download all files in the aws folder
 
     files_list = aws_list_files(f"{prefix}/{identifier}")
+    # create output folder
+    Path(output_path).mkdir(parents=True, exist_ok=True)
+
     for band_file in files_list:
         # Skip if file already exists
         if os.path.exists(band_file):
