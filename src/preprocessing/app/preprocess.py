@@ -1,26 +1,46 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
+from constants import KERNEL_SIZE  # , STEP_SIZE, USED_BANDS
 from rasterio.windows import Window
 
 
-def preprocess_handler(array: np.ndarray, window: Window) -> np.ndarray:
+def preprocess_handler(
+    array: np.ndarray, window: Optional[Window] = None, training: bool = False
+) -> np.ndarray | None:
     """Handles the preprocessing of the array.
 
     Args:
-        array (np.ndarray): The array to preprocess (w, h, dim). Expected dtype is uint16.
+        array (np.ndarray): The array to preprocess (w, h, dim). Expected dtype is uint16 and shape is (w, h, dim).
         window (Window): The window to extract.
 
     Returns:
-        np.ndarray: The preprocessed array. Returned dtype is float64.
+        np.ndarray: The preprocessed array. Returned dtype is float64 and shape is (w, h, dim).
     """
-    small_image = moving_window(array, window)
+    if not isinstance(array, np.ndarray):
+        raise ValueError("Array must be a numpy array")
+
+    if not training:
+        if not isinstance(window, Window):
+            raise ValueError("Window must be a rasterio window")
+
+    if not training:
+        small_image = moving_window(array, window)
+    else:
+        small_image = array
+
     if np.any(np.array(small_image.shape) == 0):
         return None
+
     if small_image.max() == 0:
         return None
-    small_image = color_correction(small_image)
+
+    # small_image = color_correction(small_image)
     small_image = robust_normalize(small_image)
+
+    # if small_image.shape[0] != len(USED_BANDS):
+    #     small_image = small_image.transpose(2, 0, 1)
+
     return small_image
 
 
@@ -37,6 +57,11 @@ def moving_window(
     Returns:
         np.ndarray: The extracted windows.
     """
+    if not isinstance(stacked_array, np.ndarray):
+        raise ValueError("Stacked array must be a numpy array")
+    if not isinstance(window, Window):
+        raise ValueError("Window must be a rasterio window")
+
     # Cut out the snippet from the merged stacked_array
     return stacked_array[
         window.row_off : window.row_off + window.height,
@@ -44,25 +69,31 @@ def moving_window(
     ]
 
 
-def pad_image(image, kernel_size, step_size):
+# ! Doesn't work correctly
+def pad_image(image: np.array, kernel_size: int = KERNEL_SIZE) -> np.array:
     """
     Pads an image so that windows of the given kernel size and step size cover the entire image.
 
     Args:
-    image (np.array): The image to pad.
+    image (np.array): The image to pad. (h, w, dim)
     kernel_size (int): The size of the kernel.
     step_size (int): The size of the step.
 
     Returns:
     np.array: The padded image.
     """
+    if not isinstance(image, np.ndarray):
+        raise ValueError("Image must be a numpy array")
+    if not isinstance(kernel_size, int):
+        raise ValueError("Kernel size must be an integer")
+    if not kernel_size > 0:
+        raise ValueError("Kernel size must be greater than 0")
+
     height, width, _ = image.shape
-    pad_height = (
-        (kernel_size - height % step_size) % step_size if height < kernel_size else 0
-    )
-    pad_width = (
-        (kernel_size - width % step_size) % step_size if width < kernel_size else 0
-    )
+
+    pad_height = kernel_size - height if height < kernel_size else 0
+    pad_width = kernel_size - width if width < kernel_size else 0
+
     return np.pad(
         image,
         ((0, pad_height), (0, pad_width), (0, 0)),
@@ -104,6 +135,9 @@ def color_correction(array: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: The color-corrected stacked bands array. The dtype is int16.
     """
+    if not isinstance(array, np.ndarray):
+        raise ValueError("Array must be a numpy array")
+
     # ToDo: try np.int16 instead of int
     return (array / 8).astype(np.uint16)
 
@@ -128,7 +162,12 @@ def color_correction(array: np.ndarray) -> np.ndarray:
 #     )
 
 
-def robust_normalize(array, lower_percentile=1, upper_percentile=99, epsilon=1e-7):
+def robust_normalize(
+    array: np.array,
+    lower_percentile: int = 1,
+    upper_percentile: int = 99,
+    epsilon: float = 1e-7,
+) -> np.array:
     """
     Normalizes a band using a robust method.
     Winsorization is used to clip the band values to the given percentiles.
@@ -139,9 +178,22 @@ def robust_normalize(array, lower_percentile=1, upper_percentile=99, epsilon=1e-
     upper_bound (float): The upper bound for normalization.
 
     Returns:
-    np.array: The normalized band. Returned dtype is float64.
+    np.array: The normalized band. Returned dtype is float32.
     """
+    if not isinstance(array, np.ndarray):
+        raise ValueError("Array must be a numpy array")
+    if not isinstance(lower_percentile, int):
+        raise ValueError("Lower percentile must be an integer")
+    if not isinstance(upper_percentile, int):
+        raise ValueError("Upper percentile must be an integer")
+    if not isinstance(epsilon, float):
+        raise ValueError("Epsilon must be a float")
+    if not lower_percentile < upper_percentile:
+        raise ValueError("Lower percentile must be smaller than upper percentile")
+
     lower_value = np.percentile(array, lower_percentile)
     upper_value = np.percentile(array, upper_percentile)
     array = np.clip(array, lower_value, upper_value)
+    # ! change of dtype
+    array = array.astype(np.float32)
     return (array - lower_value) / (max(upper_value - lower_value, epsilon))

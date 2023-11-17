@@ -1,6 +1,10 @@
 from pathlib import Path
+from unittest.mock import Mock
 
-from utils import create_output_directories
+import pytest
+from rasterio import DatasetReader
+from rasterio.windows import Window
+from utils import create_output_directories, update_metadata
 
 
 def test_create_output_directories(monkeypatch):
@@ -18,6 +22,71 @@ def test_create_output_directories(monkeypatch):
 
     # Then
     # If the function completes without raising an exception, the test will pass
+
+
+def test_update_metadata():
+    # Given
+    metadata = {"existing_key": "existing_value"}
+    window = Window(0, 0, 10, 10)
+    first_band_open = Mock(spec=DatasetReader)
+    first_band_open.window_transform.return_value = "mock_transform"
+
+    # When
+    updated_metadata = update_metadata(metadata, window, first_band_open)
+
+    # Then
+    assert updated_metadata["existing_key"] == "existing_value"
+    assert updated_metadata["width"] == 10
+    assert updated_metadata["height"] == 10
+    assert updated_metadata["transform"] == "mock_transform"
+
+
+def test_update_metadata_with_invalid_metadata():
+    # Given
+    metadata = "invalid_metadata"
+    window = Window(0, 0, 10, 10)
+    first_band_open = Mock(spec=DatasetReader)
+
+    # Then
+    with pytest.raises(ValueError) as e:
+        update_metadata(metadata, window, first_band_open)
+    assert str(e.value) == "Metadata must be a dictionary"
+
+
+def test_update_metadata_with_empty_metadata():
+    # Given
+    metadata = {}
+    window = Window(0, 0, 10, 10)
+    first_band_open = Mock(spec=DatasetReader)
+
+    # Then
+    with pytest.raises(ValueError) as e:
+        update_metadata(metadata, window, first_band_open)
+    assert str(e.value) == "Metadata cannot be empty"
+
+
+def test_update_metadata_with_invalid_window():
+    # Given
+    metadata = {"existing_key": "existing_value"}
+    window = "invalid_window"
+    first_band_open = Mock(spec=DatasetReader)
+
+    # Then
+    with pytest.raises(ValueError) as e:
+        update_metadata(metadata, window, first_band_open)
+    assert str(e.value) == "Window must be a rasterio.windows.Window"
+
+
+def test_update_metadata_with_invalid_first_band():
+    # Given
+    metadata = {"existing_key": "existing_value"}
+    window = Window(0, 0, 10, 10)
+    first_band_open = "invalid_first_band"
+
+    # Then
+    with pytest.raises(ValueError) as e:
+        update_metadata(metadata, window, first_band_open)
+    assert str(e.value) == "First band must be a rasterio.DatasetReader"
 
 
 # NOTE: This test is not working

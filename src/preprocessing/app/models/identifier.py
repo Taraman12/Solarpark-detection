@@ -29,11 +29,19 @@ class Identifier:
             self.latitude_band = match.group("latitude_band")
             self.square = match.group("square")
             self.year = match.group("year")
-            # remove leading zeros
-            self.month = str(int(match.group("month")))
-            self.day = str(int(match.group("day")))
+            self.month = match.group("month")
+            self.day = match.group("day")
+            # remove leading zero
+            self.month_no_leading_zeros = str(int(match.group("month")))
+            self.day_no_leading_zeros = str(int(match.group("day")))
             self.product_time = match.group("product_time")
             self.tile = f"{self.utm_code}{self.latitude_band}{self.square}"
             self.tile_date = f"{self.year}-{self.month}-{self.day}"
+            self.tile_date_no_leading_zeros = (
+                f"{self.year}-{self.month_no_leading_zeros}-{self.day_no_leading_zeros}"
+            )
         else:
             raise ValueError(f"Invalid identifier string: {identifier_string}")
+
+    def to_string(self):
+        return f"{self.mission}_MSI{self.product_level}_{self.sensing_time}_{self.processing_baseline}_{self.relative_orbit}_T{self.utm_code}{self.latitude_band}{self.square}_{self.year}{self.month}{self.day}T{self.product_time}"

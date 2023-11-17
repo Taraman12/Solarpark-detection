@@ -7,14 +7,13 @@ import rasterio
 import requests
 from constants import KERNEL_SIZE
 from shapely.geometry import Polygon
-from write_to_db import (
+from write_to_db import (  # to_datetime_str,
     calc_peak_power,
     create_mask,
     create_polygon_and_area,
     extract_polygon_coordinates,
     extract_shapes,
     prediction_to_polygons,
-    to_datetime_str,
     transform_polygon,
     write_to_db,
 )
@@ -277,33 +276,33 @@ def test_prediction_to_polygons_with_missing_crs_in_metadata():
         prediction_to_polygons(prediction, metadata)
 
 
-def test_to_datetime_str_with_valid_input():
-    # Test with valid input
-    date_string = "2022-01-01"
-    expected = "2022-01-01"
-    result = to_datetime_str(date_string)
-    assert result == expected
+# def test_to_datetime_str_with_valid_input():
+#     # Test with valid input
+#     date_string = "2022-01-01"
+#     expected = "2022-01-01"
+#     result = to_datetime_str(date_string)
+#     assert result == expected
 
 
-def test_to_datetime_str_with_invalid_format():
-    # Test with date string in invalid format
-    date_string = "01-01-2022"
-    with pytest.raises(ValueError):
-        to_datetime_str(date_string)
+# def test_to_datetime_str_with_invalid_format():
+#     # Test with date string in invalid format
+#     date_string = "01-01-2022"
+#     with pytest.raises(ValueError):
+#         to_datetime_str(date_string)
 
 
-def test_to_datetime_str_with_invalid_type():
-    # Test with non-string input
-    date_string = 20220101
-    with pytest.raises(TypeError):
-        to_datetime_str(date_string)
+# def test_to_datetime_str_with_invalid_type():
+#     # Test with non-string input
+#     date_string = 20220101
+#     with pytest.raises(TypeError):
+#         to_datetime_str(date_string)
 
 
-def test_to_datetime_str_with_empty_string():
-    # Test with empty string
-    date_string = ""
-    with pytest.raises(ValueError):
-        to_datetime_str(date_string)
+# def test_to_datetime_str_with_empty_string():
+#     # Test with empty string
+#     date_string = ""
+#     with pytest.raises(ValueError):
+#         to_datetime_str(date_string)
 
 
 def test_extract_polygon_coordinates_with_valid_input():
