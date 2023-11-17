@@ -1,5 +1,6 @@
 # build-in
 import re
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from settings import API_HOST, ML_HOST
@@ -52,7 +53,11 @@ IDENTIFIER_REGEX = re.compile(
     re.VERBOSE,
 )
 
-NOW_DICT = {"start_date": "NOW-30DAYS", "end_date": "NOW"}
+
+NOW_DICT = {
+    "start_date": (datetime.today() - timedelta(days=30)).strftime("%Y-%m-%d"),
+    "end_date": datetime.today().strftime("%Y-%m-%d"),
+}
 
 # NOTE file path can be created on the fly
 DOWNLOAD_PATH = Path(r".\data_local\training_data_raw")
