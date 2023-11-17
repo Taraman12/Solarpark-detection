@@ -92,6 +92,9 @@ def download_from_sentinel_aws(
     prefix_with_resolution = f"{prefix}/R{resolution}"
     band_file_input = f"{band}.jp2"
     band_file_output = f"{band}_{resolution}.jp2"
+    if (target_folder / band_file_output).exists():
+        logger.info(f"File already exists: {target_folder / band_file_output}")
+        return target_folder / band_file_output
     try:
         response = s3_client.get_object(
             Bucket=sentinel_bucket,
