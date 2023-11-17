@@ -94,6 +94,7 @@ def test_model_prediction_no_solarpark():
     image = torch.load(
         r"C:\Users\Fabian\Documents\Github_Masterthesis\Solarpark-detection\data_local\data_splitted_undersampling_cleaned\val\images\32UPU_598_2018-4-7.pt"
     )
+
     pred = model(image.unsqueeze(0))
     pred = pred.squeeze().detach().numpy()
     print(pred.shape)
