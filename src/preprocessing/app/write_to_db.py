@@ -1,4 +1,4 @@
-from datetime import datetime
+# from datetime import datetime
 from typing import List, Tuple
 
 import numpy as np
@@ -8,13 +8,19 @@ import requests
 from constants import AREA_THRESHOLD, HEADERS, MODEL_NAME, URL_API
 from jwt_functions import get_jwt
 from logging_config import get_logger
-from rasterio.crs import CRSError
+from rasterio.crs import CRS, CRSError
 
 # from rasterio.features import geometry_mask
 from rasterio.warp import transform_geom
 from shapely.geometry import Polygon
 
 logger = get_logger("BaseConfig")
+
+"""
+ToDo: Add avg_confidence to the data
+ToDo: Add identifier (sentinel-2) to the data
+
+"""
 
 
 def write_to_db_handler(
@@ -311,13 +317,13 @@ def create_polygon_and_area(shape: dict) -> Tuple[Polygon, float]:
     return polygon, area
 
 
-def transform_polygon(polygon: Polygon, crs: str) -> Polygon:
+def transform_polygon(polygon: Polygon, crs: CRS) -> Polygon:
     """
     Transforms a shapely Polygon to a different coordinate reference system (CRS).
 
     Parameters:
     polygon (shapely.geometry.Polygon): The Polygon to transform.
-    crs (str): The CRS to transform the Polygon to.
+    crs (rasterio.crs.CRS): The CRS to transform the Polygon to.
 
     Returns:
     shapely.geometry.Polygon: The transformed Polygon.
@@ -328,7 +334,7 @@ def transform_polygon(polygon: Polygon, crs: str) -> Polygon:
     """
     if not isinstance(polygon, Polygon):
         raise TypeError("polygon must be a shapely Polygon")
-    if not isinstance(crs, str):
+    if not isinstance(crs, CRS):
         raise TypeError("crs must be a string")
     try:
         transformed_geom = transform_geom(crs, "EPSG:4326", polygon.__geo_interface__)
