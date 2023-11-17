@@ -2,15 +2,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
+from models.identifier import Identifier
 from sentinel_query import (
+    get_identifier_handler,
+    identifier_from_title,
     make_query_string,
     query,
     title_from_query,
-    identifier_from_title,
-    get_identifier_handler,
 )
-import pandas as pd
-from models.identifier import Identifier
 
 
 def test_make_query_string_valid_inputs():
@@ -151,7 +150,7 @@ def test_title_from_query_invalid_response():
 def test_title_from_query_no_product_found():
     # Test case 6: Check if ValueError is raised when there is no data to sort
     query_response = {"features": []}
-    assert title_from_query(query_response) == None
+    assert title_from_query(query_response) is None
 
 
 def test_identifier_from_title_valid_title():

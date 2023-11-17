@@ -1,5 +1,6 @@
 # build-in
 import copy
+from pathlib import Path
 
 # third-party
 import debugpy
@@ -18,37 +19,25 @@ from constants import (
 from health_checks import run_checks
 from jwt_functions import get_jwt_from_api, store_jwt
 from logging_config import get_logger
-from models.identifier import Identifier
+
+# from models.identifier import Identifier
 from open_data import open_data_handler
 from prediction import prediction_handler
-from preprocess import pad_image, preprocess_handler
+from preprocess import moving_window, pad_image, preprocess_handler
 from sentinel_on_aws import download_from_sentinel_aws_handler
-from sentinel_query import get_identifier
+from sentinel_query import get_identifier_handler
 from settings import DOCKERIZED, MAKE_TRAININGS_DATA, PRODUCTION
-from utils import create_output_directories, load_tiles_file
+from utils import create_output_directories, load_tiles_file, update_metadata
 from write_to_db import write_to_db_handler
 
 # set up logging
 logger = get_logger("BaseConfig")
+
 # Vscode remote debugging in docker
 debugpy.listen(("0.0.0.0", 5678))
 """
-ToDo: Add online downloader for Sentinel-2 images
-ToDo: Add counter for loop
 ToDo: Add check if image and mask have the same length
 ToDo: Log/logger.info the number of total files saved
-
-ToDo: Needs better documentation
-ToDo: Needs better variable names
-ToDo: Needs better function names
-ToDo: Needs better type hints
-ToDo: Needs better comments
-ToDo: Needs better logging
-ToDo: Needs better error handling
-ToDo: Needs better testing
-ToDo: Needs better refactoring
-ToDo: Needs better structure
-ToDo: Needs better everything
 """
 
 
@@ -77,7 +66,7 @@ def run_setup() -> None:
     logger.info("Running setups")
     output_dirs = [IMAGE_OUTPUT_DIR, MASK_OUTPUT_DIR]
     create_output_directories(output_dirs)
-    # ! Change later
+    # ! username and password change later
     try:
         token = get_jwt_from_api(username="John@Doe.com", password="password")
         store_jwt(token)
@@ -86,8 +75,7 @@ def run_setup() -> None:
         exit(1)
 
 
-if __name__ == "__main__":
-    logger.info("Preprocessing started, with the settings:")
+if __name__ == "__main__":  # noqa C901
     logger.info(f"Dockerized = {DOCKERIZED}")
     logger.info(f"Make_trainings_data = {MAKE_TRAININGS_DATA}")
     logger.info(f"Production = {PRODUCTION}")
@@ -98,33 +86,53 @@ if __name__ == "__main__":
     run_checks()
 
     tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
+
+    target_folder = Path("/tmp")
+
     # TODO: Include Case
     # if MAKE_TRAININGS_DATA:
     #     folder_list = os.listdir(IMAGE_INPUT_DIR)
 
-    for centroid_counter, centroid in enumerate(set(tiles_gdf.centroid_of_tile)):
-        # 1. get identifier from centroid
-        identifier_string = get_identifier(centroid)
-        if identifier_string is None:
+    dates = {"start_date": "2021-01-01", "end_date": "2021-01-31"}
+    tiles_list = ["32UQE"]
+    for tile_counter, tile_name in enumerate(
+        tiles_list
+    ):  # enumerate(set(tiles_gdf.tile_name)):
+        logger.info(
+            f"Processing tile {tile_counter+1} of {len(set(tiles_gdf.tile_name))}"
+        )
+        # 1. get identifier from tile_name and dates
+        identifier = get_identifier_handler(tile_id=tile_name, dates=dates)
+
+        if identifier is None:
             continue
-        identifier = Identifier(identifier_string)
-        exit()
+        logger.info(f"Starting download from sentinel aws for {identifier.to_string()}")
+
         # If Production else use downloader to read from disk
-        band_file_info = download_from_sentinel_aws_handler(identifier_string)
+        band_file_info = download_from_sentinel_aws_handler(
+            identifier=identifier, target_folder=target_folder
+        )
+
         if band_file_info is None:
             continue
 
+        logger.info(f"Starting preprocessing for {identifier.to_string()}")
         # 3. open dataset readers
         stacked_bands, first_band_open, original_metadata = open_data_handler(
-            band_file_info
+            band_file_info=band_file_info
         )
+
         if stacked_bands is None:
+            logger.warning(f"Could not open data for {identifier.to_string()}")
             continue
+
         metadata = copy.deepcopy(original_metadata)
 
-        stacked_bands = pad_image(stacked_bands, KERNEL_SIZE, STEP_SIZE)
         num_rows = (metadata["height"] - KERNEL_SIZE) // STEP_SIZE + 1
         num_cols = (metadata["width"] - KERNEL_SIZE) // STEP_SIZE + 1
+
+        stacked_bands = preprocess_handler(array=stacked_bands, training=True)
+
         file_identifier = 0
         for row in range(num_rows + 1):
             for col in range(num_cols + 1):
@@ -132,12 +140,19 @@ if __name__ == "__main__":
                 window = rasterio.windows.Window(
                     col * STEP_SIZE, row * STEP_SIZE, KERNEL_SIZE, KERNEL_SIZE
                 )
-                small_image = preprocess_handler(stacked_bands, window)
-                if small_image is None:
+
+                # small_image = preprocess_handler(array=stacked_bands, window=window)
+                small_image = moving_window(stacked_bands, window)
+
+                if small_image is None or small_image.max() == 0:
+                    # image is empty
                     continue
 
+                if small_image.shape != (KERNEL_SIZE, KERNEL_SIZE, 4):
+                    small_image = pad_image(small_image, KERNEL_SIZE)
+
                 # 5. send to ml-serve
-                prediction = prediction_handler(small_image, metadata)
+                prediction = prediction_handler(small_image=small_image)
                 if prediction is None:
                     continue
 
@@ -145,19 +160,26 @@ if __name__ == "__main__":
                 filename = (
                     f"{identifier.tile}_{file_identifier}_{identifier.tile_date}.tif"
                 )
+
                 # 6. update metadata
-                # ! IMPLEMENTATION NEEDED
-                metadata.update(
-                    {
-                        "width": window.width,
-                        "height": window.height,
-                        "transform": first_band_open.window_transform(window),
-                    }
+                metadata_small_image = update_metadata(
+                    metadata=metadata, window=window, first_band_open=first_band_open
                 )
+
+                # metadata.update(
+                #     {
+                #         "width": window.width,
+                #         "height": window.height,
+                #         "transform": first_band_open.window_transform(window),
+                #     }
+                # )
 
                 # 7. send to api
                 write_to_db_handler(
-                    prediction, metadata, identifier.tile_date, filename
+                    prediction=prediction,
+                    metadata=metadata_small_image,
+                    tile_date=identifier.tile_date,
+                    filename=filename,
                 )
                 print("writen to db")
                 # 8. send to aws

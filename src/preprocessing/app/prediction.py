@@ -28,6 +28,7 @@ def prediction_handler(
         raise TypeError("Input image must be of type float64 or float32")
 
     if small_image.shape != (len(USED_BANDS), KERNEL_SIZE, KERNEL_SIZE):
+        logger.info(f"Input image shape: {small_image.shape}")
         small_image = small_image.transpose(2, 0, 1)
 
     try:

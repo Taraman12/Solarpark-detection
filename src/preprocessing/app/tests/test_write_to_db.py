@@ -7,14 +7,13 @@ import rasterio
 import requests
 from constants import KERNEL_SIZE
 from shapely.geometry import Polygon
-from write_to_db import (
+from write_to_db import (  # to_datetime_str,
     calc_peak_power,
     create_mask,
     create_polygon_and_area,
     extract_polygon_coordinates,
     extract_shapes,
     prediction_to_polygons,
-    # to_datetime_str,
     transform_polygon,
     write_to_db,
 )

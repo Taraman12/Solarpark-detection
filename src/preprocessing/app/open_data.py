@@ -75,9 +75,10 @@ def stack_bands(
     Returns:
         np.ndarray: The stacked bands array, where each band is stacked along the third dimension.
     """
+    band_order = ["B08", "B04", "B03", "B02"]
     return np.dstack(
         [
             bands[b].read(1, window=window)
-            for b in bands.keys()  # ["B08", "B04", "B03", "B02"]
+            for b in band_order  # bands.keys()  # ["B08", "B04", "B03", "B02"]
         ]
     )

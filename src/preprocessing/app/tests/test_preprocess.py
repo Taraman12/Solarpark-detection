@@ -1,5 +1,6 @@
 import numpy as np
 import rasterio
+from constants import KERNEL_SIZE
 from preprocess import (
     color_correction,
     moving_window,
@@ -35,30 +36,41 @@ def test_moving_window():
 
 def test_pad_image_correct_size():
     image = np.ones((256, 256, 4), dtype="uint16")
-    padded_image = pad_image(image, 256, 236)
-    assert padded_image.shape == (256, 256, 4)
+    padded_image = pad_image(image, KERNEL_SIZE)
+    assert padded_image.shape == image.shape
+    assert np.array_equal(image, padded_image)
+
+
+def test_pad_image_correct_size_no_input():
+    image = np.ones((256, 256, 4), dtype="uint16")
+    padded_image = pad_image(image)
+    assert padded_image.shape == image.shape
     assert np.array_equal(image, padded_image)
 
 
 def test_pad_image_needs_padding():
-    image = np.ones((200, 200, 4), dtype="uint16")
-    padded_image = pad_image(image, 256, 236)
-    assert padded_image.shape == (256, 256, 4)
-    assert np.array_equal(image, padded_image[:200, :200])
+    image = np.ones((204, 204, 4), dtype="uint16")
+
+    padded_image = pad_image(image, 250)
+    assert padded_image.shape == (250, 250, 4)
 
 
-def test_pad_image_needs_padding_only_in_one_dimension():
-    image = np.ones((256, 200, 4), dtype="uint16")
-    padded_image = pad_image(image, 256, 236)
-    assert padded_image.shape == (256, 256, 4)
-    assert np.array_equal(image, padded_image[:, :200])
+def test_pad_image_needs_padding_no_input():
+    image = np.ones((204, 204, 4), dtype="uint16")
+    padded_image = pad_image(image)
+    assert padded_image.shape == (KERNEL_SIZE, KERNEL_SIZE, 4)
 
 
-def test_pad_image_larger_than_kernel_size():
-    image = np.ones((300, 300, 4), dtype="uint16")
-    padded_image = pad_image(image, 256, 236)
-    assert padded_image.shape == (300, 300, 4)
-    assert np.array_equal(image, padded_image[:300, :300])
+def test_pad_image_needs_padding_only_in_height():
+    image = np.ones((204, 728, 4), dtype="uint16")
+    padded_image = pad_image(image, 256)
+    assert padded_image.shape == (256, 728, 4)
+
+
+def test_pad_image_needs_padding_only_in_width():
+    image = np.ones((728, 204, 4), dtype="uint16")
+    padded_image = pad_image(image, 256)
+    assert padded_image.shape == (728, 256, 4)
 
 
 def test_color_correction():
@@ -107,7 +119,7 @@ def test_robust_normalize_random():
     assert normalized_band.shape == (10, 10)
     assert normalized_band.min() >= 0
     assert normalized_band.max() <= 1
-    assert normalized_band.dtype == "float64"
+    assert normalized_band.dtype == "float32"
 
 
 def test_preprocess_handler_empty_window():
@@ -131,8 +143,8 @@ def test_preprocess_handler_normal_case():
     array = np.full((10, 10, 4), 1000, dtype="uint16")
     window = Window(0, 0, 10, 10)
     result = preprocess_handler(array, window)
-    assert result.shape == (10, 10, 4)
-    assert result.dtype == "float64"
+    assert result.shape == (4, 10, 10)
+    assert result.dtype == "float32"
     assert np.all(result >= 0)
     assert np.all(result <= 1)
 
@@ -143,8 +155,8 @@ def test_preprocess_handler_random():
     array = np.random.randint(1, 1000, (10, 10, 4), dtype="uint16")
     window = Window(0, 0, 10, 10)
     result = preprocess_handler(array, window)
-    assert result.shape == (10, 10, 4)
-    assert result.dtype == "float64"
+    assert result.shape == (4, 10, 10)
+    assert result.dtype == "float32"
     assert np.all(result >= 0)
     assert np.all(result <= 1)
 

@@ -1,9 +1,10 @@
-import requests
-from models.identifier import Identifier
-import pandas as pd
 from typing import Optional
+
+import pandas as pd
+import requests
 from constants import NOW_DICT
 from logging_config import get_logger
+from models.identifier import Identifier
 
 logger = get_logger("BaseConfig")
 

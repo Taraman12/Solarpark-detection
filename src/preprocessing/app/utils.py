@@ -3,8 +3,10 @@ from pathlib import Path
 from typing import List
 
 import geopandas as gpd
+import rasterio
 from geopandas import GeoDataFrame
 from logging_config import get_logger
+from rasterio.windows import Window
 from settings import DOCKERIZED
 
 logger = get_logger("BaseConfig")
@@ -94,45 +96,35 @@ def create_download_path(path: Path) -> bool:
         return True
 
 
-# def open_dataset_readers(
-#     band_file_info: Dict[str, Dict[str, Union[str, Path]]]
-# ) -> Dict[str, rasterio.DatasetReader]:
-#     """Open dataset readers for each band in the specified image directory.
+def update_metadata(
+    metadata: dict, window: Window, first_band_open: rasterio.DatasetReader
+) -> dict:
+    """
+    Updates metadata with new window size
+    Args:
+        metadata (dict): metadata to update
+        window (Window): window to use for update
+        first_band_open (rasterio.DatasetReaders): first band to use for update
 
-#     Args:
-#         band_file_info (Dict[str, Dict[str, Union[str, Path]]]): A dictionary mapping each band to a dictionary containing:
-#             - 'resolution' (str): The resolution of the band.
-#             - 'file_path' (Path): The local file path to the band file.
+    Returns:
+        dict: updated metadata
+    """
+    if metadata is None or not isinstance(metadata, dict):
+        raise ValueError("Metadata must be a dictionary")
+    if metadata == {}:
+        raise ValueError("Metadata cannot be empty")
+    if window is None or not isinstance(window, Window):
+        raise ValueError("Window must be a rasterio.windows.Window")
+    if first_band_open is None or not isinstance(
+        first_band_open, rasterio.DatasetReader
+    ):
+        raise ValueError("First band must be a rasterio.DatasetReader")
 
-#     Returns:
-#         Dict[str, rasterio.DatasetReader]: A dictionary mapping band names to their corresponding dataset readers.
-#     """
-#     # store open DatasetReaders in dict
-#     band_files: Dict[str, rasterio.DatasetReader] = {
-#         band_name: rasterio.open(file_info["file_path"])
-#         for band_name, file_info in band_file_info.items()
-#     }
-
-#     return band_files
-
-
-# def stack_bands(
-#     bands: Dict[str, rasterio.DatasetReader], window: Window | None = None
-# ) -> np.ndarray:
-#     """
-#     Stack the specified bands and return the resulting stacked bands array.
-#     NOTE: The order of the bands is specified to use for analysis in the notebook. (nir, red, green, blue)
-
-#     Args:
-#         bands (Dict[str, rasterio.DatasetReader]): A dictionary mapping band names to their corresponding dataset readers.
-
-#     Returns:
-#         np.ndarray: The stacked bands array, where each band is stacked along the third dimension.
-#     """
-#     return np.dstack(
-#         # ToDo: try np.int16 instead of int
-#         [
-#             bands[b].read(1, window=window).astype(int)
-#             for b in ["B08", "B04", "B03", "B02"]
-#         ]
-#     )
+    metadata.update(
+        {
+            "width": window.width,
+            "height": window.height,
+            "transform": first_band_open.window_transform(window),
+        }
+    )
+    return metadata
