@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 # local modules
-from app import crud, schemas
+from app import crud, models, schemas
 from app.api_core import deps
 
 router = APIRouter()
@@ -22,6 +22,8 @@ def read_solarpark(
 ) -> Any:
     """Retrieve solarpark."""
     solarpark = crud.solarpark.get_multi(db, skip=skip, limit=limit)
+    if not solarpark:
+        raise HTTPException(status_code=404, detail="No solarpark in DB")
     return solarpark
 
 
@@ -31,6 +33,17 @@ def read_solarpark(*, db: Session = Depends(deps.get_db), id: int) -> Any:  # no
     solarpark = crud.solarpark.get(db=db, id=id)
     if not solarpark:
         raise HTTPException(status_code=404, detail="solarpark not found")
+    return solarpark
+
+
+@router.delete("/", response_model=List[schemas.SolarPark])
+def delete_all_solarparks(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """Delete all solarparks."""
+    solarpark = crud.solarpark.remove_all(db=db)
     return solarpark
 
 
