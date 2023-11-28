@@ -11,6 +11,10 @@ from dotenv import load_dotenv
 
 from .logging_config import get_logger
 
+"""
+
+ToDo: Rework the login with boto3
+"""
 # local-modules
 
 # load_dotenv()
