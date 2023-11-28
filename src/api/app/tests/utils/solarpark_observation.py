@@ -6,6 +6,7 @@ from app import crud
 
 # from app.core.config import settings
 from app.models.solarpark_observation import SolarParkObservation
+from app.schemas.solarpark_observation import SolarParkObservationUpdate
 from app.tests.utils.utils import random_lower_string
 
 
@@ -53,9 +54,13 @@ def random_solarpark_observation() -> SolarParkObservation:
     return solarpark_observation
 
 
+# NOTE: id can be changed (should be automatically generated)
 def create_random_solarpark_observation(db: Session) -> SolarParkObservation:
     solarpark_observation_in = random_solarpark_observation()
     solarpark_observation = crud.solarpark_observation.create(
-        db, obj_in=solarpark_observation_in, solarpark_id=1
+        db, obj_in=solarpark_observation_in, solarpark_id=42
     )
     return solarpark_observation
+
+
+# def random_solarpark_observation_update() -> SolarParkObservationUpdate:

@@ -6,12 +6,15 @@ from typing import Any, Dict, TypeVar, Union
 from fastapi import File, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
-from geoalchemy2 import WKTElement
+from geoalchemy2 import WKTElement, WKBElement
 from geoalchemy2.shape import to_shape
+from fastapi.exceptions import RequestValidationError
 
 # from geoalchemy2.types import WKBElement
 from geojson import Feature, FeatureCollection, Polygon
 from shapely.geometry import shape
+import shapely.wkt
+from shapely import wkb
 
 # from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -88,6 +91,7 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         obj_in: Union[SolarParkUpdate, Dict[str, Any]],
     ) -> SolarPark:
         obj_data = jsonable_encoder(db_obj)
+        # print("obj_data", obj_data)
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
@@ -95,9 +99,15 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
         for field in obj_data:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
+
+        # db_obj.geom = shapely.wkt.loads(db_obj.geom)
+        # db_obj.geom = WKBElement(wkb.dumps(db_obj.geom, hex=False, srid=4326))
+        # print("db_obj.geom", db_obj.geom)
+        # print("db_obj.geom type", type(db_obj.geom))
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
+        # print("updated!")
         db_obj.geom = to_shape(db_obj.geom).wkt
         return db_obj
 
@@ -130,7 +140,7 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
             features.append(feature)
         feature_collection = FeatureCollection(features)
 
-        # GeoJSON-Datei als Stream senden
+        # GeoJSON-File as stream
         async def generate():
             yield '{"type": "FeatureCollection", "features": ['
             for i, feature in enumerate(feature_collection["features"]):
@@ -189,6 +199,15 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
             .filter(SolarPark.geom.intersects(WKTElement(obj_in.geom)))
             .first()
         )
+
+    # ! danger zone (development only)
+    def remove_all(self, db: Session) -> SolarPark:
+        db_obj = db.query(SolarPark)
+        if db_obj is None:
+            return None
+        db_obj.delete()
+        db.commit()
+        return db_obj
 
     # pass
     # def create(self, db: Session, *, obj_in: SolarParkCreate):
