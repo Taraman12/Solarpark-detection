@@ -1,16 +1,18 @@
+# local modules
+import json
 from typing import Any, Dict, Union
 
-# local modules
 from fastapi import File, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
-from geoalchemy2 import WKTElement, WKBElement
+from geoalchemy2 import WKBElement, WKTElement  # , functions
 from geoalchemy2.shape import to_shape
+from geojson import Feature, FeatureCollection
+from shapely.geometry import shape
 from sqlalchemy.orm import Session
-from geoalchemy2 import functions
-from geojson import Feature, FeatureCollection, Polygon
 
 # from geoalchemy2.shape import InvalidShapeError
+from app.cloud.logging_config import get_logger
 from app.models.solarpark_observation import SolarParkObservation
 from app.schemas.solarpark_observation import (
     SolarParkObservationCreate,
@@ -19,6 +21,7 @@ from app.schemas.solarpark_observation import (
 
 from .base import CRUDBase
 
+logger = get_logger("BaseConfig")
 """
 see:
 https://gis.stackexchange.com/questions/233184/converting-geoalchemy2-elements-wkbelement-to-wkt

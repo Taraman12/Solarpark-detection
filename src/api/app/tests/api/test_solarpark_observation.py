@@ -6,12 +6,11 @@ from sqlalchemy.orm import Session
 
 # from app.main import app
 from app.core.config import settings
+from app.main import app
 from app.tests.utils.solarpark_observation import (
     create_random_solarpark_observation,
     random_solarpark_observation_data,
 )
-from app.main import app
-
 
 client = TestClient(app)
 # from httpx import AsyncClient
@@ -124,7 +123,7 @@ def test_update_solarpark_observation(
     )
     all_observations = response3.json()
     print(all_observations)
-    name_of_models = [item["name_of_model"] for item in all_observations]
+    # name_of_models = [item["name_of_model"] for item in all_observations]
     # assert solarpark_after_update["name_of_model"] == list(set(name_of_models))
     size_in_sq_m = [item["size_in_sq_m"] for item in all_observations]
     assert solarpark_after_update["size_in_sq_m"] == mean(size_in_sq_m)

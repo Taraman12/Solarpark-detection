@@ -1,8 +1,6 @@
-from typing import Any
-
 from geoalchemy2 import WKTElement
-from sqlalchemy.orm import Session
 from geoalchemy2.shape import to_shape
+from sqlalchemy.orm import Session
 
 from app.models.solarpark import SolarPark
 from app.schemas.solarpark_observation import SolarParkObservationCreate

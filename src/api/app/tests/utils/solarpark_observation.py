@@ -6,7 +6,6 @@ from app import crud
 
 # from app.core.config import settings
 from app.models.solarpark_observation import SolarParkObservation
-from app.schemas.solarpark_observation import SolarParkObservationUpdate
 from app.tests.utils.utils import random_lower_string
 
 

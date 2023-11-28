@@ -3,10 +3,10 @@ from geoalchemy2 import Geometry
 from sqlalchemy import ARRAY, Column, Date, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-# from sqlalchemy import event
-
 # local modules
 from app.db.base_class import Base
+
+# from sqlalchemy import event
 
 
 class SolarParkObservation(Base):

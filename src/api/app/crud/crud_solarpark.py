@@ -6,15 +6,12 @@ from typing import Any, Dict, TypeVar, Union
 from fastapi import File, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
-from geoalchemy2 import WKTElement, WKBElement
+from geoalchemy2 import WKTElement
 from geoalchemy2.shape import to_shape
-from fastapi.exceptions import RequestValidationError
 
 # from geoalchemy2.types import WKBElement
 from geojson import Feature, FeatureCollection, Polygon
 from shapely.geometry import shape
-import shapely.wkt
-from shapely import wkb
 
 # from sqlalchemy import func
 from sqlalchemy.orm import Session

@@ -1,20 +1,16 @@
 # third party
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import PlainTextResponse
-from fastapi.responses import PlainTextResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
-from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 
 # local modules
 from app.api_core.api_v1.api import api_router
+from app.api_core.errors.http_error import http_error_handler
+from app.api_core.errors.validation_error import http422_error_handler
 from app.core.config import settings
 from app.db.init_db import init_db
 from app.db.session import SessionLocal
-from app.api_core.errors.http_error import http_error_handler
-from app.api_core.errors.validation_error import http422_error_handler
 
 # TODO: Update description and tags_metadata
 

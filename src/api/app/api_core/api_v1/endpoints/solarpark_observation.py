@@ -1,20 +1,18 @@
 # build-in
-from typing import Any, List, Generator
 from statistics import mean
+from typing import Any, List
 
 # third-party
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
-from sqlalchemy import event
 from geoalchemy2.shape import to_shape
+
+# from sqlalchemy import event
+from sqlalchemy.orm import Session
 
 # local modules
 from app import crud, models, schemas
 from app.api_core import deps
 from app.crud.utils import check_overlap
-from app.db.session import SessionLocal, engine
-
 
 router = APIRouter()
 

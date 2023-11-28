@@ -1,15 +1,9 @@
-import pytest
-
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from geoalchemy2 import WKTElement
+
 from app import crud
-
-from app.schemas.solarpark_observation import (
-    SolarParkObservationUpdate,
-)
+from app.schemas.solarpark_observation import SolarParkObservationUpdate
 from app.tests.utils.solarpark_observation import random_solarpark_observation
-
 
 solarpark_id = 22
 

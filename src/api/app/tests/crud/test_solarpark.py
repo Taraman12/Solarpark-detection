@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 
 from app import crud
-
 from app.schemas.solarpark import SolarParkUpdate
 from app.tests.utils.solarpark import random_solarpark
 
