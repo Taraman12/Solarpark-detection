@@ -25,7 +25,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     # env_file: str = get_env_file()
     model_config = SettingsConfigDict(
-        env_prefix="POSTGRES_", env_file=".env", case_sensitive=True
+        env_prefix="POSTGRES_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
     )
 
     API_V1_STR: str = "/api/v1"
@@ -69,8 +72,8 @@ class Settings(BaseSettings):
 
     HOST: str = "localhost"
     PORT: str = "5432"
-    USER: str = "postgres"
-    PASSWORD: str = "postgres"
+    USER: str = Field("postgres")
+    PASSWORD: str = Field("postgres")
     DB: str = "solar-park-detection"
 
     FIRST_SUPERUSER: EmailStr = "John@Doe.com"
