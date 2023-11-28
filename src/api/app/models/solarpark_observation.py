@@ -3,6 +3,8 @@ from geoalchemy2 import Geometry
 from sqlalchemy import ARRAY, Column, Date, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
+# from sqlalchemy import event
+
 # local modules
 from app.db.base_class import Base
 
@@ -23,3 +25,8 @@ class SolarParkObservation(Base):
     geom = Column(Geometry("POLYGON", srid=4326))
 
     solarpark = relationship("SolarPark", back_populates="observations")
+
+
+# @event.listens_for(SolarParkObservation, "after_insert")
+# def receive_after_insert(mapper, connection, target):
+#     # update solarpark
