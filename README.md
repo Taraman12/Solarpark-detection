@@ -9,6 +9,8 @@ This project was developed as part of a master thesis at the chair of Process- a
 <!-- omit from toc -->
 ## Table of contents:
 - [Overview](#overview)
+      - [The pipeline of the tool looks like this:](#the-pipeline-of-the-tool-looks-like-this)
+    - [Comparison backbones of the ML-Model:\*\*](#comparison-backbones-of-the-ml-model)
 - [Notebooks of interest](#notebooks-of-interest)
 - [Installation](#installation)
 - [ToDos:](#todos)
@@ -22,12 +24,32 @@ This project was developed as part of a master thesis at the chair of Process- a
 The repository is structured as follows:
 In Notebooks you can find basics to work with georefeneced data,the development of the ML-Model as well as the function from the other parts of the pipeline.
 The src folder contains the folder for each service. At each service is an additional README which gives a deeper look in the functionality of the service.
-
-**The pipeline of the tool looks like this:**
+<!-- omit from toc -->
+#### The pipeline of the tool looks like this:
 ![Pipeline](Create_figures_thesis/Final_Pipeline.svg)
 
-**Example of the prediction:**
+<!-- omit from toc -->
+#### Comparison backbones of the ML-Model:
+
+ For more information on how the model was trained see: [model_training.ipynb](Notebooks/ML_Modell/model_training.ipynb),
+ on the evaluation: [evaluate_model_performance.ipynb](Notebooks/ML_Modell/evaluate_model_performance.ipynb)
+
+
+| Model           | Max. Dice (%) | Mean Dice (%) | Mean F1 (%) | Mean Precision (%) | Mean Recall (%) |
+| --------------- | :-----------: | :-----------: | :---------: | :----------------: | :-------------: |
+| EfficientNet-B0 |     69.86     |     59.25     |    58.39    |       70.93        |      57.48      |
+| ResNet18        |     71.07     |     59.68     |    58.82    |       69.20        |      55.07      |
+| **ResNeSt14d**  |   **76.67**   |   **71.16**   |  **70.34**  |     **76.15**      |    **69.63**    |
+| VGG11           |     75.25     |     61.94     |    61.25    |       68.67        |      59.46      |
+
+The ResNeSt14d backbone was chosen for the final U-Net due to its superior performance.
+In the future it is planned to further improve the model by using also the NIR band and some other improvements (TBD).
+
+<!-- omit from toc -->
+#### Example of the prediction:
 ![Prediction](Notebooks/ML_Modell/figures/cleaned_verified_data/English/prediction_samples_validated_eng.svg)
+
+
 
 ## Notebooks of interest
 Create a custom dataset with masks and Sentinel-2 images:
@@ -57,11 +79,14 @@ pip install -r requirements-dev.txt
 6. TBD
 
 ## ToDos:
-- [ ] Add pre-commit hooks
-- [ ] Add coverage to workflow and badge
+- [ ] Finish PostGIS integration
+- [ ] Deploy on AWS
+- [ ] Rework frontend
 - [ ] Add docformatter again
 - [ ] Add mypy again
 - [ ] Add readTheDocs
+- [ ] Add more tests
+- [ ] Improve model performance
 
 ## Pipeline explanation
 ![Pipeline](Create_figures_thesis/Final_Pipeline.svg)
