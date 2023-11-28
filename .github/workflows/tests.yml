@@ -32,4 +32,4 @@ jobs:
         run: poetry install --only preprocessing,tests
       # run tests
       - name: Run tests
-        run: poetry run pytest --cov=src/preprocessing --cov-report=xml
+        run: pytest src/preprocessing/app/tests --cov-report=xml
