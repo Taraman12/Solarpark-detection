@@ -47,3 +47,6 @@ lint: lint-black lint-isort lint-flake8
 # lint-mypy
 
 requirements: api-requirements downloader-requirements ml-model-requirements preprocessing-requirements ml-serve-requirements dev-requirements
+
+start-api:
+	 @cd src/api && uvicorn app.main:app --reload

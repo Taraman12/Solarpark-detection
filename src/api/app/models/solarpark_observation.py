@@ -6,6 +6,8 @@ from sqlalchemy.orm import relationship
 # local modules
 from app.db.base_class import Base
 
+# from sqlalchemy import event
+
 
 class SolarParkObservation(Base):
     id = Column(Integer, primary_key=True, index=True)
@@ -23,3 +25,8 @@ class SolarParkObservation(Base):
     geom = Column(Geometry("POLYGON", srid=4326))
 
     solarpark = relationship("SolarPark", back_populates="observations")
+
+
+# @event.listens_for(SolarParkObservation, "after_insert")
+# def receive_after_insert(mapper, connection, target):
+#     # update solarpark

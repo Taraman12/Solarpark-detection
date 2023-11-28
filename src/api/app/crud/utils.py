@@ -1,18 +1,31 @@
-from typing import Any
-
 from geoalchemy2 import WKTElement
+from geoalchemy2.shape import to_shape
 from sqlalchemy.orm import Session
 
 from app.models.solarpark import SolarPark
 from app.schemas.solarpark_observation import SolarParkObservationCreate
 
 
-def check_overlap(db: Session, obj_in: SolarParkObservationCreate) -> Any:
-    return (
+def check_overlap(db: Session, obj_in: SolarParkObservationCreate) -> SolarPark:
+    db_obj = (
         db.query(SolarPark)
         .filter(SolarPark.geom.intersects(WKTElement(obj_in.geom)))
         .first()
     )
+    if db_obj is None:
+        return None
+
+    if isinstance(db_obj.geom, str):
+        db_obj.geom = WKTElement(db_obj.geom)
+    db_obj.geom = to_shape(db_obj.geom).wkt
+    return db_obj
+
+
+# return (
+#     db.query(SolarPark)
+#     .filter(SolarPark.geom.intersects(WKTElement(obj_in.geom)))
+#     .first()
+# )
 
 
 def transform_solarpark_observation(
