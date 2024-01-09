@@ -9,8 +9,10 @@ from botocore.credentials import InstanceMetadataFetcher, InstanceMetadataProvid
 from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 
+from app.core.config import settings
 from .logging_config import get_logger
 
+# import logging
 """
 
 ToDo: Rework the login with boto3
@@ -39,7 +41,7 @@ session = boto3.Session(
     region_name=region_name,
 )
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 # local file
 # local file
 if not os.environ.get("DOCKERIZED"):
@@ -76,6 +78,7 @@ else:
 # create s3 client
 s3_client = session.client("s3")
 ec2_client = session.client("ec2", region_name="eu-central-1")
+ec2_resource = session.resource("ec2", region_name="eu-central-1")
 
 
 def verify_aws_credentials() -> bool:
@@ -93,45 +96,105 @@ aws_available = verify_aws_credentials()
 
 # client = docker.from_env()
 
-
 EC2_KWARGS = {
-    "ImageId": "ami-07151644aeb34558a",  # ID des Amazon Linux 2 AMI
-    "InstanceType": "t2.micro",  # Instanztyp t3.medium
-    "MinCount": 1,  # Mindestanzahl von Instanzen
-    "MaxCount": 1,  # Maximale Anzahl von Instanzen
-    "KeyName": "Ec2-boto3",  # Name des Schlüsselpaars
-    "SubnetId": "subnet-054aaab26d7a9f96f",
-    "SecurityGroupIds": ["sg-0b7b73b05e7577a3b"],  # ID der Sicherheitsgruppe
-    "BlockDeviceMappings": [
-        {
-            "DeviceName": "/dev/xvda",
-            "Ebs": {
-                "VolumeSize": 20,  # Größe des Root-Volumes in GB
-                "DeleteOnTermination": True,
-                "VolumeType": "gp3",
-            },
-        },
-    ],
-    "UserData": """#!/bin/bash
+    "ImageId": "ami-07151644aeb34558a",
+    "InstanceType": "t3.small",
+    "MinCount": 1,
+    "MaxCount": 1,
+    "KeyName": "Ec2-boto3",
+    "SecurityGroupIds": ["sg-0b7b73b05e7577a3b"],
+    "IamInstanceProfile": {
+        "Arn": "arn:aws:iam::103976228435:instance-profile/EC2_S3_allowens"
+    },
+    "SubnetId": "subnet-0e19e3f6d404a4467",
+    "UserData": f"""#!/bin/bash
                 sudo yum update -y
                 sudo yum install docker -y
                 sudo service docker start
                 sudo usermod -a -G docker ec2-user
-                sudo curl \
-                    -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) \
-                    -o /usr/local/bin/docker-compose
-                sleep 3
-                sudo chmod +x /usr/local/bin/docker-compose
-             """,  # Skript, das beim Start der Instanz ausgeführt wird
+                sudo docker pull taraman12/api-ml-serve:latest
+                sudo docker pull taraman12/api-preprocessing:latest
+                sudo docker swarm join --token {settings.DOCKER_SWARM_JOIN_TOKEN_WORKER} {settings.DOCKER_SWARM_MANAGER_IP}:2377
+
+             """,
     "TagSpecifications": [
         {
             "ResourceType": "instance",
             "Tags": [
-                {"Key": "Name", "Value": "solar-park-detection-ml-serve"},
+                {"Key": "Name", "Value": "worker-instance"},
             ],
         },
     ],
 }
+# echo 'sudo docker swarm leave --force' > /usr/local/bin/docker-swarm-leave.sh
+# chmod +x /usr/local/bin/docker-swarm-leave.sh
+# echo '[Unit]
+# Description=Leave Docker Swarm before shutdown
+# DefaultDependencies=no
+# Before=shutdown.target reboot.target halt.target
+
+# [Service]
+# Type=oneshot
+# ExecStart=/usr/local/bin/docker-swarm-leave.sh
+# TimeoutStartSec=0
+
+# [Install]
+# WantedBy=halt.target reboot.target shutdown.target' > /etc/systemd/system/docker-swarm-leave.service
+# systemctl enable docker-swarm-leave
+# sudo docker service create -d \
+#     -p 8080:8080 \
+#     --network mynetwork \
+#     --name ml-serve \
+#     taraman12/api-ml-serve:latest
+# sudo docker service create -d \
+#     -v /var/run/docker.sock:/var/run/docker.sock \
+#     -p 8000:8000 \
+#     --network mynetwork \
+#     --name preprocessing-w \
+#     -e FIRST_SUPERUSER={settings.FIRST_SUPERUSER} \
+#     -e FIRST_SUPERUSER_PASSWORD={settings.FIRST_SUPERUSER_PASSWORD} \
+#     -e DOCKER_SWARM_JOIN_TOKEN_MANAGER={settings.DOCKER_SWARM_JOIN_TOKEN_MANAGER} \
+#     -e DOCKER_SWARM_MANAGER_IP={settings.DOCKER_SWARM_MANAGER_IP} \
+#     taraman12/api-preprocessing:latest
+
+# EC2_KWARGS = {
+#     "ImageId": "ami-07151644aeb34558a",  # ID des Amazon Linux 2 AMI
+#     "InstanceType": "t2.micro",  # Instanztyp t3.medium
+#     "MinCount": 1,  # Mindestanzahl von Instanzen
+#     "MaxCount": 1,  # Maximale Anzahl von Instanzen
+#     "KeyName": "Ec2-boto3",  # Name des Schlüsselpaars
+#     "SubnetId": "subnet-054aaab26d7a9f96f",
+#     "SecurityGroupIds": ["sg-0b7b73b05e7577a3b"],  # ID der Sicherheitsgruppe
+#     "BlockDeviceMappings": [
+#         {
+#             "DeviceName": "/dev/xvda",
+#             "Ebs": {
+#                 "VolumeSize": 20,  # Größe des Root-Volumes in GB
+#                 "DeleteOnTermination": True,
+#                 "VolumeType": "gp3",
+#             },
+#         },
+#     ],
+#     "UserData": """#!/bin/bash
+#                 sudo yum update -y
+#                 sudo yum install docker -y
+#                 sudo service docker start
+#                 sudo usermod -a -G docker ec2-user
+#                 sudo curl \
+#                     -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) \
+#                     -o /usr/local/bin/docker-compose
+#                 sleep 3
+#                 sudo chmod +x /usr/local/bin/docker-compose
+#              """,  # Skript, das beim Start der Instanz ausgeführt wird
+#     "TagSpecifications": [
+#         {
+#             "ResourceType": "instance",
+#             "Tags": [
+#                 {"Key": "Name", "Value": "solar-park-detection-ml-serve"},
+#             ],
+#         },
+#     ],
+# }
 
 # EC2_KWARGS = {
 #     "ImageId": "ami-07151644aeb34558a",  # ID des Amazon Linux 2 AMI
