@@ -8,6 +8,11 @@ from logging_config import get_logger
 
 logger = get_logger("BaseConfig")
 
+"""
+ToDo: change to tenacity
+
+"""
+
 
 def run_checks() -> None:
     """Runs all health checks."""
