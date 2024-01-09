@@ -56,7 +56,7 @@ def get_url():
     if os.environ.get("DOCKERIZED") == "true":
         USER = os.getenv("POSTGRES_USER", "postgres")
         PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
-        SERVER = os.getenv("POSTGRES_SERVER", "db")
+        SERVER = os.getenv("POSTGRES_HOST", "db")
         DB = os.getenv("POSTGRES_DB", "app")
     else:
         src_path = get_src_path()
@@ -64,7 +64,7 @@ def get_url():
         load_dotenv(dotenv_path)
         USER = os.getenv("POSTGRES_USER", "postgres")
         PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
-        SERVER = "localhost"
+        SERVER = os.getenv("POSTGRES_HOST", "localhost")
         DB = os.getenv("POSTGRES_DB", "app")
     return f"postgresql://{USER}:{PASSWORD}@{SERVER}/{DB}"
 
