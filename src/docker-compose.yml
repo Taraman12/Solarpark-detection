@@ -17,8 +17,8 @@ services:
 
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
-    expose:
-      - ${POSTGRES_PORT}
+    # expose:
+    #   - ${POSTGRES_PORT}
     networks:
       - mynetwork
 
@@ -45,8 +45,8 @@ services:
       - DOCKER_SWARM_JOIN_TOKEN_WORKER=${DOCKER_SWARM_JOIN_TOKEN_WORKER}
       - FIRST_SUPERUSER=${FIRST_SUPERUSER}
       - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}
-    expose:
-      - "8000"
+    # expose:
+    #   - "8000"
     networks:
       - mynetwork
     volumes:
