@@ -139,16 +139,17 @@ def start_instance(
 
 
 # FIXME: maybe doesn't work
-@router.delete("/terminate/{service}", response_model=schemas.Instance)
+@router.delete("/terminate/{instance_id}")  # response_model=schemas.Instance
 def terminate_instance_by_service(
     *,
     db: Session = Depends(deps.get_db),
-    service: str = "still InstanceID",
+    # service: str = "still InstanceID",
+    instance_id: str,
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Terminate an instance."""
     # instance = crud.instance.get_by_service(db=db, service=service)
     # if not instance:
     #     raise HTTPException(status_code=404, detail="instance not found")
-    crud.instance.terminate_instance(db=db, instance_id=instance_id)
+    instance = crud.instance.terminate_instance(db=db, instance_id=instance_id)
     return instance

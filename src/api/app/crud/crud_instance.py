@@ -120,23 +120,23 @@ class CRUDInstance(CRUDBase[Instance, InstanceCreate, InstanceUpdate]):
         return EC2_KWARGS
 
     def terminate_instance(self, db: Session, *, instance_id: dict) -> Any:
-        response = ec2_client.terminate_instances(instance_id)
+        response = ec2_client.terminate_instances(InstanceIds=[instance_id])
         # response = ec2_client.terminate_instances(
         #     InstanceIds=[instance.ec2_instance_id]
         # )
-        if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-            response = self.remove(db=db, id=instance.id)
-        else:
-            logging.error("Instance not terminated")
+        # if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+        #     response = self.remove(db=db, id=instance.id)
+        # else:
+        #     logging.error("Instance not terminated")
         return response
 
     def wait_for_instance_termination(ec2, instance_id):
         """
-        Wartet auf die Terminierung einer EC2-Instanz.
+        Wait for an EC2 instance to be terminated.
 
         Args:
-            ec2: Ein Boto3 EC2-Client.
-            instance_id: Die ID der EC2-Instanz.
+            ec2: boto3 client.
+            instance_id: ec2 instance id.
 
         Returns:
             None.
