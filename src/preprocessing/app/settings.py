@@ -14,17 +14,17 @@ MAKE_TRAININGS_DATA = os.getenv("MAKE_TRAININGS_DATA", "True").lower() in (
 PRODUCTION = os.getenv("PRODUCTION", "False").lower() in ("true", "1", "t")
 
 if DOCKERIZED:
-    load_dotenv(".env")
+    # load_dotenv()
     API_HOST = os.getenv("API_HOST", "api").lower()
     ML_HOST = os.getenv("ML_HOST", "ml-serve").lower()
-    FIRST_SUPERUSER = os.getenv("FIRST_SUPERUSER", "")
-    FIRST_SUPERUSER_PASSWORD = os.getenv("FIRST_SUPERUSER_PASSWORD", "")
+    FIRST_SUPERUSER = os.getenv("FIRST_SUPERUSER", "John@doe.com")
+    FIRST_SUPERUSER_PASSWORD = os.getenv("FIRST_SUPERUSER_PASSWORD", "password")
 else:
-    load_dotenv(".env")
+    load_dotenv()
     API_HOST = os.getenv("API_HOST", "localhost").lower()
     ML_HOST = os.getenv("ML_HOST", "localhost").lower()
-    FIRST_SUPERUSER = os.getenv("FIRST_SUPERUSER", "")
-    FIRST_SUPERUSER_PASSWORD = os.getenv("FIRST_SUPERUSER_PASSWORD", "")
+    FIRST_SUPERUSER = os.getenv("FIRST_SUPERUSER", "John@doe.com")
+    FIRST_SUPERUSER_PASSWORD = os.getenv("FIRST_SUPERUSER_PASSWORD", "password")
 
 
 MAKE_TRAININGS_DATA = False

@@ -18,10 +18,10 @@ def get_settings():
 
 SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = PostgresDsn.build(
     scheme="postgresql",
-    username=settings.USER,
-    password=settings.PASSWORD,
-    host=settings.HOST,
-    path=settings.DB,
+    username=settings.POSTGRES_USER,
+    password=settings.POSTGRES_PASSWORD,
+    host=settings.POSTGRES_HOST,  # set to localhost if parsing error local
+    path=settings.POSTGRES_DB,
 )
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI.unicode_string(), pool_pre_ping=True)

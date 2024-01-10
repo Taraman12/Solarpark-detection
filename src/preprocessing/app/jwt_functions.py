@@ -1,4 +1,5 @@
 import os
+import time
 
 import requests
 from constants import URL_API
@@ -44,6 +45,7 @@ def get_jwt_from_api(username: str | None = None, password: str | None = None) -
     Raises:
         Exception: If the request fails with a status code other than 401, or if the status code is 401 and the error message is "Not authenticated".
     """
+
     username = username or FIRST_SUPERUSER
     password = password or FIRST_SUPERUSER_PASSWORD
 
@@ -59,14 +61,17 @@ def get_jwt_from_api(username: str | None = None, password: str | None = None) -
 
     url = f"{URL_API}/login/access-token"
     data = {"username": username, "password": password}
-    # headers={"Content-Type": "application/x-www-form-urlencoded"}
-    # response = requests.post(url, data={"username": username, "password": password})
     logger.info(f"Sending request to API: {url}")
-    logger.info(f"Sending data to API: {data}")
-    response = requests.post(
-        "http://localhost:8000/api/v1/login/access-token",
-        data={"username": "John@doe.com", "password": "password"},
-    )
+    logger.info(f"Request data: {data}")
+    for i in range(3):
+        try:
+            response = requests.post(url, data=data)
+            response.raise_for_status()
+            break
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Request failed with exception: {e}")
+            if i < 2:
+                time.sleep(5)
     logger.info(f"Got response from API: {response}")
     if response.ok:
         return response.json()["access_token"]

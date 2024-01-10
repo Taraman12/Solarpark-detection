@@ -43,6 +43,10 @@ tags_metadata = [
         "description": "Operations with solarpark observations. The observation is used to detect the solarpark.",
     },
     {
+        "name": "service",
+        "description": "Operations with the service.",
+    },
+    {
         "name": "user",
         "description": "A user needs to be registered to use the API post/put/delete methods.",
     },
@@ -91,6 +95,10 @@ def get_application() -> FastAPI:
 
 
 app = get_application()
+
+
 # will be moved to a startup script
+# @app.on_event("startup")
+# async def startup_event():
 db = SessionLocal()
 init_db(db)

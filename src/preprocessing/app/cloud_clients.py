@@ -10,16 +10,22 @@ from logging_config import get_logger
 
 logger = get_logger("BaseConfig")
 
+"""
+ToDo: rework aws credentials
+"""
 # local file
 if not os.environ.get("DOCKERIZED"):
     load_dotenv()
 
+
+logger.info("aws_access_key_id: ", os.getenv("aws_access_key_id"))
+
 # In local docker environment, the AWS credentials are stored in the .env file
-if os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get("AWS_SECRET_ACCESS_KEY"):
+if os.environ.get("aws_access_key_id") and os.environ.get("aws_secret_access_key"):
     session = boto3.Session(
-        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.environ.get("AWS_REGION"),
+        aws_access_key_id=os.environ.get("aws_access_key_id"),
+        aws_secret_access_key=os.environ.get("aws_secret_access_key"),
+        region_name=os.environ.get("region_name"),
     )
 
 # if deployed on aws ec2 instance, the credentials are provided by the IAM role of the ec2 instance
@@ -28,7 +34,7 @@ else:
     provider = InstanceMetadataProvider(
         iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
     )
-    if provider is None:
+    if provider.load() is None:
         raise ValueError("No IAM role found")
     try:
         credentials = provider.load().get_frozen_credentials()
@@ -52,7 +58,7 @@ def verify_aws_credentials() -> bool:
         s3_client.list_buckets()
         return True
     except ClientError:
-        print("Credentials are NOT valid.")
+        logger.error("Credentials are NOT valid.")
         return False
 
 

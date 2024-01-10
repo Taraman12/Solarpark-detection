@@ -10,6 +10,10 @@ from app.db import base  # noqa: F401
 # otherwise, SQL Alchemy might fail to initialize relationships properly
 # for more details: https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/28
 
+"""
+ToDo: add initial instance to database
+"""
+
 
 def init_db(db: Session) -> None:
     # Tables should be created with Alembic migrations

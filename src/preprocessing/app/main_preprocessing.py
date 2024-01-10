@@ -73,7 +73,7 @@ def run_setup() -> None:
     create_output_directories(output_dirs)
     # ! username and password change later
     try:
-        token = get_jwt_from_api(username="John@Doe.com", password="password")
+        token = get_jwt_from_api()
         store_jwt(token)
     except Exception as e:
         logger.error(f"Could not get JWT from API: {e}")

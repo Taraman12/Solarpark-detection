@@ -22,13 +22,9 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./app /code/app
 COPY ./alembic /code/alembic
 COPY ./alembic.ini /code/alembic.ini
-# COPY ./app/cloud/.env /code/app/.env
-# COPY ./app/cloud/docker-compose.yml /code/app/docker-compose.yml
-# RUN alembic revision --autogenerate -m "init"
-# RUN alembic upgrade head
 
-# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-# CMD ["/bin/bash", "-c","alembic upgrade head; uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# COPY ./prestart.sh /code/prestart.sh
 
 # If running behind a proxy like Nginx or Traefik add --proxy-headers
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+# (moved to docker-compose.yml)
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]

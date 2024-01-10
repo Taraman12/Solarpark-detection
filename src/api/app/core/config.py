@@ -1,6 +1,5 @@
 # build-in
-# import secrets
-# import os
+import secrets
 from typing import List, Optional, Union
 
 # third-party
@@ -13,31 +12,25 @@ from pydantic import (  # PostgresDsn, validator
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# def get_env_file() -> str:
-#     if os.getenv("ENVIRONMENT") == "DOCKERIZED":
-#         return ".env.docker"
-
-#     return ".env.local"
-
 # ToDo: Revisit BACKEND_CORS_ORIGINS
 
 
 class Settings(BaseSettings):
     # env_file: str = get_env_file()
     model_config = SettingsConfigDict(
-        env_prefix="POSTGRES_",
-        env_file=".env",
+        # `.env.prod` takes priority over `.env`
+        env_file=(".env", ".env.prod"),
         env_file_encoding="utf-8",
-        case_sensitive=True,
+        extra="ignore",
     )
 
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = Field(
-        "YOUR_SECRET_KEY", alias="SECRET_KEY"
-    )  # secrets.token_urlsafe(32)
+    SECRET_KEY: str = Field(secrets.token_urlsafe(32))  # secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    SERVER_NAME: str = "localhost"
+
+    # SERVER_NAME: str = "localhost"
+    # used for email templates
     SERVER_HOST: AnyHttpUrl = "http://localhost:8080"
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
         "http://localhost",
@@ -70,17 +63,22 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Solar-Park-Detection"
     SENTRY_DSN: Optional[HttpUrl] = None
 
-    HOST: str = "localhost"
-    PORT: str = "5432"
-    USER: str = Field("postgres")
-    PASSWORD: str = Field("postgres")
-    DB: str = "solar-park-detection"
+    POSTGRES_HOST: str = Field("localhost")
+    POSTGRES_PORT: str = Field("5432")
+    POSTGRES_USER: str = Field("postgres")
+    POSTGRES_PASSWORD: str = Field("postgres")
+    POSTGRES_DB: str = Field("solar-park-detection")
 
-    FIRST_SUPERUSER: EmailStr = "John@Doe.com"
-    FIRST_SUPERUSER_PASSWORD: str = "password"
+    FIRST_SUPERUSER: EmailStr = Field("example@mail.com")  # John@doe.com
+    FIRST_SUPERUSER_PASSWORD: str = Field("password")
     USERS_OPEN_REGISTRATION: bool = False
 
     EMAILS_ENABLED: bool = False
+
+    DOCKER_SWARM_MANAGER_IP: str = Field("ip-address")
+    DOCKER_SWARM_JOIN_TOKEN_MANAGER: str = Field("Manager-Token")
+    DOCKER_SWARM_JOIN_TOKEN_WORKER: str = Field("Worker-Token")
+
     # SMTP_TLS: bool = True
     # SMTP_PORT: Optional[int] = None
     # SMTP_HOST: Optional[str] = None
