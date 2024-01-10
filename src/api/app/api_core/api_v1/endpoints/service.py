@@ -1,15 +1,13 @@
+from typing import Any
+
+import docker
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-import docker
-from typing import Any, List
-import requests
 
-from app import crud, models, schemas
-from app.core.config import settings
-import logging
-
-from app.cloud.logging_config import get_logger
+from app import crud, models
 from app.api_core import deps
+from app.cloud.logging_config import get_logger
+from app.core.config import settings
 
 logger = get_logger(__name__)
 
@@ -81,7 +79,7 @@ def get_service_from_swarm(
     try:
         response = client.services.get(serviceID)
         return
-    except docker.errors.NotFound as e:
+    except docker.errors.NotFound:
         logger.error(f"Service with ID: {serviceID} not found in swarm")
         return {"response": f"Service with ID: {serviceID} not found in swarm"}
     except Exception as e:
@@ -99,7 +97,7 @@ def update_service_from_swarm(
     try:
         service = client.services.get(serviceID)
         service.update(image=image)
-    except docker.errors.NotFound as e:
+    except docker.errors.NotFound:
         logger.error(f"Service with ID: {serviceID} not found in swarm")
         return {"response": f"Service with ID: {serviceID} not found in swarm"}
     except Exception as e:
@@ -115,7 +113,7 @@ def remove_service_from_swarm(
     # client = docker.from_env()
     try:
         response = client.services.get(name).remove()
-    except docker.errors.NotFound as e:
+    except docker.errors.NotFound:
         logger.error(f"Service {name} not found in swarm")
         return {"response": f"Service {name} not found in swarm"}
     except Exception as e:

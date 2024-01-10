@@ -10,6 +10,7 @@ from botocore.errorfactory import ClientError
 from dotenv import load_dotenv
 
 from app.core.config import settings
+
 from .logging_config import get_logger
 
 # import logging

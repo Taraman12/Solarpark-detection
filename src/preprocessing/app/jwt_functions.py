@@ -1,10 +1,10 @@
 import os
 import time
+
 import requests
 from constants import URL_API
 from logging_config import get_logger
 from settings import FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD
-import json
 
 logger = get_logger("BaseConfig")
 

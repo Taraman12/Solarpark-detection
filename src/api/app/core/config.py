@@ -1,7 +1,5 @@
 # build-in
 import secrets
-
-
 from typing import List, Optional, Union
 
 # third-party

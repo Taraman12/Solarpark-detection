@@ -7,10 +7,10 @@ from .endpoints import (
     login,
     models,
     root,
+    service,
     solarpark,
     solarpark_observation,
     user,
-    service,
 )
 
 api_router = APIRouter()

@@ -1,37 +1,20 @@
 # third-party
-from fastapi import APIRouter, Depends, BackgroundTasks
-from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
+from typing import Any
+
 import docker
-from typing import Any, List
 import requests
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from sqlalchemy.orm import Session
+from tenacity import retry, stop_after_attempt, wait_fixed
 
-from app import crud, models, schemas
-from app.core.config import settings
-import logging
-
-from app.cloud.logging_config import get_logger
+from app import crud, models
 from app.api_core import deps
-
-import queue
-import threading
-import asyncio
-from tenacity import *
-import time
+from app.cloud.logging_config import get_logger
+from app.core.config import settings
 
 logger = get_logger(__name__)
 
 router = APIRouter()
-
-URL_API = "http://preprocessing-w"
-
-
-def log_stream():
-    while True:
-        message = log_queue.get()
-        if message is None:
-            break
-        yield message
 
 
 @router.get("/")
@@ -90,6 +73,7 @@ def add_service_to_swarm(
     network_name: str = "main_mynetwork",
     ports: dict = {8001: 8001},
 ) -> Any:
+    client = docker.from_env()
     try:
         response = client.services.create(
             image=image,
@@ -113,6 +97,7 @@ def add_ml_serve_to_swarm(
     service_name: str = "main_ml_serve",
     network_name: str = "main_mynetwork",
 ) -> Any:
+    client = docker.from_env()
     try:
         response = client.services.create(
             image=image,
@@ -127,7 +112,7 @@ def add_ml_serve_to_swarm(
 
 
 @retry(wait=wait_fixed(15), stop=stop_after_attempt(10))
-def wait_for_node():
+def wait_for_node(nodes_old: list = []):
     client = docker.from_env()
     nodes_new = client.nodes.list()
     logger.info("Waiting for node to join swarm...")
@@ -151,15 +136,15 @@ def start_instance_and_service(db: Session, service: str, instance_type: str):
     if not instance:
         raise HTTPException(status_code=404, detail="instance not found")
 
-    logger.info(f"Waiting for node to join swarm...")
+    logger.info("Waiting for node to join swarm...")
 
     try:
-        wait_for_node()
+        wait_for_node(nodes_old=nodes_old)
     except Exception as e:
         logger.error(e)
         return {"error": e}
 
-    logger.info(f"Node joined swarm")
+    logger.info("Node joined swarm")
 
     # add_ml_serve_to_swarm()
     add_service_to_swarm()
@@ -181,6 +166,9 @@ def start_service(
 
 
 # --------- Start Up ------------ #
+# The process works, however it is at least a t3.small instance needed to run the docker containers
+# but it is not in the aws free tier (only t3.micro)
+
 # 1. Start instance
 #   instance/start/{service}
 # 2. Check if instance is running by checking if two nodes exists

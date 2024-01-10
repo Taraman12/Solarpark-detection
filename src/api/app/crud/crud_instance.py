@@ -1,6 +1,5 @@
 # local modules
 # import boto3
-import logging
 import time
 from builtins import NotImplementedError
 from typing import Any
@@ -11,10 +10,10 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app.cloud.aws import EC2_KWARGS, ec2_client, ec2_resource
+from app.cloud.logging_config import get_logger
 from app.crud.base import CRUDBase
 from app.models.instance import Instance
 from app.schemas.instance import InstanceCreate, InstanceUpdate
-from app.cloud.logging_config import get_logger
 
 logger = get_logger(__name__)
 
