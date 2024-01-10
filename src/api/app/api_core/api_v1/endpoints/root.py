@@ -1,5 +1,5 @@
 # third-party
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 import docker
@@ -16,6 +16,8 @@ from app.api_core import deps
 import queue
 import threading
 import asyncio
+from tenacity import *
+import time
 
 logger = get_logger(__name__)
 
@@ -82,6 +84,102 @@ def docker_info():
     return {"info": info}
 
 
+def add_service_to_swarm(
+    image: str = "taraman12/api-preprocessing:latest",
+    service_name: str = "main_preprocessing",
+    network_name: str = "main_mynetwork",
+    ports: dict = {8001: 8001},
+) -> Any:
+    try:
+        response = client.services.create(
+            image=image,
+            name=service_name,
+            networks=[network_name],
+            endpoint_spec=docker.types.EndpointSpec(ports=ports),
+            env=[
+                f"FIRST_SUPERUSER={settings.FIRST_SUPERUSER}",
+                f"FIRST_SUPERUSER_PASSWORD={settings.FIRST_SUPERUSER_PASSWORD}",
+            ],
+        )
+    except Exception as e:
+        logger.error(e)
+        return {"error": e}
+
+    return {"serviceID": response.id}
+
+
+def add_ml_serve_to_swarm(
+    image: str = "taraman12/solar-park-detection-ml-serve:latest",
+    service_name: str = "main_ml_serve",
+    network_name: str = "main_mynetwork",
+) -> Any:
+    try:
+        response = client.services.create(
+            image=image,
+            name=service_name,
+            networks=[network_name],
+        )
+    except Exception as e:
+        logger.error(e)
+        return {"error": e}
+
+    return {"serviceID": response.id}
+
+
+@retry(wait=wait_fixed(15), stop=stop_after_attempt(10))
+def wait_for_node():
+    client = docker.from_env()
+    nodes_new = client.nodes.list()
+    logger.info("Waiting for node to join swarm...")
+    if len(nodes_new) < len(nodes_old):
+        raise Exception("Node not joined swarm")
+
+
+def start_instance_and_service(db: Session, service: str, instance_type: str):
+    logger.info(f"Starting instance for {service}")
+    client = docker.from_env()
+    logger.info(f"Client: {client.info()}")
+
+    nodes_old = client.nodes.list()
+    logger.info(f"Nodes before: {nodes_old}")
+    instance = crud.instance.start_instance(
+        db=db, service=service, instance_type=instance_type
+    )
+    logger.info(
+        f"Started instance with instance id: {instance['Instances'][0]['InstanceId']}"
+    )
+    if not instance:
+        raise HTTPException(status_code=404, detail="instance not found")
+
+    logger.info(f"Waiting for node to join swarm...")
+
+    try:
+        wait_for_node()
+    except Exception as e:
+        logger.error(e)
+        return {"error": e}
+
+    logger.info(f"Node joined swarm")
+
+    # add_ml_serve_to_swarm()
+    add_service_to_swarm()
+    # could check if service is running
+
+
+@router.post("/start-service")
+def start_service(
+    *,
+    db: Session = Depends(deps.get_db),
+    service: str,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+    instance_type: str = "t3.micro",
+    background_tasks: BackgroundTasks,
+) -> Any:
+    """Start service."""
+    background_tasks.add_task(start_instance_and_service, db, service, instance_type)
+    return {"status": "started"}
+
+
 # --------- Start Up ------------ #
 # 1. Start instance
 #   instance/start/{service}
@@ -103,7 +201,8 @@ def docker_info():
 #  service/remove-service
 # 7. Stop instance
 # and not stored with id in db
-# instance/terminate/{service}
+# instance/terminate/{service} (needs to be tested)
+#
 # todo: move to preprocessing service
 # @router.get("/leave-swarm")
 # def leave_swarm():
