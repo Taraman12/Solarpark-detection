@@ -27,10 +27,6 @@ aws_secret_access_key = os.getenv("aws_secret_access_key")
 region_name = os.getenv("region_name")
 BUCKET_NAME = os.getenv("aws_s3_bucket")
 
-COPERNICUS_API_USER = os.getenv("COPERNICUS_API_USER")
-COPERNICUS_API_SECRET = os.getenv("COPERNICUS_API_SECRET")
-COPERNICUS_API_URL = os.getenv("COPERNICUS_API_URL")
-
 DOCKERHUB_USER = os.getenv("DOCKERHUB_USER")
 DOCKERHUB_PASSWORD = os.getenv("DOCKERHUB_PASSWORD")
 
