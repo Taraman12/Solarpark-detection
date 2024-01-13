@@ -11,9 +11,9 @@ from app.core.config import settings
 
 
 # see: https://fastapi.tiangolo.com/advanced/settings/?h=envir
-@lru_cache()
-def get_settings():
-    return settings
+# @lru_cache()
+# def get_settings():
+#     return settings
 
 
 SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = PostgresDsn.build(
