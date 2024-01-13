@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = Field("5432")
     POSTGRES_USER: str = Field("postgres")
     POSTGRES_PASSWORD: str = Field("postgres")
-    POSTGRES_DB: str = Field("solar-park-detection")
+    POSTGRES_DB: str = Field("SolarParkDetection")
 
     FIRST_SUPERUSER: EmailStr = Field("example@mail.com")  # John@doe.com
     FIRST_SUPERUSER_PASSWORD: str = Field("password")
