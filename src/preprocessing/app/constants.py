@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from settings import API_HOST, ML_HOST
+from app.settings import API_HOST, ML_HOST
 
 # where will the images be stored/ name of the folder in s3 bucket
 # IMAGE_INPUT_DIR = Path(r"data_raw")

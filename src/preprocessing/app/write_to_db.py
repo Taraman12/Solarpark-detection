@@ -5,16 +5,16 @@ import numpy as np
 import rasterio
 import rasterio.features
 import requests
-from constants import AREA_THRESHOLD, HEADERS, MODEL_NAME, URL_API
-from jwt_functions import get_jwt
-from logging_config import get_logger
+from app.constants import AREA_THRESHOLD, HEADERS, MODEL_NAME, URL_API
+from app.jwt_functions import get_jwt
+from app.logging_config import get_logger
 from rasterio.crs import CRS, CRSError
 
 # from rasterio.features import geometry_mask
 from rasterio.warp import transform_geom
 from shapely.geometry import Polygon
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 """
 ToDo: Add avg_confidence to the data

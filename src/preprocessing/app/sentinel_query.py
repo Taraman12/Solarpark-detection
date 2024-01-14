@@ -2,11 +2,11 @@ from typing import Optional
 
 import pandas as pd
 import requests
-from constants import NOW_DICT
-from logging_config import get_logger
-from models.identifier import Identifier
+from app.constants import NOW_DICT
+from app.logging_config import get_logger
+from app.models.identifier import Identifier
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 
 def get_identifier_handler(

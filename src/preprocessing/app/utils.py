@@ -5,11 +5,11 @@ from typing import List
 import geopandas as gpd
 import rasterio
 from geopandas import GeoDataFrame
-from logging_config import get_logger
+from app.logging_config import get_logger
 from rasterio.windows import Window
-from settings import DOCKERIZED
+from app.settings import DOCKERIZED
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 
 def create_output_directories(output_dirs: List[Path]) -> None:

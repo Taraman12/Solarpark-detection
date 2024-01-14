@@ -14,9 +14,13 @@ import numpy as np
 import rasterio
 import rasterio.features
 import requests
-from aws_functions import delete_folder_on_aws, download_from_aws, upload_file_to_aws
-from cloud_clients import aws_available
-from constants import (
+from app.aws_functions import (
+    delete_folder_on_aws,
+    download_from_aws,
+    upload_file_to_aws,
+)
+from app.cloud_clients import aws_available
+from app.constants import (
     HEADERS,
     IDENTIFIER_REGEX,
     IMAGE_INPUT_DIR,
@@ -34,14 +38,14 @@ from constants import (
 from geopandas import GeoDataFrame
 
 # local modules
-from logging_config import get_logger
+from app.logging_config import get_logger
 from rasterio.features import geometry_mask  # noqa F401
 from rasterio.warp import transform_geom
 from rasterio.windows import Window
-from settings import MAKE_TRAININGS_DATA, PRODUCTION
+from app.settings import MAKE_TRAININGS_DATA, PRODUCTION
 from shapely.geometry import Polygon
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 """
 TODO: Add Class Solarpark (or Polygon)

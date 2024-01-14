@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from logging_config import get_logger
 from sentinelsat import SentinelAPI
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 
 def connect_to_sentinel_api() -> Union[SentinelAPI, Exception]:

@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 import numpy as np
-from constants import KERNEL_SIZE  # , STEP_SIZE, USED_BANDS
+from app.constants import KERNEL_SIZE  # , STEP_SIZE, USED_BANDS
 from rasterio.windows import Window
 
 

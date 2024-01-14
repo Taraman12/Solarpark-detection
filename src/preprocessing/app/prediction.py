@@ -3,10 +3,10 @@ from typing import Union
 
 import numpy as np
 import requests
-from constants import HEADERS, KERNEL_SIZE, MODEL_NAME, URL_ML, USED_BANDS
-from logging_config import get_logger
+from app.constants import HEADERS, KERNEL_SIZE, MODEL_NAME, URL_ML, USED_BANDS
+from app.logging_config import get_logger
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 
 def prediction_handler(
@@ -28,7 +28,7 @@ def prediction_handler(
         raise TypeError("Input image must be of type float64 or float32")
 
     if small_image.shape != (len(USED_BANDS), KERNEL_SIZE, KERNEL_SIZE):
-        logger.info(f"Input image shape: {small_image.shape}")
+        logger.debug(f"Input image shape: {small_image.shape}")
         small_image = small_image.transpose(2, 0, 1)
 
     try:

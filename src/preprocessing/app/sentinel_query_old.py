@@ -10,7 +10,7 @@ from sentinel_api import connect_to_sentinel_api
 from sentinelsat import SentinelAPI
 from sentinelsat.exceptions import ServerError, UnauthorizedError
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 
 def get_identifier(tile: str, dates: Union[dict, None] = None) -> Union[str, None]:

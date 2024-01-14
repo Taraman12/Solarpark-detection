@@ -2,12 +2,12 @@ import os
 from pathlib import Path
 from typing import Dict, Union
 
-from cloud_clients import s3_client
-from constants import USED_BANDS
-from logging_config import get_logger
-from models.identifier import Identifier
+from app.cloud_clients import s3_client
+from app.constants import USED_BANDS
+from app.logging_config import get_logger
+from app.models.identifier import Identifier
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 
 def download_from_sentinel_aws_handler(

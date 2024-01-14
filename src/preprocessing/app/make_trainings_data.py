@@ -9,15 +9,16 @@ from pathlib import Path
 import geopandas as gpd
 import numpy as np
 import rasterio
-import torch
-from constants import KERNEL_SIZE, STEP_SIZE, UNDERSAMPLING_RATE, USED_BANDS
-from models.identifier import Identifier
-from open_data import open_data_handler
-from preprocess import moving_window, pad_image, preprocess_handler
 from rasterio.features import geometry_mask
+import torch
+from app.constants import KERNEL_SIZE, STEP_SIZE, UNDERSAMPLING_RATE, USED_BANDS
+from app.models.identifier import Identifier
+from app.open_data import open_data_handler
+from app.preprocess import moving_window, pad_image, preprocess_handler
+
 
 # from rasterio.windows import Window
-from utils import update_metadata
+from app.utils import update_metadata
 
 """
 Idea:

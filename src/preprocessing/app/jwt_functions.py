@@ -2,11 +2,11 @@ import os
 import time
 
 import requests
-from constants import URL_API
-from logging_config import get_logger
-from settings import FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD
+from app.constants import URL_API
+from app.logging_config import get_logger
+from app.settings import FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 
 def get_jwt() -> str:
