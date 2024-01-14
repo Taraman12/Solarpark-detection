@@ -239,6 +239,7 @@ async function handleItemUpdate(item) {
   await addImage(url)
   await addOSMPolygon(data);
 }
+
 async function loadGoogleMaps(item) {
   await loader.load();
   map.value = new google.maps.Map(mapDiv.value, {

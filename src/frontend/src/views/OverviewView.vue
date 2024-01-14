@@ -181,6 +181,7 @@ async function addOSMPolygon(data) {
         maxZoom: 15,
     });
 }
+
 async function loadSource(url) {
     // const url = url
     const source = new GeoTIFF({
