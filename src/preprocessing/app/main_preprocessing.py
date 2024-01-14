@@ -9,9 +9,10 @@ import numpy as np
 # third-party
 # import debugpy
 import rasterio
+from rasterio.windows import Window
 
 # local-modules
-from constants import (
+from app.constants import (
     IMAGE_OUTPUT_DIR,
     KERNEL_SIZE,
     MASK_OUTPUT_DIR,
@@ -21,22 +22,22 @@ from constants import (
     URL_API,
     URL_ML,
 )
-from health_checks import run_checks
-from jwt_functions import get_jwt_from_api, store_jwt
-from logging_config import get_logger
-from models.identifier import Identifier
-from open_data import open_data_handler
-from prediction import prediction_handler
-from preprocess import moving_window, pad_image, preprocess_handler
-from rasterio.windows import Window
-from sentinel_on_aws import download_from_sentinel_aws_handler
-from sentinel_query import get_identifier_handler
-from settings import DOCKERIZED  # , MAKE_TRAININGS_DATA, PRODUCTION
-from utils import create_output_directories, load_tiles_file, update_metadata
-from write_to_db import write_to_db_handler
+from app.health_checks import run_checks
+from app.jwt_functions import get_jwt_from_api, store_jwt
+from app.logging_config import get_logger
+from app.models.identifier import Identifier
+from app.open_data import open_data_handler
+from app.prediction import prediction_handler
+from app.preprocess import moving_window, pad_image, preprocess_handler
+from app.sentinel_on_aws import download_from_sentinel_aws_handler
+from app.sentinel_query import get_identifier_handler
+from app.settings import DOCKERIZED  # , MAKE_TRAININGS_DATA, PRODUCTION
+from app.utils import create_output_directories, load_tiles_file, update_metadata
+from app.write_to_db import write_to_db_handler
+
 
 # set up logging
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 # Vscode remote debugging in docker
 # debugpy.listen(("0.0.0.0", 5678))
@@ -46,7 +47,10 @@ ToDo: Log/logger.info the number of total files saved
 """
 
 
-def main():
+def main(
+    tiles_list: list = None,
+    dates: Dict[str, str] = NOW_DICT,
+):
     logger.info(f"Dockerized = {DOCKERIZED}")
     logger.info(f"URL_ML = {URL_ML}")
     logger.info(f"URL_API = {URL_API}")
@@ -54,16 +58,20 @@ def main():
     run_setup()
     run_checks()
 
-    tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
-    tiles_list = ["32UQE"]
+    # tiles_list = ["32UQE"]
+    #! test needed
+    if tiles_list is None:
+        tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
+        tiles_list = list(set(tiles_gdf.tile_name))
 
     for tile_counter, tile_name in enumerate(tiles_list):
         # logger.info(f"Processing tile {tile_counter+1} of {len(set(tiles_gdf.tile_name))}")
         try:
-            process_tile(tile_name, tiles_gdf)
+            process_tile(tile_name=tile_name, dates=dates)
         except Exception as e:
             logger.error(f"Could not process tile {tile_name}: {e}")
             continue
+    logger.info("Finished processing all tiles")
 
 
 def run_setup() -> None:
@@ -80,8 +88,13 @@ def run_setup() -> None:
         exit(1)
 
 
-def process_tile(tile_name: str, tiles_gdf: gpd.GeoDataFrame):
-    identifier, band_file_info = get_identifier_and_band_info(tile_name=tile_name)
+def process_tile(
+    tile_name: str,
+    dates: Dict[str, str],
+):
+    identifier, band_file_info = get_identifier_and_band_info(
+        tile_name=tile_name, dates=dates
+    )
     if identifier is None or band_file_info is None:
         return
 
@@ -101,6 +114,7 @@ def process_tile(tile_name: str, tiles_gdf: gpd.GeoDataFrame):
 
     for row in range(num_rows + 1):
         for col in range(num_cols + 1):
+            logger.info(f"Processing tile {tile_name} row {row} col {col}")
             # Define the window coordinates for the snippet
             window = rasterio.windows.Window(
                 col * STEP_SIZE, row * STEP_SIZE, KERNEL_SIZE, KERNEL_SIZE
@@ -114,13 +128,15 @@ def process_tile(tile_name: str, tiles_gdf: gpd.GeoDataFrame):
                 identifier=identifier,
                 file_identifier=file_identifier,
             )
+    logger.info(f"Finished processing tile {tile_name}")
     return
 
 
 def get_identifier_and_band_info(
     tile_name: str,
+    dates: Dict[str, str] = NOW_DICT,
 ) -> Tuple[Identifier | None, Dict[str, Dict[str, Union[str, Path]]] | None]:
-    identifier = get_identifier_handler(tile_id=tile_name, dates=NOW_DICT)
+    identifier = get_identifier_handler(tile_id=tile_name, dates=dates)
     if identifier is None:
         return None, None
 
@@ -215,8 +231,9 @@ def process_window(
         metadata=metadata_small_image,
         tile_date=identifier.tile_date,
         filename=filename,
+        identifier=identifier.to_string(),
     )
-    print("writen to db")
+    logger.debug("written to db")
 
     return file_identifier
 
