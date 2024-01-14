@@ -32,7 +32,7 @@ def test_create_solarpark_observation_overlapping(
     assert content["size_in_sq_m"] == solarpark_observation["size_in_sq_m"]
     assert content["peak_power"] == solarpark_observation["peak_power"]
     assert content["avg_confidence"] == solarpark_observation["avg_confidence"]
-    assert content["name_in_aws"] == solarpark_observation["name_in_aws"]
+    assert content["image_identifier"] == solarpark_observation["image_identifier"]
     assert content["comment"] == solarpark_observation["comment"]
     assert content["lat"] == solarpark_observation["lat"]
     assert content["lon"] == solarpark_observation["lon"]
@@ -55,7 +55,7 @@ def test_create_solarpark_observation_non_overlapping(
     assert content["size_in_sq_m"] == solarpark_observation["size_in_sq_m"]
     assert content["peak_power"] == solarpark_observation["peak_power"]
     assert content["avg_confidence"] == solarpark_observation["avg_confidence"]
-    assert content["name_in_aws"] == solarpark_observation["name_in_aws"]
+    assert content["image_identifier"] == solarpark_observation["image_identifier"]
     assert content["comment"] == solarpark_observation["comment"]
     assert content["lat"] == solarpark_observation["lat"]
     assert content["lon"] == solarpark_observation["lon"]
@@ -82,7 +82,7 @@ def test_create_solarpark_observation_non_overlapping(
 #     assert content["size_in_sq_m"] == solarpark_observation.size_in_sq_m
 #     assert content["peak_power"] == solarpark_observation.peak_power
 #     assert content["avg_confidence"] == solarpark_observation.avg_confidence
-#     assert content["name_in_aws"] == solarpark_observation.name_in_aws
+#     assert content["image_identifier"] == solarpark_observation.image_identifier
 #     assert content["comment"] == solarpark_observation.comment
 #     assert content["lat"] == solarpark_observation.lat
 #     assert content["lon"] == solarpark_observation.lon
@@ -109,7 +109,9 @@ def test_update_solarpark_observation(
     assert content["size_in_sq_m"] == solarpark_observation_update["size_in_sq_m"]
     assert content["peak_power"] == solarpark_observation_update["peak_power"]
     assert content["avg_confidence"] == solarpark_observation_update["avg_confidence"]
-    assert content["name_in_aws"] == solarpark_observation_update["name_in_aws"]
+    assert (
+        content["image_identifier"] == solarpark_observation_update["image_identifier"]
+    )
     assert content["comment"] == solarpark_observation_update["comment"]
     assert content["lat"] == solarpark_observation_update["lat"]
     assert content["lon"] == solarpark_observation_update["lon"]
@@ -157,7 +159,7 @@ def test_delete_solarpark_observation(
     assert content["size_in_sq_m"] == solarpark_observation.size_in_sq_m
     assert content["peak_power"] == solarpark_observation.peak_power
     assert content["avg_confidence"] == solarpark_observation.avg_confidence
-    assert content["name_in_aws"] == solarpark_observation.name_in_aws
+    assert content["image_identifier"] == solarpark_observation.image_identifier
     assert content["comment"] == solarpark_observation.comment
     assert content["lat"] == solarpark_observation.lat
     assert content["lon"] == solarpark_observation.lon

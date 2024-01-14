@@ -34,7 +34,10 @@ def test_get_solarpark_observation(db: Session) -> None:
         solarpark_observation.avg_confidence
         == stored_solarpark_observation.avg_confidence
     )
-    assert solarpark_observation.name_in_aws == stored_solarpark_observation.name_in_aws
+    assert (
+        solarpark_observation.image_identifier
+        == stored_solarpark_observation.image_identifier
+    )
     assert solarpark_observation.comment == stored_solarpark_observation.comment
     assert solarpark_observation.lat == stored_solarpark_observation.lat
     assert solarpark_observation.lon == stored_solarpark_observation.lon
@@ -102,7 +105,10 @@ def test_update_solarpark_observation(db: Session) -> None:
     assert solarpark_observation.size_in_sq_m == solarpark_observation2.size_in_sq_m
     assert solarpark_observation.peak_power == solarpark_observation2.peak_power
     assert solarpark_observation.avg_confidence == solarpark_observation2.avg_confidence
-    assert solarpark_observation.name_in_aws == solarpark_observation2.name_in_aws
+    assert (
+        solarpark_observation.image_identifier
+        == solarpark_observation2.image_identifier
+    )
     assert solarpark_observation.comment == solarpark_observation2.comment
     assert solarpark_observation.lat == solarpark_observation2.lat
     assert solarpark_observation.lon == solarpark_observation2.lon
@@ -141,7 +147,7 @@ def test_get_as_geojson(db: Session) -> None:
 #     assert solarpark_observation2.size_in_sq_m == solarpark_observation.size_in_sq_m
 #     assert solarpark_observation2.peak_power == solarpark_observation.peak_power
 #     assert solarpark_observation2.avg_confidence == solarpark_observation.avg_confidence
-#     assert solarpark_observation2.name_in_aws == solarpark_observation.name_in_aws
+#     assert solarpark_observation2.image_identifier == solarpark_observation.image_identifier
 #     assert solarpark_observation2.comment == solarpark_observation.comment
 #     assert solarpark_observation2.lat == solarpark_observation.lat
 #     assert solarpark_observation2.lon == solarpark_observation.lon
@@ -184,8 +190,8 @@ def test_get_as_geojson(db: Session) -> None:
 #     == stored_solarpark_observations[0].avg_confidence
 # )
 # assert (
-#     solarpark_observation1.name_in_aws
-#     == stored_solarpark_observations[0].name_in_aws
+#     solarpark_observation1.image_identifier
+#     == stored_solarpark_observations[0].image_identifier
 # )
 # assert solarpark_observation1.comment == stored_solarpark_observations[0].comment
 # assert solarpark_observation1.lat == stored_solarpark_observations[0].lat
@@ -223,7 +229,7 @@ def test_get_as_geojson(db: Session) -> None:
 #     assert (
 #         solarpark_observation.avg_confidence == solarpark_observation_in.avg_confidence
 #     )
-#     assert solarpark_observation.name_in_aws == solarpark_observation_in.name_in_aws
+#     assert solarpark_observation.image_identifier == solarpark_observation_in.image_identifier
 #     assert solarpark_observation.comment == solarpark_observation_in.comment
 #     assert solarpark_observation.lat == solarpark_observation_in.lat
 #     assert solarpark_observation.lon == solarpark_observation_in.lon
@@ -254,7 +260,7 @@ def test_get_as_geojson(db: Session) -> None:
 #     assert solarpark_observation2.size_in_sq_m == solarpark_observation.size_in_sq_m
 #     assert solarpark_observation2.peak_power == solarpark_observation.peak_power
 #     assert solarpark_observation2.avg_confidence == solarpark_observation.avg_confidence
-#     assert solarpark_observation2.name_in_aws == solarpark_observation.name_in_aws
+#     assert solarpark_observation2.image_identifier == solarpark_observation.image_identifier
 #     assert solarpark_observation2.comment == solarpark_observation.comment
 #     assert solarpark_observation2.lat == solarpark_observation.lat
 #     assert solarpark_observation2.lon == solarpark_observation.lon

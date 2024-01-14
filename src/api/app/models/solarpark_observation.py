@@ -17,7 +17,7 @@ class SolarParkObservation(Base):
     peak_power = Column(Float)
     date_of_data = Column(Date)
     avg_confidence = Column(Float)
-    name_in_aws = Column(String)
+    image_identifier = Column(String)
     is_valid = Column(String, default="None")
     comment = Column(String, default="None")
     lat = Column(ARRAY(Float))

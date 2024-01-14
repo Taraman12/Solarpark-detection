@@ -129,7 +129,7 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
                 "first_detection": row["first_detection"],  # .strftime('%Y-%m-%d'),
                 "last_detection": row["last_detection"],  # .strftime('%Y-%m-%d'),
                 "avg_confidence": row["avg_confidence"],
-                "name_in_aws": row["name_in_aws"],
+                "image_identifier": row["image_identifier"],
                 "is_valid": row["is_valid"],
                 "comment": row["comment"],
             }
@@ -177,14 +177,14 @@ class CRUDSolarPark(CRUDBase[SolarPark, SolarParkCreate, SolarParkUpdate]):
                 first_detection=properties["first_detection"],
                 last_detection=properties["last_detection"],
                 avg_confidence=properties["avg_confidence"],
-                name_in_aws=properties["name_in_aws"],
+                image_identifier=properties["image_identifier"],
                 is_valid=properties["is_valid"],
                 comment=properties["comment"],
                 lat=latitudes,
                 lon=longitudes,
             )
             db.add(obj_in_data)
-            logger.info(f"Added {obj_in_data.name_in_aws} to database")
+            logger.info(f"Added {obj_in_data.image_identifier} to database")
             db.commit()
 
         # db.commit()

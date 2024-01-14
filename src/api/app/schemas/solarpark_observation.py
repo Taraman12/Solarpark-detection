@@ -40,7 +40,9 @@ class SolarParkObservationBase(BaseModel):
     peak_power: float = Field(10.0)
     date_of_data: date = Field(date.today())
     avg_confidence: float = Field(0.8)
-    name_in_aws: str = Field("31UGR_1011_2018-10-10.tif")
+    image_identifier: str = Field(
+        "S2A_MSIL1C_20170105T013442_N0204_R031_T53NMJ_20170105T013443"
+    )
     is_valid: Status = Field(Status.none)
     comment: str = "None"
     lat: List[float] = Field([599968.55, 599970.91, 599973.65, 599971.31, 599968.55])

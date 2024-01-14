@@ -19,7 +19,7 @@ class SolarPark(Base):
     first_detection = Column(Date)
     last_detection = Column(Date)
     avg_confidence_over_all_observations = Column(Float)
-    name_in_aws = Column(String)
+    image_identifier = Column(String)
     is_valid = Column(String, default="None")
     comment = Column(String, default="None")
     lat = Column(ARRAY(Float))

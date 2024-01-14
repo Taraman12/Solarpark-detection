@@ -18,7 +18,7 @@ def random_solarpark_observation_data() -> dict:
         "size_in_sq_m": 100.0,
         "peak_power": 100.0,
         "avg_confidence": 100.0,
-        "name_in_aws": "Test",
+        "image_identifier": "Test",
         "comment": "None",
         "lat": [599968.55, 599970.91, 599973.65, 599971.31, 599968.55],
         "lon": [5570202.63, 5570205.59, 5570203.42, 5570200.46, 5570202.63],
@@ -33,7 +33,7 @@ def random_solarpark_observation() -> SolarParkObservation:
     size_in_sq_m = 100.0
     peak_power = 100.0
     avg_confidence = 100.0
-    name_in_aws = random_lower_string()
+    image_identifier = random_lower_string()
     comment = "None"
     lat = [599968.55, 599970.91, 599973.65, 599971.31, 599968.55]
     lon = [5570202.63, 5570205.59, 5570203.42, 5570200.46, 5570202.63]
@@ -44,7 +44,7 @@ def random_solarpark_observation() -> SolarParkObservation:
         size_in_sq_m=size_in_sq_m,
         peak_power=peak_power,
         avg_confidence=avg_confidence,
-        name_in_aws=name_in_aws,
+        image_identifier=image_identifier,
         comment=comment,
         lat=lat,
         lon=lon,
