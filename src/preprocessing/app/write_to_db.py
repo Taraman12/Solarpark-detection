@@ -18,13 +18,16 @@ logger = get_logger(__name__)
 
 """
 ToDo: Add avg_confidence to the data
-ToDo: Add identifier (sentinel-2) to the data
-
+ToDo: Add variable model name to the data
 """
 
 
 def write_to_db_handler(
-    prediction: np.ndarray, metadata: dict, tile_date: str, filename: str
+    prediction: np.ndarray,
+    metadata: dict,
+    tile_date: str,
+    filename: str,
+    identifier: str,
 ) -> None:
     """
     Sends the prediction to the API.
@@ -34,11 +37,12 @@ def write_to_db_handler(
         metadata (dict): The metadata of the image.
         tile_date (str): The date of the image.
         filename (str): The filename of the image.
+        identifier (str): The identifier of the large image.
     """
     polygons, areas = prediction_to_polygons(prediction, metadata)
     for polygon, area in zip(polygons, areas):
         try:
-            write_to_db(polygon, area=area, tile_date=tile_date, filename=filename)
+            write_to_db(polygon, area=area, tile_date=tile_date, identifier=identifier)
             logger.info("Polygon written to DB")
         except Exception as e:
             logger.error(f"Could not write to DB: {e}")
@@ -46,7 +50,7 @@ def write_to_db_handler(
     return None
 
 
-def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
+def write_to_db(polygon: Polygon, area, tile_date: str, identifier: str) -> bool:
     if not isinstance(polygon, Polygon):
         raise TypeError("polygon must be a Polygon")
 
@@ -56,8 +60,8 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
     if not isinstance(tile_date, str):
         raise TypeError("tile_date must be a string")
 
-    if not isinstance(filename, str):
-        raise TypeError("filename must be a string")
+    if not isinstance(identifier, str):
+        raise TypeError("identifier must be a string")
 
     # tile_date = to_datetime_str(tile_date)
     lat, lon = extract_polygon_coordinates(polygon)
@@ -68,7 +72,7 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
         "peak_power": calc_peak_power(area_in_sq_m=area),
         "date_of_data": tile_date,
         "avg_confidence": 0,
-        "name_in_aws": filename,
+        "image_identifier": identifier,
         "is_valid": "None",
         "comment": "None",
         "lat": lat,
@@ -282,7 +286,7 @@ def extract_shapes(mask: np.array, transform: rasterio.transform) -> List[dict]:
     if mask.ndim != 2:
         raise ValueError("Input mask must be 2-dimensional")
 
-    # mask is used to times, because using float mask may not be precise and without mask=mask the 0 will be passed as features
+    # mask is used two times, because using float mask may not be precise and without mask=mask the 0 will be passed as features
     return list(rasterio.features.shapes(mask, mask=mask, transform=transform))
 
 
@@ -334,11 +338,14 @@ def transform_polygon(polygon: Polygon, crs: CRS) -> Polygon:
     """
     if not isinstance(polygon, Polygon):
         raise TypeError("polygon must be a shapely Polygon")
+
     if not isinstance(crs, CRS):
         raise TypeError("crs must be a string")
+
     try:
         transformed_geom = transform_geom(crs, "EPSG:4326", polygon.__geo_interface__)
     except CRSError:
         raise ValueError(f"{crs} is not a valid CRS")
+
     transformed_coords = transformed_geom["coordinates"][0]
     return Polygon(transformed_coords)

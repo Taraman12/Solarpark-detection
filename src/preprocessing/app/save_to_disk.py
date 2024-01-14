@@ -362,7 +362,7 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
         "peak_power": calc_peak_power(area_in_sq_m=area),
         "date_of_data": tile_date,
         "avg_confidence": 0,
-        "name_in_aws": filename,
+        "image_identifier": filename,
         "is_valid": "None",
         "comment": "None",
         "lat": lat,
