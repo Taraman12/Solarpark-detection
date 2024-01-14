@@ -1,6 +1,6 @@
 {
-  "name": "admin-one-vue-tailwind",
-  "version": "3.3.0",
+  "name": "new-frontend",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -9,20 +9,25 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.16.2",
+    "@googlemaps/markerclusterer": "^2.5.2",
     "@mdi/js": "^7.0.96",
     "axios": "^1.5.0",
     "chart.js": "^4.4.0",
     "numeral": "^2.0.6",
+    "ol": "^8.2.0",
     "pinia": "^2.1.6",
+    "proj4": "^2.10.0",
     "vue": "^3.3.4",
-    "vue-router": "^4.2.4"
+    "vue-router": "^4.2.4",
+    "vue-toastification": "^2.0.0-rc.5"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.3.3",
     "@tailwindcss/forms": "^0.5.6",
     "@vitejs/plugin-vue": "^4.3.4",
     "@vue/eslint-config-prettier": "^8.0.0",
-    "autoprefixer": "^10.4.15",
+    "autoprefixer": "^10.4.16",
     "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
     "postcss": "^8.4.30",
