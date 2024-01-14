@@ -1,12 +1,12 @@
 import time
 
 import requests
-from cloud_clients import aws_available
-from constants import URL_API, URL_ML
-from jwt_functions import check_jwt_against_api
-from logging_config import get_logger
+from app.cloud_clients import aws_available
+from app.constants import URL_API, URL_ML
+from app.jwt_functions import check_jwt_against_api
+from app.logging_config import get_logger
 
-logger = get_logger("BaseConfig")
+logger = get_logger(__name__)
 
 """
 ToDo: change to tenacity
@@ -14,7 +14,7 @@ ToDo: change to tenacity
 """
 
 
-def run_checks() -> None:
+def run_checks() -> str:
     """Runs all health checks."""
     logger.info("Running health checks")
 
@@ -22,16 +22,17 @@ def run_checks() -> None:
         logger.warning("AWS credentials not valid")
 
     if not check_ml_serve_online():
-        logger.error("ml-serve not online. Exiting.")
-        exit(2)
+        logger.error("ml-serve not online")
+        return "ml-serve not online"
 
     if not check_api_online():
-        logger.error("API not online. Exiting.")
-        exit(2)
+        logger.error("API not online")
+        return "API not online"
 
     if not check_jwt_against_api():
-        logger.error("JWT not valid. Exiting.")
-        exit(2)
+        logger.error("JWT not valid")
+        return "JWT not valid"
+    return "All checks passed"
 
 
 # def check_input_paths(input_dirs: List[Path]) -> bool:
