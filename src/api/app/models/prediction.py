@@ -27,6 +27,6 @@ class Prediction(Base):
     solarpark = relationship("SolarPark", back_populates="prediction")
 
 
-# @event.listens_for(SolarParkObservation, "after_insert")
+# @event.listens_for(Prediction, "after_insert")
 # def receive_after_insert(mapper, connection, target):
 #     # update solarpark

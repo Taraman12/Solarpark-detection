@@ -18,14 +18,14 @@ description = """
 This is the API for the Solarpark Detection Project.
 
 ## Solarpark
-in this project a solarpark is defined as a polygon with a name and a unique ID.
-The solarpark is used to group the observations.
-Each observation is assigned to a solarpark.
+In this project a solarpark is defined as a polygon with a name and a unique ID.\n
+The solarpark is used to group the prediction from every date.\n
+Each prediction is assigned to a solarpark (see prediction).
 
-## Observation
-An observation is a polygon with a date, a name, a confidence and a size.
-The observation is used to detect the solarpark.
-The observation is assigned to a solarpark.
+## Prediction
+An prediction is a polygon with a date, a confidence and a size, etc.\n
+The prediction is used to detect the solarpark.\n
+The prediction is assigned to a solarpark (n:1).\n
 
 """
 

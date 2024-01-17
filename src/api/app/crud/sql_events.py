@@ -2,10 +2,10 @@ from sqlalchemy import event
 from sqlalchemy.orm import Session
 
 from app.models.solarpark import SolarPark
-from app.models.prediction import SolarParkObservation
+from app.models.prediction import Prediction
 
 
-@event.listens_for(SolarParkObservation, "after_commit")
+@event.listens_for(Prediction, "after_commit")
 def update_name_of_model(mapper, connection, target):
     session = Session(bind=connection)
     solarpark = session.query(SolarPark).get(target.solarpark_id)
@@ -14,7 +14,7 @@ def update_name_of_model(mapper, connection, target):
     session.commit()
 
 
-@event.listens_for(SolarParkObservation, "after_commit")
+@event.listens_for(Prediction, "after_commit")
 def update_solarpark_dates(mapper, connection, target):
     session = Session(bind=connection)
     solarpark = session.query(SolarPark).get(target.solarpark_id)
@@ -24,7 +24,7 @@ def update_solarpark_dates(mapper, connection, target):
     session.commit()
 
 
-@event.listens_for(SolarParkObservation, "after_commit")
+@event.listens_for(Prediction, "after_commit")
 def update_average_confidence(mapper, connection, target):
     session = Session(bind=connection)
     solarpark = session.query(SolarPark).get(target.solarpark_id)
@@ -35,10 +35,10 @@ def update_average_confidence(mapper, connection, target):
     session.commit()
 
 
-event.listen(SolarParkObservation, "after_insert", update_name_of_model)
-event.listen(SolarParkObservation, "after_insert", update_solarpark_dates)
-event.listen(SolarParkObservation, "after_insert", update_average_confidence)
+event.listen(Prediction, "after_insert", update_name_of_model)
+event.listen(Prediction, "after_insert", update_solarpark_dates)
+event.listen(Prediction, "after_insert", update_average_confidence)
 
-event.listen(SolarParkObservation, "after_delete", update_name_of_model)
-event.listen(SolarParkObservation, "after_delete", update_solarpark_dates)
-event.listen(SolarParkObservation, "after_delete", update_average_confidence)
+event.listen(Prediction, "after_delete", update_name_of_model)
+event.listen(Prediction, "after_delete", update_solarpark_dates)
+event.listen(Prediction, "after_delete", update_average_confidence)

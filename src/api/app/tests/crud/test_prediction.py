@@ -2,7 +2,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app import crud
-from app.schemas.prediction import SolarParkObservationUpdate
+from app.schemas.prediction import PredictionUpdate
 from app.tests.utils.prediction import random_prediction
 
 solarpark_id = 22
@@ -30,13 +30,13 @@ def test_get_prediction(db: Session) -> None:
 
 
 def test_get_multi_without_solarpark_id(db: Session) -> None:
-    # Create some SolarParkObservation objects
+    # Create some Prediction objects
     prediction_in1 = random_prediction()
     prediction_in2 = random_prediction()
     crud.prediction.create(db, obj_in=prediction_in1, solarpark_id=solarpark_id)
     crud.prediction.create(db, obj_in=prediction_in2, solarpark_id=solarpark_id)
 
-    # Get multiple SolarParkObservation objects
+    # Get multiple Prediction objects
     db_obj = crud.prediction.get_multi(db, skip=0, limit=10000)
 
     # Check if the correct number of objects was retrieved
@@ -44,13 +44,13 @@ def test_get_multi_without_solarpark_id(db: Session) -> None:
 
 
 def test_get_multi_with_solarpark_id(db: Session) -> None:
-    # Create some SolarParkObservation objects
+    # Create some Prediction objects
     prediction_in1 = random_prediction()
     prediction_in2 = random_prediction()
     crud.prediction.create(db, obj_in=prediction_in1, solarpark_id=solarpark_id)
     crud.prediction.create(db, obj_in=prediction_in2, solarpark_id=solarpark_id)
 
-    # Get multiple SolarParkObservation objects
+    # Get multiple Prediction objects
     db_obj = crud.prediction.get_multi(
         db, skip=0, limit=10000, solarpark_id=solarpark_id
     )
@@ -72,7 +72,7 @@ def test_update_prediction(db: Session) -> None:
         db, obj_in=prediction_in, solarpark_id=solarpark_id
     )
 
-    prediction_in = SolarParkObservationUpdate(name_of_model="Test-update")
+    prediction_in = PredictionUpdate(name_of_model="Test-update")
     prediction2 = crud.prediction.update(db, db_obj=prediction, obj_in=prediction_in)
     assert prediction.id == prediction2.id
     assert prediction.name_of_model == prediction2.name_of_model
