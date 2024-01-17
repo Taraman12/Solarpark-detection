@@ -9,7 +9,7 @@ from app.db.base_class import Base
 # from sqlalchemy import event
 
 
-class SolarParkObservation(Base):
+class Prediction(Base):
     id = Column(Integer, primary_key=True, index=True)
     solarpark_id = Column(Integer, ForeignKey("solarpark.id", ondelete="CASCADE"))
     name_of_model = Column(String)
@@ -24,7 +24,7 @@ class SolarParkObservation(Base):
     lon = Column(ARRAY(Float))
     geom = Column(Geometry("POLYGON", srid=4326))
 
-    solarpark = relationship("SolarPark", back_populates="observations")
+    solarpark = relationship("SolarPark", back_populates="prediction")
 
 
 # @event.listens_for(SolarParkObservation, "after_insert")

@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 from app import crud
 
 # from app.core.config import settings
-from app.models.solarpark_observation import SolarParkObservation
+from app.models.prediction import SolarParkObservation
 from app.tests.utils.utils import random_lower_string
 
 
-def random_solarpark_observation_data() -> dict:
+def random_prediction_data() -> dict:
     data = {
         "name_of_model": "Test",
         "size_in_sq_m": 100.0,
@@ -27,7 +27,7 @@ def random_solarpark_observation_data() -> dict:
     return data
 
 
-def random_solarpark_observation() -> SolarParkObservation:
+def random_prediction() -> SolarParkObservation:
     name_of_model = random_lower_string()
     date_of_data = date(2021, 1, 1)
     size_in_sq_m = 100.0
@@ -38,7 +38,7 @@ def random_solarpark_observation() -> SolarParkObservation:
     lat = [599968.55, 599970.91, 599973.65, 599971.31, 599968.55]
     lon = [5570202.63, 5570205.59, 5570203.42, 5570200.46, 5570202.63]
     geom = "POLYGON ((599968.55 5570202.63, 599970.91 5570205.59, 599973.65 5570203.42, 599971.31 5570200.46, 599968.55 5570202.63))"
-    solarpark_observation = SolarParkObservation(
+    prediction = SolarParkObservation(
         name_of_model=name_of_model,
         date_of_data=date_of_data,
         size_in_sq_m=size_in_sq_m,
@@ -50,16 +50,14 @@ def random_solarpark_observation() -> SolarParkObservation:
         lon=lon,
         geom=geom,
     )
-    return solarpark_observation
+    return prediction
 
 
 # NOTE: id can be changed (should be automatically generated)
-def create_random_solarpark_observation(db: Session) -> SolarParkObservation:
-    solarpark_observation_in = random_solarpark_observation()
-    solarpark_observation = crud.solarpark_observation.create(
-        db, obj_in=solarpark_observation_in, solarpark_id=42
-    )
-    return solarpark_observation
+def create_random_prediction(db: Session) -> SolarParkObservation:
+    prediction_in = random_prediction()
+    prediction = crud.prediction.create(db, obj_in=prediction_in, solarpark_id=42)
+    return prediction
 
 
-# def random_solarpark_observation_update() -> SolarParkObservationUpdate:
+# def random_prediction_update() -> SolarParkObservationUpdate:

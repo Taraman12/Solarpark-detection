@@ -33,7 +33,7 @@ def test_get_solarpark(db: Session) -> None:
 # NOTE: It fails, because the db is not properly cleaned up after each test
 def test_get_multi_solarpark(db: Session) -> None:
     """
-    needs to create two solarpark_observation objects to check if get_multi works
+    needs to create two prediction objects to check if get_multi works
     """
     # solarpark_in1 = random_solarpark()
     # solarpark_in2 = random_solarpark()
@@ -86,7 +86,7 @@ def test_update_solarpark(db: Session) -> None:
     assert solarpark.geom == solarpark2.geom
 
 
-# NOTE: solarparks should be deleted automatically when deleting all solarpark_observation with solarpark_id
+# NOTE: solarparks should be deleted automatically when deleting all prediction with solarpark_id
 def test_delete_solarpark(db: Session) -> None:
     solarpark_in = random_solarpark()
     solarpark = crud.solarpark.create(db, obj_in=solarpark_in)

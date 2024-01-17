@@ -31,7 +31,7 @@ class CustomStr(str):
     pass
 
 
-class SolarParkObservationBase(BaseModel):
+class PredictionBase(BaseModel):
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
     # solarpark_id: int = Field("Test_id")
@@ -55,15 +55,15 @@ class SolarParkObservationBase(BaseModel):
     # WKTElement #Polygon
 
 
-class SolarParkObservation(SolarParkObservationBase):
+class Prediction(PredictionBase):
     id: int
     solarpark_id: int
     # group_id: str = Field(default_factory=lambda: str(uuid4()))
 
 
-class SolarParkObservationCreate(SolarParkObservationBase):
+class PredictionCreate(PredictionBase):
     pass
 
 
-class SolarParkObservationUpdate(SolarParkObservationBase):
+class PredictionUpdate(PredictionBase):
     pass

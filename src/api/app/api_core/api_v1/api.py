@@ -9,7 +9,7 @@ from .endpoints import (
     root,
     service,
     solarpark,
-    solarpark_observation,
+    prediction,
     user,
 )
 
@@ -18,9 +18,9 @@ api_router = APIRouter()
 api_router.include_router(root.router, tags=["root"])
 api_router.include_router(solarpark.router, prefix="/solarpark", tags=["solarpark"])
 api_router.include_router(
-    solarpark_observation.router,
-    prefix="/solarpark_observation",
-    tags=["solarpark_observation"],
+    prediction.router,
+    prefix="/prediction",
+    tags=["prediction"],
 )
 api_router.include_router(service.router, prefix="/service", tags=["service"])
 api_router.include_router(user.router, prefix="/user", tags=["user"])

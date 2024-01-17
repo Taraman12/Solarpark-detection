@@ -13,10 +13,10 @@ from sqlalchemy.orm import Session
 
 # from geoalchemy2.shape import InvalidShapeError
 from app.cloud.logging_config import get_logger
-from app.models.solarpark_observation import SolarParkObservation
-from app.schemas.solarpark_observation import (
-    SolarParkObservationCreate,
-    SolarParkObservationUpdate,
+from app.models.prediction import Prediction
+from app.schemas.prediction import (
+    PredictionCreate,
+    PredictionUpdate,
 )
 
 from .base import CRUDBase
@@ -33,15 +33,9 @@ fix this in the future, so that the geom is always a WKBElement
 """
 
 
-class CRUDSolarParkObservation(
-    CRUDBase[
-        SolarParkObservation, SolarParkObservationCreate, SolarParkObservationUpdate
-    ]
-):
-    def get(self, db: Session, *, id: int) -> SolarParkObservation:
-        db_obj = (
-            db.query(SolarParkObservation).filter(SolarParkObservation.id == id).first()
-        )
+class CRUDPrediction(CRUDBase[Prediction, PredictionCreate, PredictionUpdate]):
+    def get(self, db: Session, *, id: int) -> Prediction:
+        db_obj = db.query(Prediction).filter(Prediction.id == id).first()
         if db_obj is None:
             return None
         # db_obj.geom = functions.ST_AsText(db_obj.geom)
@@ -57,15 +51,15 @@ class CRUDSolarParkObservation(
         skip: int = 0,
         limit: int = 10000,
         solarpark_id: int = None,
-    ) -> SolarParkObservation:
-        # db_obj = db.query(SolarParkObservation).offset(skip).limit(limit).all()
+    ) -> Prediction:
+        # db_obj = db.query(Prediction).offset(skip).limit(limit).all()
 
         if solarpark_id is None:
-            db_obj = db.query(SolarParkObservation).offset(skip).limit(limit).all()
+            db_obj = db.query(Prediction).offset(skip).limit(limit).all()
         else:
             db_obj = (
-                db.query(SolarParkObservation)
-                .filter(SolarParkObservation.solarpark_id == solarpark_id)
+                db.query(Prediction)
+                .filter(Prediction.solarpark_id == solarpark_id)
                 .offset(skip)
                 .limit(limit)
                 .all()
@@ -104,10 +98,10 @@ class CRUDSolarParkObservation(
         return db_obj
 
     def create(
-        self, db: Session, *, obj_in: SolarParkObservationCreate, solarpark_id: int
-    ) -> SolarParkObservation:
+        self, db: Session, *, obj_in: PredictionCreate, solarpark_id: int
+    ) -> Prediction:
         obj_in_data = jsonable_encoder(obj_in)
-        db_obj = SolarParkObservation(**obj_in_data)  # type: ignore
+        db_obj = Prediction(**obj_in_data)  # type: ignore
         db_obj.solarpark_id = solarpark_id
         db.add(db_obj)
         db.commit()
@@ -119,9 +113,9 @@ class CRUDSolarParkObservation(
         self,
         db: Session,
         *,
-        db_obj: SolarParkObservation,
-        obj_in: Union[SolarParkObservationUpdate, Dict[str, Any]],
-    ) -> SolarParkObservation:
+        db_obj: Prediction,
+        obj_in: Union[PredictionUpdate, Dict[str, Any]],
+    ) -> Prediction:
         obj_data = jsonable_encoder(db_obj)
         if isinstance(obj_in, dict):
             update_data = obj_in
@@ -141,7 +135,7 @@ class CRUDSolarParkObservation(
         db: Session,
     ) -> Any:
         # https://gis.stackexchange.com/questions/233184/converting-geoalchemy2-elements-wkbelement-to-wkt/233246#233246?newreg=a18c8fcff5e245fda8395530e9933b85
-        db_obj = db.query(SolarParkObservation).all()
+        db_obj = db.query(Prediction).all()
         print("db_obj", db_obj)
         if db_obj is None:
             return None
@@ -207,7 +201,7 @@ class CRUDSolarParkObservation(
             latitudes = [coord[1] for coord in coords]
             longitudes = [coord[0] for coord in coords]
             properties = feature["properties"]
-            obj_in_data = SolarParkObservation(
+            obj_in_data = Prediction(
                 name_of_model=properties["name_of_model"],
                 size_in_sq_m=properties["size_in_sq_m"],
                 peak_power=properties["peak_power"],
@@ -227,8 +221,8 @@ class CRUDSolarParkObservation(
         # db.commit()
         return {"filename": file.filename}
 
-    def delete(self, db: Session, *, id: int) -> SolarParkObservation:
-        db_obj = db.query(SolarParkObservation).filter(SolarParkObservation.id == id)
+    def delete(self, db: Session, *, id: int) -> Prediction:
+        db_obj = db.query(Prediction).filter(Prediction.id == id)
         if db_obj is None:
             return None
         db_obj.delete()
@@ -236,8 +230,8 @@ class CRUDSolarParkObservation(
         return db_obj
 
     # ! danger zone (development only)
-    def remove_all(self, db: Session) -> SolarParkObservation:
-        db_obj = db.query(SolarParkObservation)
+    def remove_all(self, db: Session) -> Prediction:
+        db_obj = db.query(Prediction)
         if db_obj is None:
             return None
         db_obj.delete()
@@ -245,4 +239,4 @@ class CRUDSolarParkObservation(
         return db_obj
 
 
-solarpark_observation = CRUDSolarParkObservation(SolarParkObservation)
+prediction = CRUDPrediction(Prediction)

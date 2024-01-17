@@ -2,7 +2,7 @@ from sqlalchemy import event
 from sqlalchemy.orm import Session
 
 from app.models.solarpark import SolarPark
-from app.models.solarpark_observation import SolarParkObservation
+from app.models.prediction import SolarParkObservation
 
 
 @event.listens_for(SolarParkObservation, "after_commit")

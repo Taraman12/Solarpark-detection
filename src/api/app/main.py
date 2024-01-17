@@ -36,11 +36,11 @@ tags_metadata = [
     },
     {
         "name": "solarpark",
-        "description": "The solarpark is used to group the observations.",
+        "description": "The solarpark is used to group the predictions from different dates.",
     },
     {
-        "name": "solarpark_observation",
-        "description": "Operations with solarpark observations. The observation is used to detect the solarpark.",
+        "name": "prediction",
+        "description": "Each prediction is assigned to a solarpark.",
     },
     {
         "name": "service",
