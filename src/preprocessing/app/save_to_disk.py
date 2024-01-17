@@ -369,7 +369,7 @@ def write_to_db(polygon: Polygon, area, tile_date: str, filename: str) -> bool:
         "lon": lon,
         "geom": polygon.wkt,
     }
-    url = f"{URL_API}/solarpark_observation/"
+    url = f"{URL_API}/prediction/"
     logger.debug(f"Writing to DB: {data}")
     try:
         response = requests.post(url, headers=HEADERS, json=data)

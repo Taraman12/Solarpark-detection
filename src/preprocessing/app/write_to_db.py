@@ -81,7 +81,7 @@ def write_to_db(polygon: Polygon, area, tile_date: str, identifier: str) -> bool
     }
     token = get_jwt()
     HEADERS["Authorization"] = f"Bearer {token}"
-    url = f"{URL_API}/solarpark_observation/"
+    url = f"{URL_API}/prediction/"
     logger.debug(f"Writing to DB: {data}")
     try:
         response = requests.post(url, headers=HEADERS, json=data)
