@@ -11,6 +11,7 @@ from app import crud, models, schemas
 from app.api_core import deps
 
 router = APIRouter()
+
 # The Docstring are shown in the Swagger UI as the description of the endpoint.
 
 
@@ -46,6 +47,33 @@ def delete_all_solarparks(
     solarpark = crud.solarpark.remove_all(db=db)
     return solarpark
 
+
+@router.get("/download/as-geojson", response_class=StreamingResponse)
+async def get_as_geojson(
+    *,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """Retrieve all solar parks as geojson."""
+    # response = crud.solarpark.get_geojson(db)
+    # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
+    # print(response)
+    return crud.solarpark.get_as_geojson(db)  # response #crud.solarpark.get_geojson(db)
+
+
+@router.post("/upload/as-geojson")
+async def upload_as_geojson(
+    *,
+    db: Session = Depends(deps.get_db),
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """Upload geojson file."""
+    # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
+    message = await crud.solarpark.create_upload_file(db, file)
+    return message
+
+
+# ----------------- OLD Code ----------------- #
 
 # @router.post("/", response_model=schemas.SolarPark)
 # def create_solarpark(
@@ -84,33 +112,6 @@ def delete_all_solarparks(
 #         raise HTTPException(status_code=404, detail="solarpark not found")
 #     solarpark = crud.solarpark.remove(db=db, id=id)
 #     return solarpark
-
-
-@router.get("/download/as-geojson", response_class=StreamingResponse)
-async def get_as_geojson(
-    *,
-    db: Session = Depends(deps.get_db),
-) -> Any:
-    """Retrieve all solar parks as geojson."""
-    # response = crud.solarpark.get_geojson(db)
-    # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
-    # print(response)
-    return crud.solarpark.get_as_geojson(db)  # response #crud.solarpark.get_geojson(db)
-
-
-@router.post("/upload/as-geojson")
-async def upload_as_geojson(
-    *,
-    db: Session = Depends(deps.get_db),
-    file: UploadFile = File(...),
-) -> Any:
-    print("upload_as_geojson")
-    print(file)
-    """Upload geojson file."""
-    # response.headers["Content-Disposition"] = "attachment; filename=geodata.geojson"
-    message = await crud.solarpark.create_upload_file(db, file)
-    return message
-
 
 # @router.post("/check-overlap", response_model=schemas.SolarPark)
 # def create_solarpark_with_check_overlap(
