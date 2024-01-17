@@ -20,7 +20,7 @@ SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = PostgresDsn.build(
     scheme="postgresql",
     username=settings.POSTGRES_USER,
     password=settings.POSTGRES_PASSWORD,
-    host="localhost",  # settings.POSTGRES_HOST,  # set to localhost if parsing error local
+    host=settings.POSTGRES_HOST,  # set to localhost if parsing error local
     path=settings.POSTGRES_DB,
 )
 

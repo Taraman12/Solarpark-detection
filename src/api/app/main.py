@@ -15,7 +15,7 @@ from app.db.session import SessionLocal
 # TODO: Update description and tags_metadata
 
 description = """
-This is the API for the Solarpark Detection Project.
+This is the API for the Solarpark Detection Project: [Github Solarpark-detection](https://github.com/Taraman12/Solarpark-detection).
 
 ## Solarpark
 In this project a solarpark is defined as a polygon with a name and a unique ID.\n
@@ -23,9 +23,9 @@ The solarpark is used to group the prediction from every date.\n
 Each prediction is assigned to a solarpark (see prediction).
 
 ## Prediction
-An prediction is a polygon with a date, a confidence and a size, etc.\n
-The prediction is used to detect the solarpark.\n
-The prediction is assigned to a solarpark (n:1).\n
+An prediction is a polygon with a date, size, confidence etc.\n
+It is the result of the ml-model used to detect solarparks from sentinel-2 imagery.\n
+The prediction is assigned to a solarpark (n:1) to be validated.\n
 
 """
 
@@ -40,27 +40,27 @@ tags_metadata = [
     },
     {
         "name": "prediction",
-        "description": "Each prediction is assigned to a solarpark.",
+        "description": "Predictions are made from a self trained U-Net.",
     },
     {
         "name": "service",
-        "description": "Operations with the service.",
+        "description": "Operations with the microservices and docker.",
     },
     {
-        "name": "user",
-        "description": "A user needs to be registered to use the API post/put/delete methods.",
-    },
-    {
-        "name": "login",
-        "description": "Login to the API.",
+        "name": "instance",
+        "description": "Operations to keep track of the ec2 instances.",
     },
     {
         "name": "models",
         "description": "Operations to CRUD models to and from the ml server.",
     },
     {
-        "name": "instance",
-        "description": "Operations to keep track of the ec2 instances.",
+        "name": "login",
+        "description": "Login to the API.",
+    },
+    {
+        "name": "user",
+        "description": "A user needs to be registered to use the API post/put/delete methods.",
     },
 ]
 

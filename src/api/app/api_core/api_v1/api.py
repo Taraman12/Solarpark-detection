@@ -23,7 +23,7 @@ api_router.include_router(
     tags=["prediction"],
 )
 api_router.include_router(service.router, prefix="/service", tags=["service"])
-api_router.include_router(user.router, prefix="/user", tags=["user"])
-api_router.include_router(login.router, prefix="/login", tags=["login"])
-api_router.include_router(models.router, prefix="/models", tags=["models"])
 api_router.include_router(instance.router, prefix="/instance", tags=["instance"])
+api_router.include_router(models.router, prefix="/models", tags=["models"])
+api_router.include_router(login.router, prefix="/login", tags=["login"])
+api_router.include_router(user.router, prefix="/user", tags=["user"])
