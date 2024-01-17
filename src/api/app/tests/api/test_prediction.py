@@ -7,10 +7,7 @@ from sqlalchemy.orm import Session
 # from app.main import app
 from app.core.config import settings
 from app.main import app
-from app.tests.utils.prediction import (
-    create_random_prediction,
-    random_prediction_data,
-)
+from app.tests.utils.prediction import create_random_prediction, random_prediction_data
 
 client = TestClient(app)
 # from httpx import AsyncClient

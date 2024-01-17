@@ -5,8 +5,9 @@ from typing import List
 import geopandas as gpd
 import rasterio
 from geopandas import GeoDataFrame
-from app.logging_config import get_logger
 from rasterio.windows import Window
+
+from app.logging_config import get_logger
 from app.settings import DOCKERIZED
 
 logger = get_logger(__name__)

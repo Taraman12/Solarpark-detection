@@ -1,9 +1,10 @@
 from typing import Dict, List
-import requests
-from fastapi import FastAPI, BackgroundTasks
+
+from fastapi import BackgroundTasks, FastAPI
+
 from app.health_checks import run_checks
-from app.main_preprocessing import main, run_setup
 from app.logging_config import get_logger
+from app.main_preprocessing import main, run_setup
 
 logger = get_logger(__name__)
 

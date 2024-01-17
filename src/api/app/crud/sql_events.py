@@ -1,8 +1,8 @@
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from app.models.solarpark import SolarPark
 from app.models.prediction import Prediction
+from app.models.solarpark import SolarPark
 
 
 @event.listens_for(Prediction, "after_commit")

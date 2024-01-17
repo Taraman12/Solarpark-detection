@@ -3,11 +3,9 @@ import copy
 from pathlib import Path
 from typing import Any, Dict, Tuple, Union
 
-import geopandas as gpd
 import numpy as np
 
 # third-party
-# import debugpy
 import rasterio
 from rasterio.windows import Window
 
@@ -35,7 +33,6 @@ from app.settings import DOCKERIZED  # , MAKE_TRAININGS_DATA, PRODUCTION
 from app.utils import create_output_directories, load_tiles_file, update_metadata
 from app.write_to_db import write_to_db_handler
 
-
 # set up logging
 logger = get_logger(__name__)
 
@@ -59,7 +56,7 @@ def main(
     run_checks()
 
     # tiles_list = ["32UQE"]
-    #! test needed
+    # ! tests needed
     if tiles_list is None:
         tiles_gdf = load_tiles_file(path=PATH_TO_TILES)
         tiles_list = list(set(tiles_gdf.tile_name))

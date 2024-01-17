@@ -2,6 +2,7 @@ import os
 import time
 
 import requests
+
 from app.constants import URL_API
 from app.logging_config import get_logger
 from app.settings import FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD

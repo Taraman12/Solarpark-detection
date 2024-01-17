@@ -6,10 +6,10 @@ from .endpoints import (
     instance,
     login,
     models,
+    prediction,
     root,
     service,
     solarpark,
-    prediction,
     user,
 )
 

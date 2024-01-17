@@ -3,6 +3,7 @@ from typing import Union
 
 import numpy as np
 import requests
+
 from app.constants import HEADERS, KERNEL_SIZE, MODEL_NAME, URL_ML, USED_BANDS
 from app.logging_config import get_logger
 

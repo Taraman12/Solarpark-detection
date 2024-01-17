@@ -14,10 +14,7 @@ from sqlalchemy.orm import Session
 # from geoalchemy2.shape import InvalidShapeError
 from app.cloud.logging_config import get_logger
 from app.models.prediction import Prediction
-from app.schemas.prediction import (
-    PredictionCreate,
-    PredictionUpdate,
-)
+from app.schemas.prediction import PredictionCreate, PredictionUpdate
 
 from .base import CRUDBase
 

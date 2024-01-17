@@ -1,8 +1,9 @@
 from typing import Optional, Tuple
 
 import numpy as np
-from app.constants import KERNEL_SIZE  # , STEP_SIZE, USED_BANDS
 from rasterio.windows import Window
+
+from app.constants import KERNEL_SIZE  # , STEP_SIZE, USED_BANDS
 
 
 def preprocess_handler(

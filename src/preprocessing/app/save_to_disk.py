@@ -14,6 +14,12 @@ import numpy as np
 import rasterio
 import rasterio.features
 import requests
+from geopandas import GeoDataFrame
+from rasterio.features import geometry_mask  # noqa F401
+from rasterio.warp import transform_geom
+from rasterio.windows import Window
+from shapely.geometry import Polygon
+
 from app.aws_functions import (
     delete_folder_on_aws,
     download_from_aws,
@@ -35,15 +41,10 @@ from app.constants import (
     URL_API,
     URL_ML,
 )
-from geopandas import GeoDataFrame
 
 # local modules
 from app.logging_config import get_logger
-from rasterio.features import geometry_mask  # noqa F401
-from rasterio.warp import transform_geom
-from rasterio.windows import Window
 from app.settings import MAKE_TRAININGS_DATA, PRODUCTION
-from shapely.geometry import Polygon
 
 logger = get_logger(__name__)
 

@@ -2,6 +2,7 @@ from typing import Optional
 
 import pandas as pd
 import requests
+
 from app.constants import NOW_DICT
 from app.logging_config import get_logger
 from app.models.identifier import Identifier

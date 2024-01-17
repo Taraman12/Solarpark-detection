@@ -1,16 +1,8 @@
 # third-party
-from typing import Any
+from fastapi import APIRouter
 
-import docker
-import requests
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from sqlalchemy.orm import Session
-from tenacity import retry, stop_after_attempt, wait_fixed
-
-from app import crud, models
-from app.api_core import deps
+# local modules
 from app.cloud.logging_config import get_logger
-from app.core.config import settings
 
 logger = get_logger(__name__)
 
@@ -26,16 +18,6 @@ def root():
 def health_check():
     return {"status": "Healthy"}
 
-
-# Präsentation
-# - Ziele
-# - Vorgehen
-# - WEleche telchnologien
-# - Workloads der Daten
-# - Datenbank
-
-# -> Work EC2
-# Welches Deployment Strategy
 
 # --------- Start Up ------------ #
 # The process works, however it is at least a t3.small instance needed to run the docker containers
