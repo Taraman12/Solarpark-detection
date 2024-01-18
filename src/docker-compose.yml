@@ -66,8 +66,8 @@ services:
     #   # else on each thread (core) a model will be loaded
     #   cpus: 1.0
 
-    # preprocessing:
-    #   image: taraman12/solar-park-detection-preprocessing:latest
+    # processing:
+    #   image: taraman12/solar-park-detection-processing:latest
     #   depends_on:
     #     - ml-serve
     #   environment:

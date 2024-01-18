@@ -23,7 +23,7 @@ from app.utils import update_metadata
 """
 Idea:
 store just the raw bands and the masks in a folder
-so the preprocessing can be done on the fly
+so the processing can be done on the fly
 
 ToDos:
 - [ ] Add docstrings
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     )
     check_files_exist(path)
     masks_gdf = gpd.read_file(
-        "./src/preprocessing/app/data/trn_polygons_germany_tile_names.geojson"
+        "./src/processing/app/data/trn_polygons_germany_tile_names.geojson"
     )
     process_file_with_args = partial(process_file, masks_gdf=masks_gdf)
     with Pool(processes=4) as p:

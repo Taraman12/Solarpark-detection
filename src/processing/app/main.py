@@ -4,7 +4,7 @@ from fastapi import BackgroundTasks, FastAPI
 
 from app.health_checks import run_checks
 from app.logging_config import get_logger
-from app.main_preprocessing import main, run_setup
+from app.main_processing import main, run_setup
 
 logger = get_logger(__name__)
 
@@ -37,10 +37,10 @@ def run_prediction(
         dates = {"start_date": start_date, "end_date": end_date}
     else:
         dates = None
-    background_tasks.add_task(start_preprocessing, tiles_list=tiles_list, dates=dates)
+    background_tasks.add_task(start_processing, tiles_list=tiles_list, dates=dates)
     return {"status": "started"}
 
 
-def start_preprocessing(tiles_list: list = None, dates: Dict[str, str] = None):
+def start_processing(tiles_list: list = None, dates: Dict[str, str] = None):
     main(tiles_list=tiles_list, dates=dates)
     return {"Message": "Preprocessing finished"}

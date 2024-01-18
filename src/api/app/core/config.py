@@ -43,12 +43,12 @@ class Settings(BaseSettings):
         "http://3.66.239.204:80",
         "http://3.66.239.204",
         "http://localhost",
-        "http://preprocessing:7000",
-        "http://preprocessing",
+        "http://processing:7000",
+        "http://processing",
         "http://frontend:80",
         "http://frontend:8080",
         "http://frontend:5000",
-        "http://preprocessing:5678",
+        "http://processing:5678",
         "http://ml-serve:8081",
     ]
 

@@ -45,7 +45,7 @@ def health_check():
 # and not stored with id in db
 # instance/terminate/{service} (needs to be tested)
 #
-# todo: move to preprocessing service
+# todo: move to processing service
 # @router.get("/leave-swarm")
 # def leave_swarm():
 #     client = docker.from_env()

@@ -11,7 +11,7 @@ from constants import (
     NOW_DICT,
     STEP_SIZE,
 )
-from main_preprocessing import (  # process_window,
+from main_processing import (  # process_window,
     calc_rows_cols,
     get_identifier_and_band_info,
     get_prediction_and_filename,
@@ -23,9 +23,9 @@ from models.identifier import Identifier
 from rasterio.windows import Window
 
 
-@patch("main_preprocessing.get_jwt_from_api")
-@patch("main_preprocessing.store_jwt")
-@patch("main_preprocessing.create_output_directories")
+@patch("main_processing.get_jwt_from_api")
+@patch("main_processing.store_jwt")
+@patch("main_processing.create_output_directories")
 def test_run_setup_success(
     mock_create_output_directories, mock_store_jwt, mock_get_jwt_from_api
 ):
@@ -41,9 +41,9 @@ def test_run_setup_success(
     mock_store_jwt.assert_called_once_with("test_token")
 
 
-@patch("main_preprocessing.get_jwt_from_api")
-@patch("main_preprocessing.store_jwt")
-@patch("main_preprocessing.create_output_directories")
+@patch("main_processing.get_jwt_from_api")
+@patch("main_processing.store_jwt")
+@patch("main_processing.create_output_directories")
 def test_run_setup_jwt_api_failure(
     mock_create_output_directories, mock_store_jwt, mock_get_jwt_from_api
 ):
@@ -62,7 +62,7 @@ def test_run_setup_jwt_api_failure(
     mock_store_jwt.assert_not_called()
 
 
-@patch("main_preprocessing.get_identifier_handler")
+@patch("main_processing.get_identifier_handler")
 def test_get_identifier_and_band_info_no_identifier(mock_get_identifier_handler):
     # Test when get_identifier_handler returns None
     mock_get_identifier_handler.return_value = None
@@ -73,8 +73,8 @@ def test_get_identifier_and_band_info_no_identifier(mock_get_identifier_handler)
     )
 
 
-@patch("main_preprocessing.download_from_sentinel_aws_handler")
-@patch("main_preprocessing.get_identifier_handler")
+@patch("main_processing.download_from_sentinel_aws_handler")
+@patch("main_processing.get_identifier_handler")
 def test_get_identifier_and_band_info_success(
     mock_get_identifier_handler, mock_download_from_sentinel_aws_handler
 ):
@@ -93,8 +93,8 @@ def test_get_identifier_and_band_info_success(
     )
 
 
-@patch("main_preprocessing.preprocess_handler")
-@patch("main_preprocessing.open_data_handler")
+@patch("main_processing.preprocess_handler")
+@patch("main_processing.open_data_handler")
 def test_open_and_preprocess_data_no_stacked_bands(
     mock_open_data_handler, mock_preprocess_handler
 ):
@@ -110,8 +110,8 @@ def test_open_and_preprocess_data_no_stacked_bands(
     mock_preprocess_handler.assert_not_called()
 
 
-@patch("main_preprocessing.preprocess_handler")
-@patch("main_preprocessing.open_data_handler")
+@patch("main_processing.preprocess_handler")
+@patch("main_processing.open_data_handler")
 def test_open_and_preprocess_data_success(
     mock_open_data_handler, mock_preprocess_handler
 ):
@@ -183,7 +183,7 @@ def test_calc_rows_cols_width_not_int():
     )
 
 
-@patch("main_preprocessing.moving_window")
+@patch("main_processing.moving_window")
 def test_get_small_image_none(mock_moving_window):
     # Test when moving_window returns None
     mock_moving_window.return_value = None
@@ -192,7 +192,7 @@ def test_get_small_image_none(mock_moving_window):
     mock_moving_window.assert_called_once()
 
 
-@patch("main_preprocessing.moving_window")
+@patch("main_processing.moving_window")
 def test_get_small_image_max_zero(mock_moving_window):
     # Test when the maximum value of the small image is 0
     mock_moving_window.return_value = np.zeros((KERNEL_SIZE, KERNEL_SIZE, 4))
@@ -202,8 +202,8 @@ def test_get_small_image_max_zero(mock_moving_window):
 
 
 # TODO: Fix this test
-# @patch("main_preprocessing.moving_window")
-# @patch("main_preprocessing.pad_image")
+# @patch("main_processing.moving_window")
+# @patch("main_processing.pad_image")
 # def test_get_small_image_pad(mock_pad_image, mock_moving_window):
 #     # Test when the shape of the small image is not (KERNEL_SIZE, KERNEL_SIZE, 4)
 #     mock_moving_window.return_value = np.ones((KERNEL_SIZE - 1, KERNEL_SIZE - 1, 4))
@@ -216,7 +216,7 @@ def test_get_small_image_max_zero(mock_moving_window):
 #     )
 
 
-@patch("main_preprocessing.moving_window")
+@patch("main_processing.moving_window")
 def test_get_small_image_success(mock_moving_window):
     # Test successful run of get_small_image
     mock_moving_window.return_value = np.ones((KERNEL_SIZE, KERNEL_SIZE, 4))
@@ -225,7 +225,7 @@ def test_get_small_image_success(mock_moving_window):
     mock_moving_window.assert_called_once()
 
 
-@patch("main_preprocessing.prediction_handler")
+@patch("main_processing.prediction_handler")
 def test_get_prediction_and_filename_none(mock_prediction_handler):
     # Test when prediction_handler returns None
     mock_prediction_handler.return_value = None
@@ -238,7 +238,7 @@ def test_get_prediction_and_filename_none(mock_prediction_handler):
     # mock_prediction_handler.assert_called_once_with(small_image=np.array([1, 2, 3, 4]))
 
 
-@patch("main_preprocessing.prediction_handler")
+@patch("main_processing.prediction_handler")
 def test_get_prediction_and_filename_success(mock_prediction_handler):
     # Test successful run of get_prediction_and_filename
     mock_prediction_handler.return_value = np.array([5, 6, 7, 8])
@@ -252,7 +252,7 @@ def test_get_prediction_and_filename_success(mock_prediction_handler):
     # mock_prediction_handler.assert_called_once_with(small_image=np.array([1, 2, 3, 4]))
 
 
-# @patch("main_preprocessing.get_small_image")
+# @patch("main_processing.get_small_image")
 # def test_process_window_no_small_image(mock_get_small_image):
 #     # Test when get_small_image returns None
 #     mock_get_small_image.return_value = None
@@ -270,8 +270,8 @@ def test_get_prediction_and_filename_success(mock_prediction_handler):
 #     )
 
 
-# @patch("main_preprocessing.get_prediction_and_filename")
-# @patch("main_preprocessing.get_small_image")
+# @patch("main_processing.get_prediction_and_filename")
+# @patch("main_processing.get_small_image")
 # def test_process_window_no_prediction(
 #     mock_get_small_image, mock_get_prediction_and_filename
 # ):
@@ -295,10 +295,10 @@ def test_get_prediction_and_filename_success(mock_prediction_handler):
 #     )
 
 
-# @patch("main_preprocessing.write_to_db_handler")
-# @patch("main_preprocessing.update_metadata")
-# @patch("main_preprocessing.get_prediction_and_filename")
-# @patch("main_preprocessing.get_small_image")
+# @patch("main_processing.write_to_db_handler")
+# @patch("main_processing.update_metadata")
+# @patch("main_processing.get_prediction_and_filename")
+# @patch("main_processing.get_small_image")
 # def test_process_window_success(
 #     mock_get_small_image,
 #     mock_get_prediction_and_filename,

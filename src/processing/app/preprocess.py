@@ -9,7 +9,7 @@ from app.constants import KERNEL_SIZE  # , STEP_SIZE, USED_BANDS
 def preprocess_handler(
     array: np.ndarray, window: Optional[Window] = None, training: bool = False
 ) -> np.ndarray | None:
-    """Handles the preprocessing of the array.
+    """Handles the processing of the array.
 
     Args:
         array (np.ndarray): The array to preprocess (w, h, dim). Expected dtype is uint16 and shape is (w, h, dim).

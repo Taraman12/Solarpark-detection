@@ -36,8 +36,8 @@ def get_service_from_swarm(
 
 
 def add_service_to_swarm(
-    image: str = "taraman12/api-preprocessing:latest",
-    service_name: str = "main_preprocessing",
+    image: str = "taraman12/api-processing:latest",
+    service_name: str = "main_processing",
     network_name: str = "main_mynetwork",
     ports: dict = {8001: 8001},
 ) -> Any:
@@ -176,7 +176,7 @@ def run_service_checks(
 
 @router.post("/run-prediction")
 def run_prediction(
-    service_name: str = "preprocessing:7000",
+    service_name: str = "processing:7000",
     tiles_list: List[str] = ["32UQE"],
     start_date: str = "2020-05-01",
     end_date: str = "2020-07-02",
@@ -270,8 +270,8 @@ def get_nodes_info() -> Any:
 # todo: move to crud, and docker secrets
 # @router.post("/add-service")
 # def add_service_to_swarm(
-#     image: str = "taraman12/api-preprocessing:latest",
-#     service_name: str = "main_preprocessing",
+#     image: str = "taraman12/api-processing:latest",
+#     service_name: str = "main_processing",
 #     network_name: str = "main_mynetwork",
 # ) -> Any:
 #     # client = docker.from_env()

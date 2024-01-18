@@ -110,7 +110,7 @@ EC2_KWARGS = {
                 sudo service docker start
                 sudo usermod -a -G docker ec2-user
                 sudo docker pull taraman12/api-ml-serve:latest
-                sudo docker pull taraman12/api-preprocessing:latest
+                sudo docker pull taraman12/api-processing:latest
                 sudo docker swarm join --token {settings.DOCKER_SWARM_JOIN_TOKEN_WORKER} {settings.DOCKER_SWARM_MANAGER_IP}:2377
 
              """,
@@ -147,12 +147,12 @@ EC2_KWARGS = {
 #     -v /var/run/docker.sock:/var/run/docker.sock \
 #     -p 8000:8000 \
 #     --network mynetwork \
-#     --name preprocessing-w \
+#     --name processing-w \
 #     -e FIRST_SUPERUSER={settings.FIRST_SUPERUSER} \
 #     -e FIRST_SUPERUSER_PASSWORD={settings.FIRST_SUPERUSER_PASSWORD} \
 #     -e DOCKER_SWARM_JOIN_TOKEN_MANAGER={settings.DOCKER_SWARM_JOIN_TOKEN_MANAGER} \
 #     -e DOCKER_SWARM_MANAGER_IP={settings.DOCKER_SWARM_MANAGER_IP} \
-#     taraman12/api-preprocessing:latest
+#     taraman12/api-processing:latest
 
 # EC2_KWARGS = {
 #     "ImageId": "ami-07151644aeb34558a",  # ID des Amazon Linux 2 AMI
