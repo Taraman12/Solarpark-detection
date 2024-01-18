@@ -39,13 +39,13 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-ml-serve:latest
 
 
-      - name: Build and push preprocessing
+      - name: Build and push processing
         uses: docker/build-push-action@v4
         with:
-          context: ./src/preprocessing
-          file: ./src/preprocessing/preprocessing.dockerfile
+          context: ./src/processing
+          file: ./src/processing/processing.dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-preprocessing:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/solar-park-detection-processing:latest
 
       - name: Build and push api
         uses: docker/build-push-action@v4
