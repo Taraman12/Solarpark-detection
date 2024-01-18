@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 import docker
 import requests
@@ -149,7 +149,7 @@ def remove_service_from_swarm(
     return {"response": response}
 
 
-@router.get("/test_connection_service")
+@router.get("/test-connection-service")
 def test_connection(service_name: str):
     try:
         response = requests.get(f"http://{service_name}/")
@@ -161,7 +161,7 @@ def test_connection(service_name: str):
         return {"error": "connection failed"}
 
 
-@router.post("/run-service-checks")
+@router.get("/run-service-checks")
 def run_service_checks(
     service_name: str,
     current_user: models.User = Depends(deps.get_current_active_superuser),
@@ -171,10 +171,26 @@ def run_service_checks(
         response = requests.get(f"http://{service_name}/run-checks")
     except requests.exceptions.ConnectionError as e:
         return {"error": f"connection to {service_name}/ failed with error {e} "}
-    if response.json()["Message"] == "All checks passed":
-        return {"success": "connection established"}
-    else:
-        return {"error": "connection failed"}
+    return response.json()
+
+
+@router.post("/run-prediction")
+def run_prediction(
+    service_name: str = "preprocessing:7000",
+    tiles_list: List[str] = ["32UQE"],
+    start_date: str = "2020-05-01",
+    end_date: str = "2020-07-02",
+    # current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """Run predictions."""
+    url = f"http://{service_name}/run-prediction"
+    params = {"start_date": start_date, "end_date": end_date}
+    # json = tiles_list
+    try:
+        response = requests.post(url=url, params=params, json=tiles_list)
+    except requests.exceptions.ConnectionError as e:
+        return {"error": f"connection to {service_name}/ failed with error {e} "}
+    return response.json()
 
 
 @router.get("/list-services")
