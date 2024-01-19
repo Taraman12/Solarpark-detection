@@ -180,6 +180,7 @@ def run_prediction(
     tiles_list: List[str] = ["32UQE"],
     start_date: str = "2020-05-01",
     end_date: str = "2020-07-02",
+    model: str = "solar-park-detection",
     # current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Run predictions."""
