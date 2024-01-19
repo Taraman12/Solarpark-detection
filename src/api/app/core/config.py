@@ -80,6 +80,7 @@ class Settings(BaseSettings):
     DOCKER_SWARM_JOIN_TOKEN_MANAGER: str = Field("Manager-Token")
     DOCKER_SWARM_JOIN_TOKEN_WORKER: str = Field("Worker-Token")
 
+    ML_HOST: str = Field("ml-serve")
     # SMTP_TLS: bool = True
     # SMTP_PORT: Optional[int] = None
     # SMTP_HOST: Optional[str] = None
