@@ -160,7 +160,8 @@ In this project (with Makefile):
 ```bash
 make requirements
 ```
-
+## Related projects
+- Satellite Image Labeling Tool: https://microsoft.github.io/satellite-imagery-labeling-tool/src/labeler.html
 ## Known problems
 
 ### psycopg2:
@@ -168,3 +169,10 @@ sudo apt-get install libpq-dev
 
 mypy vscode settings:
 "mypy.dmypyExecutable":".//.env//Lib//site-packages//mypy//dmypy_server.py"
+
+### Bash script throws error:
+Error message:
+```bash
+$ '\r': command not found
+```
+see: https://stackoverflow.com/questions/11616835/r-command-not-found-bashrc-bash-profile
