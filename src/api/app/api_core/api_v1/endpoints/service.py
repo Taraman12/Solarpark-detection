@@ -36,10 +36,10 @@ def get_service_from_swarm(
 
 
 def add_service_to_swarm(
-    image: str = "taraman12/api-processing:latest",
+    image: str = "taraman12/solar-park-detection-processing:latest",
     service_name: str = "main_processing",
     network_name: str = "main_mynetwork",
-    ports: dict = {8001: 8001},
+    ports: dict = {8080: 8080, 8081: 8081},
 ) -> Any:
     client = docker.from_env()
     try:
@@ -88,15 +88,14 @@ def wait_for_node(nodes_old: list = []):
         raise Exception("Node not joined swarm")
 
 
-def start_instance_and_service(db: Session, service: str, instance_type: str):
-    logger.info(f"Starting instance for {service}")
+def start_instance_and_service(db: Session, instance_tag: str, instance_type: str):
+    logger.info(f"Starting instance for {instance_tag}")
     client = docker.from_env()
-    logger.info(f"Client: {client.info()}")
 
     nodes_old = client.nodes.list()
     logger.info(f"Nodes before: {nodes_old}")
     instance = crud.instance.start_instance(
-        db=db, service=service, instance_type=instance_type
+        db=db, instance_tag=instance_tag, instance_type=instance_type
     )
     logger.info(
         f"Started instance with instance id: {instance['Instances'][0]['InstanceId']}"
@@ -114,7 +113,7 @@ def start_instance_and_service(db: Session, service: str, instance_type: str):
 
     logger.info("Node joined swarm")
 
-    # add_ml_serve_to_swarm()
+    add_ml_serve_to_swarm()
     add_service_to_swarm()
     # could check if service is running
     return {"status": "finished"}
@@ -124,13 +123,15 @@ def start_instance_and_service(db: Session, service: str, instance_type: str):
 def start_service(
     *,
     db: Session = Depends(deps.get_db),
-    service: str,
+    instance_tag: str,
     current_user: models.User = Depends(deps.get_current_active_superuser),
     instance_type: str = "t3.micro",
     background_tasks: BackgroundTasks,
 ) -> Any:
     """Start service."""
-    background_tasks.add_task(start_instance_and_service, db, service, instance_type)
+    background_tasks.add_task(
+        start_instance_and_service, db, instance_tag, instance_type
+    )
     return {"status": "started"}
 
 
@@ -234,6 +235,11 @@ def get_nodes_info() -> Any:
         return {"error": str(e)}
 
     return nodes_info
+
+
+@router.get("/get-google-maps-api-key")
+def get_google_api_key() -> Any:
+    return {"api_key": settings.GOOGLE_MAPS_API_KEY}
 
 
 # ------------------------------------------------------------
