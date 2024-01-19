@@ -39,7 +39,7 @@ def add_service_to_swarm(
     image: str = "taraman12/solar-park-detection-processing:latest",
     service_name: str = "main_processing",
     network_name: str = "main_mynetwork",
-    ports: dict = {8080: 8080, 8081: 8081},
+    ports: dict = {7000: 7000},
 ) -> Any:
     client = docker.from_env()
     try:
@@ -64,6 +64,7 @@ def add_ml_serve_to_swarm(
     image: str = "taraman12/solar-park-detection-ml-serve:latest",
     service_name: str = "main_ml_serve",
     network_name: str = "main_mynetwork",
+    ports: dict = {8080: 8080, 8081: 8081},
 ) -> Any:
     client = docker.from_env()
     try:
@@ -71,6 +72,7 @@ def add_ml_serve_to_swarm(
             image=image,
             name=service_name,
             networks=[network_name],
+            endpoint_spec=docker.types.EndpointSpec(ports=ports),
         )
     except Exception as e:
         logger.error(e)
