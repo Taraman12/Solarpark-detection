@@ -17,7 +17,7 @@ def test_create_solarpark(client: TestClient, db: Session) -> None:
         "first_detection": "2021-01-01",
         "last_detection": "2021-01-01",
         "avg_confidence_over_all_observations": 0.8,
-        "name_in_aws": "Test",
+        "image_identifier": "Test",
         "is_valid": "None",
         "comment": "None",
         "lat": [599968.55, 599970.91, 599973.65, 599971.31, 599968.55],
@@ -43,7 +43,7 @@ def test_create_solarpark(client: TestClient, db: Session) -> None:
         content["avg_confidence_over_all_observations"]
         == data["avg_confidence_over_all_observations"]
     )
-    assert content["name_in_aws"] == data["name_in_aws"]
+    assert content["image_identifier"] == data["image_identifier"]
     assert content["is_valid"] == data["is_valid"]
     assert content["comment"] == data["comment"]
     assert content["lat"] == data["lat"]
@@ -66,7 +66,7 @@ def test_read_solarpark(client: TestClient, db: Session) -> None:
         content["avg_confidence_over_all_observations"]
         == solarpark.avg_confidence_over_all_observations
     )
-    assert content["name_in_aws"] == solarpark.name_in_aws
+    assert content["image_identifier"] == solarpark.image_identifier
     assert content["is_valid"] == solarpark.is_valid
     assert content["comment"] == solarpark.comment
     assert content["lat"] == solarpark.lat
@@ -87,7 +87,7 @@ def test_read_solarpark(client: TestClient, db: Session) -> None:
 # assert content[0]["first_detection"] == solarpark1.first_detection.strftime("%Y-%m-%d")
 # assert content[0]["last_detection"] == solarpark1.last_detection.strftime("%Y-%m-%d")
 # assert content[0]["avg_confidence_over_all_observations"] == solarpark1.avg_confidence_over_all_observations
-# assert content[0]["name_in_aws"] == solarpark1.name_in_aws
+# assert content[0]["image_identifier"] == solarpark1.image_identifier
 # assert content[0]["is_valid"] == solarpark1.is_valid
 # assert content[0]["comment"] == solarpark1.comment
 # assert content[0]["lat"] == solarpark1.lat
@@ -99,7 +99,7 @@ def test_read_solarpark(client: TestClient, db: Session) -> None:
 # assert content[1]["first_detection"] == solarpark2.first_detection.strftime("%Y-%m-%d")
 # assert content[1]["last_detection"] == solarpark2.last_detection.strftime("%Y-%m-%d")
 # assert content[1]["avg_confidence_over_all_observations"] == solarpark2.avg_confidence_over_all_observations
-# assert content[1]["name_in_aws"] == solarpark2.name_in_aws
+# assert content[1]["image_identifier"] == solarpark2.image_identifier
 # assert content[1]["is_valid"] == solarpark2.is_valid
 # assert content[1]["comment"] == solarpark2.comment
 # assert content[1]["lat"] == solarpark2.lat
@@ -117,7 +117,7 @@ def test_update_solarpark(client: TestClient, db: Session) -> None:
         "first_detection": "2021-01-01",
         "last_detection": "2021-01-01",
         "avg_confidence_over_all_observations": 0.8,
-        "name_in_aws": "Test",
+        "image_identifier": "Test",
         "is_valid": "None",
         "comment": "None",
         "lat": [599968.55, 599970.91, 599973.65, 599971.31, 599968.55],
@@ -140,7 +140,7 @@ def test_update_solarpark(client: TestClient, db: Session) -> None:
         content["avg_confidence_over_all_observations"]
         == data["avg_confidence_over_all_observations"]
     )
-    assert content["name_in_aws"] == data["name_in_aws"]
+    assert content["image_identifier"] == data["image_identifier"]
     assert content["is_valid"] == data["is_valid"]
     assert content["comment"] == data["comment"]
     assert content["lat"] == data["lat"]
@@ -165,7 +165,7 @@ def test_delete_solarpark(client: TestClient, db: Session) -> None:
         content["avg_confidence_over_all_observations"]
         == solarpark.avg_confidence_over_all_observations
     )
-    assert content["name_in_aws"] == solarpark.name_in_aws
+    assert content["image_identifier"] == solarpark.image_identifier
     assert content["is_valid"] == solarpark.is_valid
     assert content["comment"] == solarpark.comment
     assert content["lat"] == solarpark.lat

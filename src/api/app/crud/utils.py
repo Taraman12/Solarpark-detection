@@ -3,10 +3,10 @@ from geoalchemy2.shape import to_shape
 from sqlalchemy.orm import Session
 
 from app.models.solarpark import SolarPark
-from app.schemas.solarpark_observation import SolarParkObservationCreate
+from app.schemas.prediction import PredictionCreate
 
 
-def check_overlap(db: Session, obj_in: SolarParkObservationCreate) -> SolarPark:
+def check_overlap(db: Session, obj_in: PredictionCreate) -> SolarPark:
     db_obj = (
         db.query(SolarPark)
         .filter(SolarPark.geom.intersects(WKTElement(obj_in.geom)))
@@ -28,17 +28,15 @@ def check_overlap(db: Session, obj_in: SolarParkObservationCreate) -> SolarPark:
 # )
 
 
-def transform_solarpark_observation(
-    solarpark_observation_in: SolarParkObservationCreate,
+def transform_prediction(
+    prediction_in: PredictionCreate,
 ):
-    solarpark_in = vars(solarpark_observation_in).copy()
+    solarpark_in = vars(prediction_in).copy()
     unwanted_keys = ["name_of_model", "avg_confidence", "date_of_data"]
     for key in unwanted_keys:
         solarpark_in.pop(key, None)
-    solarpark_in["name_of_model"] = [solarpark_observation_in.name_of_model]
-    solarpark_in["first_detection"] = solarpark_observation_in.date_of_data
-    solarpark_in["last_detection"] = solarpark_observation_in.date_of_data
-    solarpark_in[
-        "avg_confidence_over_all_observations"
-    ] = solarpark_observation_in.avg_confidence
+    solarpark_in["name_of_model"] = [prediction_in.name_of_model]
+    solarpark_in["first_detection"] = prediction_in.date_of_data
+    solarpark_in["last_detection"] = prediction_in.date_of_data
+    solarpark_in["avg_confidence_over_all_observations"] = prediction_in.avg_confidence
     return solarpark_in

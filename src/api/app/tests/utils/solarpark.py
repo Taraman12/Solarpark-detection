@@ -20,7 +20,7 @@ def random_solarpark() -> SolarPark:
     first_detection = date(2021, 1, 1)
     last_detection = date(2021, 1, 1)
     avg_confidence_over_all_observations = 0.8
-    name_in_aws = random_lower_string()
+    image_identifier = random_lower_string()
     is_valid = "None"
     comment = "None"
     lat = [599968.55, 599970.91, 599973.65, 599971.31, 599968.55]
@@ -33,7 +33,7 @@ def random_solarpark() -> SolarPark:
         first_detection=first_detection,
         last_detection=last_detection,
         avg_confidence_over_all_observations=avg_confidence_over_all_observations,
-        name_in_aws=name_in_aws,
+        image_identifier=image_identifier,
         is_valid=is_valid,
         comment=comment,
         lat=lat,

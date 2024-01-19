@@ -15,17 +15,17 @@ from app.db.session import SessionLocal
 # TODO: Update description and tags_metadata
 
 description = """
-This is the API for the Solarpark Detection Project.
+This is the API for the Solarpark Detection Project: [Github Solarpark-detection](https://github.com/Taraman12/Solarpark-detection).
 
 ## Solarpark
-in this project a solarpark is defined as a polygon with a name and a unique ID.
-The solarpark is used to group the observations.
-Each observation is assigned to a solarpark.
+In this project a solarpark is defined as a polygon with a name and a unique ID.\n
+The solarpark is used to group the prediction from every date.\n
+Each prediction is assigned to a solarpark (see prediction).
 
-## Observation
-An observation is a polygon with a date, a name, a confidence and a size.
-The observation is used to detect the solarpark.
-The observation is assigned to a solarpark.
+## Prediction
+An prediction is a polygon with a date, size, confidence etc.\n
+It is the result of the ml-model used to detect solarparks from sentinel-2 imagery.\n
+The prediction is assigned to a solarpark (n:1) to be validated.\n
 
 """
 
@@ -36,31 +36,31 @@ tags_metadata = [
     },
     {
         "name": "solarpark",
-        "description": "The solarpark is used to group the observations.",
+        "description": "The solarpark is used to group the predictions from different dates.",
     },
     {
-        "name": "solarpark_observation",
-        "description": "Operations with solarpark observations. The observation is used to detect the solarpark.",
+        "name": "prediction",
+        "description": "Predictions are made from a self trained U-Net.",
     },
     {
         "name": "service",
-        "description": "Operations with the service.",
+        "description": "Operations with the microservices and docker.",
     },
     {
-        "name": "user",
-        "description": "A user needs to be registered to use the API post/put/delete methods.",
-    },
-    {
-        "name": "login",
-        "description": "Login to the API.",
+        "name": "instance",
+        "description": "Operations to keep track of the ec2 instances.",
     },
     {
         "name": "models",
         "description": "Operations to CRUD models to and from the ml server.",
     },
     {
-        "name": "instance",
-        "description": "Operations to keep track of the ec2 instances.",
+        "name": "login",
+        "description": "Login to the API.",
+    },
+    {
+        "name": "user",
+        "description": "A user needs to be registered to use the API post/put/delete methods.",
     },
 ]
 

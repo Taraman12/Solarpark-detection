@@ -12,7 +12,7 @@ CREATE TABLE "solarpark" (
   "geom" geography(POLYGON,4267)
 );
 
-CREATE TABLE "solarpark_observation" (
+CREATE TABLE "prediction" (
   "id" int PRIMARY KEY,
   "solarpark_id" int,
   "date_of_data" date,
@@ -32,4 +32,4 @@ CREATE TABLE "aws_instance" (
   "ec2_instance_id" str
 );
 
-ALTER TABLE "solarpark" ADD FOREIGN KEY ("solarpark_id") REFERENCES "solarpark_observation" ("solarpark_id");
+ALTER TABLE "solarpark" ADD FOREIGN KEY ("solarpark_id") REFERENCES "prediction" ("solarpark_id");

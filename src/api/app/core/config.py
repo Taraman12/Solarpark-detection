@@ -36,18 +36,19 @@ class Settings(BaseSettings):
         "http://localhost",
         "http://localhost:5000",
         "http://localhost:5678",
+        "http://localhost:7000",
         "http://localhost:8000",
         "http://localhost:8080",
         "http://localhost:8081",
         "http://3.66.239.204:80",
         "http://3.66.239.204",
         "http://localhost",
-        "http://preprocessing:5678",
-        "http://preprocessing",
+        "http://processing:7000",
+        "http://processing",
         "http://frontend:80",
         "http://frontend:8080",
         "http://frontend:5000",
-        "http://preprocessing:5678",
+        "http://processing:5678",
         "http://ml-serve:8081",
     ]
 
@@ -67,7 +68,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = Field("5432")
     POSTGRES_USER: str = Field("postgres")
     POSTGRES_PASSWORD: str = Field("postgres")
-    POSTGRES_DB: str = Field("solar-park-detection")
+    POSTGRES_DB: str = Field("SolarParkDetection")
 
     FIRST_SUPERUSER: EmailStr = Field("example@mail.com")  # John@doe.com
     FIRST_SUPERUSER_PASSWORD: str = Field("password")
@@ -79,6 +80,8 @@ class Settings(BaseSettings):
     DOCKER_SWARM_JOIN_TOKEN_MANAGER: str = Field("Manager-Token")
     DOCKER_SWARM_JOIN_TOKEN_WORKER: str = Field("Worker-Token")
 
+    ML_HOST: str = Field("ml-serve")
+    GOOGLE_MAPS_API_KEY: str = Field("api-key")
     # SMTP_TLS: bool = True
     # SMTP_PORT: Optional[int] = None
     # SMTP_HOST: Optional[str] = None

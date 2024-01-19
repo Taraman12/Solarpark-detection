@@ -20,8 +20,8 @@ services:
     # else on each thread (core) a model will be loaded
     cpus: 1.0
 
-  preprocessing:
-    image: taraman12/solar-park-detection-preprocessing:latest
+  processing:
+    image: taraman12/solar-park-detection-processing:latest
     environment:
       - DOCKERIZED=True
       - aws_access_key_id=${aws_access_key_id}

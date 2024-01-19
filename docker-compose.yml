@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   db:
-    image: postgis/postgis:16-3.4 # alt: postgis/postgis:15-3.3
+    image: postgis/postgis:16-3.4
     restart: always
     volumes:
       - data:/var/lib/postgres/data
@@ -12,7 +12,6 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       #- POSTGRES_INITDB_ARGS=--encoding=UTF8
-
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     expose:
@@ -32,8 +31,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=${POSTGRES_DB}
-      # ! not a variable
-      - POSTGRES_HOST=localhost
+      - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - FIRST_SUPERUSER=${FIRST_SUPERUSER}
       - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}
@@ -42,82 +40,97 @@ services:
       - aws_s3_bucket=${aws_s3_bucket}
       - region_name=${region_name}
       - API_Host=${API_Host}
-
+      - ML_HOST=${ML_HOST}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
     expose:
       - "8000"
-    # network: host
     volumes:
       - data:/var/lib/postgis/data
       - /var/run/docker.sock:/var/run/docker.sock
+      # ml-serve:
+      #   build:
+      #     context: ./src/ml-serve
+      #     dockerfile: ml-serve.dockerfile
+      #   ports:
+      #     - "8080:8080"
+      #     - "8081:8081"
+      #     - "8082:8082"
+      #   expose:
+      #     - "8080"
+      #     - "8081"
+      #     - "8082"
+      #   # limits the number of cpus the container can use
+      #   # else on each thread (core) a model will be loaded
+      #   cpus: 1.0
 
-  # ml-serve:
-  #   build:
-  #     context: ./src/ml-serve
-  #     dockerfile: ml-serve.dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #     - "8081:8081"
-  #     - "8082:8082"
-  #   expose:
-  #     - "8080"
-  #     - "8081"
-  #     - "8082"
-  #   # limits the number of cpus the container can use
-  #   # else on each thread (core) a model will be loaded
-  #   cpus: 1.0
+      # processing:
+      #   build:
+      #     context: ./src/processing
+      #     dockerfile: processing.dockerfile
+      #   depends_on:
+      #     - ml-serve
+      #   environment:
+      #     - DOCKERIZED=true
+      #     - MAKE_TRAININGS_DATA=False
+      #     - PRODUCTION=true
+      #     - API_HOST=${API_HOST}
+      #     - ML_HOST=${ML_HOST}
+      #     - aws_access_key_id=${aws_access_key_id}
+      #     - aws_secret_access_key=${aws_secret_access_key}
+      #     - aws_s3_bucket=${aws_s3_bucket}
+      #     - region_name=${region_name}
+      #   ports:
+      #     - "7000:7000"
+      #   expose:
+      #     - "7000"
+      # prevents the container from being started automatically
+      # when running `docker-compose up`
+      # profiles: [ "cli-only" ]
 
-  # preprocessing:
-  #   build:
-  #     context: ./src/preprocessing
-  #     dockerfile: preprocessing.dockerfile
-  #   depends_on:
-  #     - ml-serve
-  #   environment:
-  #     - DOCKERIZED=true
-  #     - MAKE_TRAININGS_DATA=False
-  #     - PRODUCTION=true
-  #     - aws_access_key_id=${aws_access_key_id}
-  #     - aws_secret_access_key=${aws_secret_access_key}
-  #     - aws_s3_bucket=${aws_s3_bucket}
-  #     - region_name=${region_name}
-  #   ports:
-  #     - "5678:5678"
-  #   expose:
-  #     - "5678"
-  #   # prevents the container from being started automatically
-  #   # when running `docker-compose up`
-  #   # profiles: [ "cli-only" ]
+      # frontend:
+      #   build:
+      #     context: ./src/frontend
+      #     dockerfile: frontend.dockerfile
+      #   environment:
+      #     - VITE_DOCKERIZED=true
+      #     - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      #     - VITE_AWS_ACCESS_KEY_ID=${aws_access_key_id}
+      #     - VITE_AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+      #     - VITE_BASE_IP=${VITE_BASE_IP}
+      #   ports:
+      #     - "5000:5000"
+      # expose:
+      #   - "80"
+      # networks:
+      #   - my-network
 
-  frontend:
+      # add ssl-certificates to nginx
+      # https://sitegeist.de/blog/typo3-blog/docker-compose-setup-mit-nginx-reverse-proxy.html
+  new-frontend:
     build:
-      context: ./src/frontend
-      dockerfile: frontend.dockerfile
+      context: ./src/new-frontend
+      dockerfile: new-frontend.dockerfile
+      args:
+        - VITE_GOOGLE_MAPS_API_KEY=${VITE_GOOGLE_MAPS_API_KEY}
+        - VITE_BASE_IP=${VITE_BASE_IP}
     environment:
       - VITE_DOCKERIZED=true
-      - VITE_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-      - VITE_AWS_ACCESS_KEY_ID=${aws_access_key_id}
-      - VITE_AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}
+      - VITE_GOOGLE_MAPS_API_KEY=${VITE_GOOGLE_MAPS_API_KEY}
       - VITE_BASE_IP=${VITE_BASE_IP}
     ports:
-      - "5000:5000"
-    # expose:
-    #   - "80"
-    # networks:
-    #   - my-network
-
-    # add ssl-certificates to nginx
-    # https://sitegeist.de/blog/typo3-blog/docker-compose-setup-mit-nginx-reverse-proxy.html
-
-  proxy:
-    image: nginx:1.25.3
-    restart: always
-    ports:
       - "80:80"
-    volumes:
-      - ./src/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - frontend
       - api
+  # proxy:
+  #   image: nginx:1.25.3
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./src/nginx/nginx.conf:/etc/nginx/nginx.conf
+  #   depends_on:
+  #     - frontend
+  #     - api
 
 volumes:
   data:

@@ -7,6 +7,9 @@ from fastapi import APIRouter, Depends
 
 from app import models
 from app.api_core import deps
+from app.core.config import Settings
+
+settings = Settings()
 
 router = APIRouter()
 
@@ -27,7 +30,7 @@ This only handles / forwards requests to the torchserve management API, and does
 @router.get("/")
 def get_model() -> Any:
     """Returns registered models from ml server"""
-    response = requests.get("http://ml-serve:8081/models")
+    response = requests.get(f"http://{settings.ML_HOST}:8081/models")
 
     return response.json()["models"]
 
@@ -35,7 +38,7 @@ def get_model() -> Any:
 @router.get("/{model}")
 def get_model(model: str) -> Any:  # noqa: F811
     """Get model by name from ml server"""
-    response = requests.get(f"http://ml-serve:8081/models/{model}/all")
+    response = requests.get(f"http://{settings.ML_HOST}:8081/models/{model}/all")
 
     return response.json()
 
@@ -46,20 +49,20 @@ def register_example_model(
 ) -> Any:
     """Register squeezenet1_1 model as example"""
     response = requests.post(
-        "http://ml-serve:8081/models?url=https://torchserve.pytorch.org/mar_files/squeezenet1_1.mar"
+        f"http://{settings.ML_HOST}/models?url=https://torchserve.pytorch.org/mar_files/squeezenet1_1.mar"
     )
 
     return response.json()
 
 
 @router.post("/{model}")
-async def register_model(
+async def register_model_from_bucket(
     model: str = "solar-park-detection",
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
-    """register model by name from ml server"""
+    """register model by name from solar-park-detection aws s3 bucket"""
     response = requests.post(
-        f"http://ml-serve:8081/models?url=https://solar-detection-697553-eu-central-1.s3.eu-central-1.amazonaws.com/model-store/{model}.mar"
+        f"http://{settings.ML_HOST}:8081/models?url=https://solar-detection-697553-eu-central-1.s3.eu-central-1.amazonaws.com/model-store/{model}.mar"
     )
 
     return response.json()
@@ -70,8 +73,8 @@ def register_model(  # noqa: F811
     url: str,
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
-    """register model by url from ml server"""
-    response = requests.post(f"http://ml-serve:8081/models?url={url}")
+    """register model from any url from ml server"""
+    response = requests.post(f"http://{settings.ML_HOST}:8081/models?url={url}")
 
     return response.json()
 
@@ -83,6 +86,8 @@ def delete_model(
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Delete model by name from ml server"""
-    response = requests.delete(f"http://ml-serve:8081/models/{model}/{version}.0")
+    response = requests.delete(
+        f"http://{settings.ML_HOST}:8081/models/{model}/{version}.0"
+    )
 
     return response.json()

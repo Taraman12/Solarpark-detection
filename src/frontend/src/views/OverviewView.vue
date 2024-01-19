@@ -76,7 +76,7 @@ const polygonOptions = {
 async function fetchData(id) {
     try {
         // change to solarpark
-        const response = await get(`/solarpark_observation/${id}`);
+        const response = await get(`/prediction/${id}`);
         const data = await response.json();
         return data;
     } catch (error) {
@@ -181,6 +181,7 @@ async function addOSMPolygon(data) {
         maxZoom: 15,
     });
 }
+
 async function loadSource(url) {
     // const url = url
     const source = new GeoTIFF({

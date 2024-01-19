@@ -2,7 +2,7 @@
 [![Docker](https://github.com/Taraman12/Solarpark-detection/actions/workflows/docker.yml/badge.svg)](https://github.com/Taraman12/Solarpark-detection/actions/workflows/docker.yml)
 
 <!-- omit from toc -->
-# Continous Solar Park Detection
+# Continuous Solar Park Detection
 This tool is designed to deliver automated and continuous data about solar parks in Germany like the exact location, size and first detection.
 Which is accomplished by a deep learning model for image segmentation which uses satellite imagery from sentinel-2 which is updated every five days. This tool runs the prediction every month. The predictions can be validated on a website, which delivers the used image as well as a image with a higher resolution from google maps. The data on google Maps gets updated between one to three years, thats why it can only be used as an indication. The tool utilizes a microservice architecture with the following services: DB, API, downloader, preprocessing, Ml-serve, frontend.
 This project was developed as part of a master thesis at the chair of Process- and IT-Integration for AI in enterprises at the Julius-Maximilians-University Wuerzburg, Germany.
@@ -160,7 +160,8 @@ In this project (with Makefile):
 ```bash
 make requirements
 ```
-
+## Related projects
+- Satellite Image Labeling Tool: https://microsoft.github.io/satellite-imagery-labeling-tool/src/labeler.html
 ## Known problems
 
 ### psycopg2:
@@ -168,3 +169,10 @@ sudo apt-get install libpq-dev
 
 mypy vscode settings:
 "mypy.dmypyExecutable":".//.env//Lib//site-packages//mypy//dmypy_server.py"
+
+### Bash script throws error:
+Error message:
+```bash
+$ '\r': command not found
+```
+see: https://stackoverflow.com/questions/11616835/r-command-not-found-bashrc-bash-profile

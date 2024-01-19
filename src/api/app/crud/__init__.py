@@ -2,6 +2,6 @@
 
 from .crud_instance import instance  # noqa
 from .crud_maillist import maillist  # noqa
+from .crud_prediction import prediction  # noqa
 from .crud_solarpark import solarpark  # noqa
-from .crud_solarpark_observation import solarpark_observation  # noqa
 from .crud_user import user  # noqa

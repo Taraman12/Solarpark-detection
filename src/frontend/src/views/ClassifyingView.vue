@@ -41,7 +41,7 @@ const filteredData = ref([]);
 
 async function fetchData(id) {
   try {
-    const response = await get(`/solarpark_observation/${id}`);
+    const response = await get(`/prediction/${id}`);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -209,12 +209,12 @@ async function addImage(name_in_aws) {
 
 async function updateItem(id, value) {
   try {
-    const item = await get(`/solarpark_observation/${id}`);
+    const item = await get(`/prediction/${id}`);
     console.log(item);
     const object = await item.json();
     const updatedItem = { ...object, is_valid: value };
     console.log(updatedItem);
-    await put(`/solarpark_observation/${id}`, updatedItem);
+    await put(`/prediction/${id}`, updatedItem);
     console.log(`Item ${id} updated to ${value}`);
     filteredData.value = await fetchData("");
     noneItem.value = filteredData.value.find(item => item.is_valid === "None");
@@ -239,6 +239,7 @@ async function handleItemUpdate(item) {
   await addImage(url)
   await addOSMPolygon(data);
 }
+
 async function loadGoogleMaps(item) {
   await loader.load();
   map.value = new google.maps.Map(mapDiv.value, {

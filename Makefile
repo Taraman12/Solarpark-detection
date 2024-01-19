@@ -1,20 +1,20 @@
 format-black:
-	@black ./src --exclude ./src/frontend
+	@black ./src --exclude ./src/frontend  --exclude ./src/new-frontend
 
 format-docformatter:
 	@docformatter --config ./pyproject.toml ./src
 
 format-isort:
-	@isort ./src --skip ./src/frontend
+	@isort ./src --skip ./src/frontend --skip ./src/new-frontend
 
 lint-black:
-	@black ./src --exclude ./src/frontend --check
+	@black ./src --exclude ./src/frontend --exclude ./src/new-frontend --check
 
 lint-isort:
-	@isort ./src --skip ./src/frontend --check
+	@isort ./src --skip ./src/frontend --skip ./src/new-frontend --check
 
 lint-flake8:
-	@flake8 ./src --exclude ./src/frontend
+	@flake8 ./src --exclude ./src/frontend --exclude ./src/new-frontend
 
 # update names of folders
 api-requirements:

@@ -21,7 +21,7 @@ def test_get_solarpark(db: Session) -> None:
         solarpark.avg_confidence_over_all_observations
         == stored_solarpark.avg_confidence_over_all_observations
     )
-    assert solarpark.name_in_aws == stored_solarpark.name_in_aws
+    assert solarpark.image_identifier == stored_solarpark.image_identifier
     assert solarpark.is_valid == stored_solarpark.is_valid
     assert solarpark.comment == stored_solarpark.comment
     assert solarpark.lat == stored_solarpark.lat
@@ -33,7 +33,7 @@ def test_get_solarpark(db: Session) -> None:
 # NOTE: It fails, because the db is not properly cleaned up after each test
 def test_get_multi_solarpark(db: Session) -> None:
     """
-    needs to create two solarpark_observation objects to check if get_multi works
+    needs to create two prediction objects to check if get_multi works
     """
     # solarpark_in1 = random_solarpark()
     # solarpark_in2 = random_solarpark()
@@ -55,7 +55,7 @@ def test_create_solarpark(db: Session) -> None:
         solarpark.avg_confidence_over_all_observations
         == solarpark_in.avg_confidence_over_all_observations
     )
-    assert solarpark.name_in_aws == solarpark_in.name_in_aws
+    assert solarpark.image_identifier == solarpark_in.image_identifier
     assert solarpark.is_valid == solarpark_in.is_valid
     assert solarpark.comment == solarpark_in.comment
     assert solarpark.lat == solarpark_in.lat
@@ -78,7 +78,7 @@ def test_update_solarpark(db: Session) -> None:
         solarpark.avg_confidence_over_all_observations
         == solarpark2.avg_confidence_over_all_observations
     )
-    assert solarpark.name_in_aws == solarpark2.name_in_aws
+    assert solarpark.image_identifier == solarpark2.image_identifier
     assert solarpark.is_valid == solarpark2.is_valid
     assert solarpark.comment == solarpark2.comment
     assert solarpark.lat == solarpark2.lat
@@ -86,7 +86,7 @@ def test_update_solarpark(db: Session) -> None:
     assert solarpark.geom == solarpark2.geom
 
 
-# NOTE: solarparks should be deleted automatically when deleting all solarpark_observation with solarpark_id
+# NOTE: solarparks should be deleted automatically when deleting all prediction with solarpark_id
 def test_delete_solarpark(db: Session) -> None:
     solarpark_in = random_solarpark()
     solarpark = crud.solarpark.create(db, obj_in=solarpark_in)
@@ -103,7 +103,7 @@ def test_delete_solarpark(db: Session) -> None:
         solarpark2.avg_confidence_over_all_observations
         == solarpark.avg_confidence_over_all_observations
     )
-    assert solarpark2.name_in_aws == solarpark.name_in_aws
+    assert solarpark2.image_identifier == solarpark.image_identifier
     assert solarpark2.is_valid == solarpark.is_valid
     assert solarpark2.comment == solarpark.comment
     assert solarpark2.lat == solarpark.lat

@@ -1,6 +1,5 @@
 import os
 from logging.config import fileConfig
-from os.path import abspath, dirname, join
 
 import geoalchemy2  # noqa
 from alembic import context
@@ -9,6 +8,9 @@ from dotenv import load_dotenv
 # added for geo spacial data support
 from geoalchemy2 import alembic_helpers
 from sqlalchemy import engine_from_config, pool
+
+# from os.path import abspath, dirname, join
+
 
 """
 Docs for geoalchemy2 with alembic:
@@ -40,14 +42,14 @@ target_metadata = Base.metadata
 # ... etc.
 
 
-def get_src_path():
-    current_path = abspath(__file__)
-    src_path = None
-    while current_path != "/":
-        current_path = dirname(current_path)
-        if os.path.exists(join(current_path, "src")):
-            src_path = join(current_path, "src")
-            return src_path
+# def get_src_path():
+#     current_path = abspath(__file__)
+#     src_path = None
+#     while current_path != "/":
+#         current_path = dirname(current_path)
+#         if os.path.exists(join(current_path, "src")):
+#             src_path = join(current_path, "src")
+#             return src_path
 
 
 def get_url():
@@ -59,9 +61,9 @@ def get_url():
         SERVER = os.getenv("POSTGRES_HOST", "db")
         DB = os.getenv("POSTGRES_DB", "app")
     else:
-        src_path = get_src_path()
-        dotenv_path = join(src_path, ".env")
-        load_dotenv(dotenv_path)
+        # src_path = get_src_path()
+        # dotenv_path = join(src_path, ".env")
+        load_dotenv()  # dotenv_path
         USER = os.getenv("POSTGRES_USER", "postgres")
         PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
         SERVER = os.getenv("POSTGRES_HOST", "localhost")

@@ -1,4 +1,5 @@
 ### At this service we can download Sentinel-2 data from the Copernicus Open Access Hub or AWS
+This service is used to download the data locally, to create a custom trainings.
 
 The are two possible ways to download Sentinel-2 data:
 1. Download from the Copernicus Open Access Hub
