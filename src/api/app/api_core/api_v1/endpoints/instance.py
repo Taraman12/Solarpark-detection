@@ -123,17 +123,17 @@ def delete_instance_from_db(
 
 
 # FIXME: Fails, due to wrong response model
-@router.post("/start/{service}")  # , response_model=schemas.Instance
+@router.post("/start/{instance_tag}")  # , response_model=schemas.Instance
 def start_instance(
     *,
     db: Session = Depends(deps.get_db),
-    service: str,
+    instance_tag: str,
     instance_type: str = "t3.micro",
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Start an instance."""
     instance = crud.instance.start_instance(
-        db=db, service=service, instance_type=instance_type
+        db=db, instance_tag=instance_tag, instance_type=instance_type
     )
     return instance
 

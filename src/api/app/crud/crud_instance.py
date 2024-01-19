@@ -57,9 +57,11 @@ class CRUDInstance(CRUDBase[Instance, InstanceCreate, InstanceUpdate]):
         return db_obj
 
     def start_instance(
-        self, db: Session, *, service: str, instance_type: str = "t3.micro"
+        self, db: Session, *, instance_tag: str, instance_type: str = "t3.micro"
     ) -> dict:
         EC2_KWARGS["InstanceType"] = instance_type
+        EC2_KWARGS["TagSpecifications"][0]["Tags"][0]["Value"] = instance_tag
+
         # EC2_KWARGS = self.replace_instance_str(service, instance_type)
         # logger.info(EC2_KWARGS)
         try:
