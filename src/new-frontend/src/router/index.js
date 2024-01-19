@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Style from '@/views/StyleView.vue'
 import Home from '@/views/HomeView.vue'
+import Dashboard from '@/views/DashboardView.vue'
 
 const routes = [
   {
@@ -8,8 +8,32 @@ const routes = [
       title: 'Select style'
     },
     path: '/',
-    name: 'style',
-    component: Style
+    name: 'home',
+    component: Home
+  },
+  {
+    meta: {
+      title: 'Overview'
+    },
+    path: '/overview',
+    name: 'overview',
+    component: () => import('@/views/OverviewView.vue')
+  },
+  {
+    meta: {
+      title: 'Classifying'
+    },
+    path: '/classifying',
+    name: 'classifying',
+    component: () => import('@/views/ClassifyingView.vue')
+  },
+  {
+    meta: {
+      title: 'Model'
+    },
+    path: '/model',
+    name: 'model',
+    component: () => import('@/views/ModelView.vue')
   },
   {
     // Document title tag
@@ -19,7 +43,7 @@ const routes = [
     },
     path: '/dashboard',
     name: 'dashboard',
-    component: Home
+    component: Dashboard
   },
   {
     meta: {

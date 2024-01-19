@@ -1,136 +1,90 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue'
-import { useMainStore } from '@/stores/main'
-import {
-  mdiAccountMultiple,
-  mdiCartOutline,
-  mdiChartTimelineVariant,
-  mdiMonitorCellphone,
-  mdiReload,
-  mdiGithub,
-  mdiChartPie
-} from '@mdi/js'
-import * as chartConfig from '@/components/Charts/chart.config.js'
-import LineChart from '@/components/Charts/LineChart.vue'
+import { mdiSatelliteVariant, mdiGithub } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
-import CardBoxWidget from '@/components/CardBoxWidget.vue'
 import CardBox from '@/components/CardBox.vue'
-import TableSampleClients from '@/components/TableSampleClients.vue'
-import NotificationBar from '@/components/NotificationBar.vue'
-import BaseButton from '@/components/BaseButton.vue'
-import CardBoxTransaction from '@/components/CardBoxTransaction.vue'
-import CardBoxClient from '@/components/CardBoxClient.vue'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
-import SectionBannerStarOnGitHub from '@/components/SectionBannerStarOnGitHub.vue'
-
-const chartData = ref(null)
-
-const fillChartData = () => {
-  chartData.value = chartConfig.sampleChartData()
-}
-
-onMounted(() => {
-  fillChartData()
-})
-
-const mainStore = useMainStore()
-
-const clientBarItems = computed(() => mainStore.clients.slice(0, 4))
-
-const transactionBarItems = computed(() => mainStore.history)
+import SectionTitle from '@/components/SectionTitle.vue'
+import BaseButton from '@/components/BaseButton.vue'
+import BaseDivider from '@/components/BaseDivider.vue'
 </script>
 
 <template>
   <LayoutAuthenticated>
     <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiChartTimelineVariant" title="Overview" main>
-        <BaseButton
-          href="https://github.com/justboil/admin-one-vue-tailwind"
-          target="_blank"
-          :icon="mdiGithub"
-          label="Star on GitHub"
-          color="contrast"
-          rounded-full
-          small
-        />
+
+      <SectionTitleLineWithButton :icon="mdiSatelliteVariant" title="Continues Solar Park Detection" main>
+        <BaseButton href="https://github.com/Taraman12/Solarpark-detection" target="_blank" :icon="mdiGithub"
+          label="Star on GitHub" color="contrast" rounded-full small />
       </SectionTitleLineWithButton>
+      <p class="text-xl">
+        This project uses a self trained neural network to detect solar parks from satellite images.<br>
+        Used key technologies:
+      <ul class="list-disc ml-10">
+        <li> <i>PyTorch</i> for model development and <b>TorchServe</b> for model serving</li>
+        <li> FastAPI for the backend and Postgres for DB</li>
+        <li> Vue.js for the frontend and NGINX for reverse proxy</li>
+        <li> Docker for containerization and Docker Swarm for orchestration</li>
+      </ul>
 
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-6">
-        <CardBoxWidget
-          trend="12%"
-          trend-type="up"
-          color="text-emerald-500"
-          :icon="mdiAccountMultiple"
-          :number="512"
-          label="Clients"
-        />
-        <CardBoxWidget
-          trend="12%"
-          trend-type="down"
-          color="text-blue-500"
-          :icon="mdiCartOutline"
-          :number="7770"
-          prefix="$"
-          label="Sales"
-        />
-        <CardBoxWidget
-          trend="Overflow"
-          trend-type="alert"
-          color="text-red-500"
-          :icon="mdiChartTimelineVariant"
-          :number="256"
-          suffix="%"
-          label="Performance"
-        />
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="flex flex-col justify-between">
-          <CardBoxTransaction
-            v-for="(transaction, index) in transactionBarItems"
-            :key="index"
-            :amount="transaction.amount"
-            :date="transaction.date"
-            :business="transaction.business"
-            :type="transaction.type"
-            :name="transaction.name"
-            :account="transaction.account"
-          />
-        </div>
-        <div class="flex flex-col justify-between">
-          <CardBoxClient
-            v-for="client in clientBarItems"
-            :key="client.id"
-            :name="client.name"
-            :login="client.login"
-            :date="client.created"
-            :progress="client.progress"
-          />
-        </div>
-      </div>
-
-      <SectionBannerStarOnGitHub class="mt-6 mb-6" />
-
-      <SectionTitleLineWithButton :icon="mdiChartPie" title="Trends overview">
-        <BaseButton :icon="mdiReload" color="whiteDark" @click="fillChartData" />
-      </SectionTitleLineWithButton>
-
-      <CardBox class="mb-6">
-        <div v-if="chartData">
-          <line-chart :data="chartData" class="h-96" />
-        </div>
+      </p>
+      <SectionTitle :first=false>
+        Pipeline
+      </SectionTitle>
+      <CardBox>
+        <img src="../assets/pipeline_ec2.svg" alt="pipeline" />
       </CardBox>
-
-      <SectionTitleLineWithButton :icon="mdiAccountMultiple" title="Clients" />
-
-      <NotificationBar color="info" :icon="mdiMonitorCellphone">
-        <b>Responsive table.</b> Collapses on mobile
-      </NotificationBar>
-
+      <SectionTitle :first=false>
+        Comparison backbones of the ML-Model
+      </SectionTitle>
       <CardBox has-table>
-        <TableSampleClients />
-      </CardBox>
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Max. Dice (%)</th>
+            <th>Mean Dice (%)</th>
+            <th>Mean F1 (%)</th>
+            <th>Mean Precision (%)</th>
+            <th>Mean Recall (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>EfficientNet-B0</td>
+            <td>69.86</td>
+            <td>59.25</td>
+            <td>58.39</td>
+            <td>70.93</td>
+            <td>57.48</td>
+          </tr>
+          <tr>
+            <td>ResNet18</td>
+            <td>71.07</td>
+            <td>59.68</td>
+            <td>58.82</td>
+            <td>69.20</td>
+            <td>55.07</td>
+          </tr>
+          <tr>
+            <td>ResNeSt14d</td>
+            <td>76.67</td>
+            <td>71.16</td>
+            <td>70.34</td>
+            <td>76.15</td>
+            <td>69.63</td>
+          </tr>
+          <tr>
+            <td>VGG11</td>
+            <td>75.25</td>
+            <td>61.94</td>
+            <td>61.25</td>
+            <td>68.67</td>
+            <td>59.46</td>
+          </tr>
+        </tbody>
+      </table>
+    </CardBox>
     </SectionMain>
   </LayoutAuthenticated>
 </template>

@@ -1,6 +1,14 @@
 # build stage
 FROM node:lts-alpine as build-stage
+
 WORKDIR /app
+
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+
+ARG VITE_BASE_IP
+ENV VITE_BASE_IP=$VITE_BASE_IP
+
 COPY package*.json ./
 RUN npm install
 COPY . .

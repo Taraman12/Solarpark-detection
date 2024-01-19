@@ -1,6 +1,9 @@
 import {
   mdiAccountCircle,
   mdiMonitor,
+  mdiViewListOutline,
+  mdiLightbulbOn,
+  mdiHome,
   mdiLock,
   mdiAlertCircle,
   mdiSquareEditOutline,
@@ -12,6 +15,26 @@ import {
 } from '@mdi/js'
 
 export default [
+  {
+    to: '/',
+    icon: mdiHome,
+    label: 'Home'
+  },
+  {
+    to: '/overview',
+    icon: mdiViewListOutline,
+    label: 'Overview'
+  },
+  {
+    to: '/classifying',
+    icon: mdiViewListOutline,
+    label: 'Classifying'
+  },
+  {
+    to: '/model',
+    icon: mdiLightbulbOn,
+    label: 'Model'
+  },
   {
     to: '/dashboard',
     icon: mdiMonitor,

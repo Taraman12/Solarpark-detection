@@ -3,8 +3,9 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 
 export const useMainStore = defineStore('main', () => {
-  const userName = ref('John Doe')
-  const userEmail = ref('doe.doe.doe@example.com')
+  const userName = ref('Guest')
+  const userEmail = ref('guest@example.com')
+  const access_token = ref('')
 
   const userAvatar = computed(
     () =>
@@ -25,6 +26,9 @@ export const useMainStore = defineStore('main', () => {
     }
     if (payload.email) {
       userEmail.value = payload.email
+    }
+    if (payload.access_token) {
+      access_token.value = payload.access_token
     }
   }
 
@@ -53,6 +57,7 @@ export const useMainStore = defineStore('main', () => {
   return {
     userName,
     userEmail,
+    access_token,
     userAvatar,
     isFieldFocusRegistered,
     clients,
