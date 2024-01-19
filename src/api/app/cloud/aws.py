@@ -109,20 +109,20 @@ EC2_KWARGS = {
                 sudo yum install docker -y
                 sudo service docker start
                 sudo usermod -a -G docker ec2-user
-                sudo docker pull taraman12/api-ml-serve:latest
-                sudo docker pull taraman12/api-processing:latest
+                sudo docker pull taraman12/solar-park-detection-ml-serve:latest
+                sudo docker pull taraman12/solar-park-detection-processing:latest
                 sudo docker swarm join --token {settings.DOCKER_SWARM_JOIN_TOKEN_WORKER} {settings.DOCKER_SWARM_MANAGER_IP}:2377
-
              """,
     "TagSpecifications": [
         {
             "ResourceType": "instance",
             "Tags": [
-                {"Key": "Name", "Value": "worker-instance"},
+                {"Key": "Name", "Value": "Worker-instance"},
             ],
         },
     ],
 }
+
 # echo 'sudo docker swarm leave --force' > /usr/local/bin/docker-swarm-leave.sh
 # chmod +x /usr/local/bin/docker-swarm-leave.sh
 # echo '[Unit]
