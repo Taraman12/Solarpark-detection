@@ -24,12 +24,12 @@ let intervalIdServiceOnline;
 let intervalIdPredictionInDB;
 
 const startInstance = reactive({
-  service: 'Worker',
-  instance_type: 't3.micro',
+  instance_tag: 'Worker',
+  instance_type: 't3.medium',
 })
 
 const runPrediction = reactive({
-  service_name: 'processing:7000',
+  service_name: 'main_processing:7000',
   start_date: '2020-05-01',
   end_date: '2020-07-02',
   model: 'solar-park-detection',
@@ -117,8 +117,8 @@ const terminateInstance = async (instanceId) => {
   // const listServiceGet = get("service/list-services")
   // const listService = await listServiceGet
   // console.log("listService", listService)
-  del("service/remove-service/processing")
-  del("service/remove-service/ml-serve")
+  del("service/remove-service/main_processing")
+  del("service/remove-service/main_ml-serve")
   const response = del(`instance/terminate/${instanceId}`)
   const data = await response
   console.log("data del", data)
@@ -162,7 +162,7 @@ const testServiceOnline = async () => {
     return false
   }
   console.log("data", data)
-  serviceCheck.value = CheckService("processing:7000")
+  serviceCheck.value = CheckService("main_processing:7000")
   return true
 }
 
@@ -291,13 +291,15 @@ onUnmounted(() => {
                   <td data-label="Service">{{ ec2Instance.Tag }}</td>
                   <td data-label="Instance Type">{{ ec2Instance.Type }}</td>
                   <td>{{ ec2Instance.State }}</td>
-                  <div v-if="ec2Instance.Tag == 'worker-instance'">
-                    <td class="before:hidden lg:w-1 whitespace-nowrap">
+
+                  <td class="before:hidden lg:w-1 whitespace-nowrap">
+                    <div v-if="ec2Instance.Tag != 'manager-instance'">
                       <BaseButtons type="justify-start lg:justify-end" no-wrap>
                         <BaseButton color="danger" :icon="mdiTrashCan" small @click="terminateInstance(instanceId)" />
                       </BaseButtons>
-                    </td>
-                  </div>
+                    </div>
+                  </td>
+
                 </tr>
               </tbody>
             </table>
@@ -307,7 +309,7 @@ onUnmounted(() => {
       <BaseDivider />
       <CardBox start-instance @submit.prevent="postSubmit(endpoint, startInstance)">
         <FormField label="Start ec2 instances">
-          <FormControl v-model="startInstance.service" placeholder="Service Name" :icon="mdiAccount" />
+          <FormControl v-model="startInstance.instance_tag" placeholder="Service Name" :icon="mdiAccount" />
           <FormControl v-model="startInstance.instance_type" placeholder="EC2 instance type" :icon="mdiCloud" />
         </FormField>
         <template #footer>

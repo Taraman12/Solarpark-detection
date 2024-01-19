@@ -27,19 +27,11 @@ import { register } from 'ol/proj/proj4';
 import { fromEPSGCode } from 'ol/proj/proj4';
 import proj4 from 'proj4';
 
-// defineProps({
-//   checkable: Boolean
-// })
 
 const { get } = useFetch()
-// S2B_MSIL2A_20200602T100559_N0500_R022_T32UQE_20230618T155201
 
 // https://stackoverflow.com/questions/76076055/how-to-delete-google-maps-markers-in-vue-3-composition-api-js-gmaps-api
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-
-console.log("Variable GOOGLE_MAPS_API_KEY", GOOGLE_MAPS_API_KEY);
-console.log("env GOOGLE_MAPS_API_KEY", import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
-console.log("VITE_BASE_IP", import.meta.env.VITE_BASE_IP);
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || getAPIkey();
 
 // needed to get the epsg code definitions
 register(proj4);
@@ -56,12 +48,18 @@ const layer = new TileLayer({
 
 const dataTable = ref(null)
 const data = ref({})
-const error = ref(null)
-const FilterIsValid = ref("");
-const FilterModelName = ref("solar-park-detection");
+// const error = ref(null)
+// const FilterIsValid = ref("");
+// const FilterModelName = ref("solar-park-detection");
 const filteredData = ref(null);
 
 // ---- Google Maps ----
+const getAPIkey = async () => {
+  const response = await get('service/get-google-maps-api-key');
+  const data = await response.json();
+  console.log("key", data.api_key);
+  return data.api_key;
+}
 const loader = new Loader({
   apiKey: GOOGLE_MAPS_API_KEY,
   version: 'weekly',

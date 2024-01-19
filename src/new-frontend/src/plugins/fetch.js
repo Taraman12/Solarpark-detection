@@ -2,12 +2,13 @@
 import { ref } from 'vue'
 import { useToast } from "vue-toastification";
 import { useMainStore } from '@/stores/main'
+// import { VITE_BASE_IP } from '@/config'
 
 const mainStore = useMainStore()
 
 
-const BASE_IP = import.meta.env.VITE_BASE_IP || 'localhost';
-// const BASE_IP = 'localhost'
+// const BASE_IP = import.meta.env.VITE_BASE_IP || 'localhost';
+const BASE_IP = 'localhost'
 
 const toast = useToast()
 
