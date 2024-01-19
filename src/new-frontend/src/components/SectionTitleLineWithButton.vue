@@ -1,8 +1,8 @@
 <script setup>
-import { mdiCog } from '@mdi/js'
-import { useSlots, computed } from 'vue'
+// import { mdiCog } from '@mdi/js'
+// import { useSlots, computed } from 'vue'
 import BaseIcon from '@/components/BaseIcon.vue'
-import BaseButton from '@/components/BaseButton.vue'
+// import BaseButton from '@/components/BaseButton.vue'
 import IconRounded from '@/components/IconRounded.vue'
 
 defineProps({
@@ -17,7 +17,7 @@ defineProps({
   main: Boolean
 })
 
-const hasSlot = computed(() => useSlots().default)
+// const hasSlot = computed(() => useSlots().default)
 </script>
 
 <template>
@@ -29,7 +29,7 @@ const hasSlot = computed(() => useSlots().default)
         {{ title }}
       </h1>
     </div>
-    <slot v-if="hasSlot" />
-    <BaseButton v-else :icon="mdiCog" color="whiteDark" />
+    <!-- <slot v-if="hasSlot" />
+    <BaseButton v-else :icon="mdiCog" color="whiteDark" /> -->
   </section>
 </template>
